@@ -67,7 +67,8 @@
     "amount": 50,
     "category": "Utilities",
     "description": "Wells Fargo - Deposit from Spending XXXXXXX7828",
-    "type": "income"
+    "type": "income",
+    "excluded": true
   },
   {
     "id": 9,
@@ -75,7 +76,8 @@
     "amount": 40,
     "category": "Utilities",
     "description": "discover card - Deposit from Spending XXXXXXX7828",
-    "type": "income"
+    "type": "income",
+    "excluded": true
   },
   {
     "id": 10,
@@ -83,7 +85,8 @@
     "amount": -35,
     "category": "Utilities",
     "description": "Withdrawal from CHASE CRD AUTOPAY",
-    "type": "expense"
+    "type": "expense",
+    "excluded": true
   },
   {
     "id": 11,
