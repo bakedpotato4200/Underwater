@@ -29,6 +29,7 @@ let goals = [];
 
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
+  if (desc.match(/transfer|from account|to account|xfer|move|deposit to|acct|internal|between accounts/i)) return 'Transfer';
   if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|inola|sinclair/)) return 'Food & Dining';
   if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super/)) return 'Groceries';
   if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|harley|davidson|car payment|motorcycle|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt|crunch|fit|payment/)) return 'Utilities';
@@ -36,7 +37,7 @@ function categorizeTransaction(description) {
   if (desc.match(/shell|chevron|exxon|bp|gas|fuel|parking|metro|transit|lyft|qt|murphy|carwash|armstrong|bank/)) return 'Transportation';
   if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|staxx/)) return 'Shopping';
   if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|ctlp|foto/)) return 'Health & Fitness';
-  if (desc.match(/salary|paycheck|deposit|transfer|income|bonus|interest|cash app/)) return 'Income';
+  if (desc.match(/salary|paycheck|deposit|income|bonus|interest|cash app/)) return 'Income';
   return 'Other';
 }
 
@@ -288,7 +289,7 @@ app.post('/api/transactions', express.json(), (req, res) => {
 app.get('/api/categories', (req, res) => {
   const categories = {};
   transactions.forEach(t => {
-    if (t.type === 'expense' && t.category !== 'Income') {
+    if (t.type === 'expense' && t.category !== 'Income' && t.category !== 'Transfer') {
       categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
     }
   });
@@ -296,15 +297,17 @@ app.get('/api/categories', (req, res) => {
 });
 
 app.get('/api/balance', (req, res) => {
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length });
+  const totalIncome = transactions.filter(t => t.type === 'income' && t.category !== 'Transfer').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense' && t.category !== 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const transfers = transactions.filter(t => t.category === 'Transfer').length;
+  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length, transfers });
 });
 
 app.get('/api/summary', (req, res) => {
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses });
+  const totalIncome = transactions.filter(t => t.type === 'income' && t.category !== 'Transfer').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'expense' && t.category !== 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const transfers = transactions.filter(t => t.category === 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses, transfers });
 });
 
 app.get('/api/daily-breakdown', (req, res) => {
@@ -323,8 +326,9 @@ app.get('/api/alerts', (req, res) => res.json(generateAlerts()));
 app.get('/api/insights', (req, res) => {
   const recurring = detectRecurring();
   const velocity = calculateSpendingVelocity();
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const totalIncome = transactions.filter(t => t.type === 'income' && t.category !== 'Transfer').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'expense' && t.category !== 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const transfers = transactions.filter(t => t.category === 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
   
   let score = 50;
@@ -339,6 +343,7 @@ app.get('/api/insights', (req, res) => {
     velocity,
     avgDailySpend: velocity.daily,
     totalTransactions: transactions.length,
+    transfers,
     debtTotal: debts.reduce((s, d) => s + d.balance, 0)
   });
 });

@@ -171,6 +171,15 @@
           </div>
         </div>
 
+        <div class="card">
+          <h2>↔️ Account Transfers</h2>
+          <div id="transfersInfo" style="padding: 15px; background: #ecf0f1; border-radius: 8px; margin-bottom: 15px;">
+            <strong style="color: #2c3e50;">Total Transfers Detected:</strong>
+            <div style="font-size: 24px; color: #3498db; font-weight: bold; margin-top: 5px;" id="transferCount">0</div>
+            <p style="color: #7f8c8d; font-size: 12px; margin-top: 10px;">💡 Transfers between your accounts are automatically excluded from income/expense calculations to give you accurate financial metrics.</p>
+          </div>
+        </div>
+
         <div class="card full">
           <h2>📈 Spending Velocity</h2>
           <div id="velocityChart" class="velocity-chart"></div>
@@ -270,9 +279,23 @@
       </div>
       <div class="form-group">
         <label>Type</label>
-        <select id="txnType">
+        <select id="txnType" onchange="updateCategoryOptions()">
           <option value="expense">Expense</option>
           <option value="income">Income</option>
+          <option value="transfer">Transfer (Account to Account)</option>
+        </select>
+      </div>
+      <div class="form-group" id="categoryGroup">
+        <label>Category</label>
+        <select id="txnCategory">
+          <option>Food & Dining</option>
+          <option>Groceries</option>
+          <option>Entertainment</option>
+          <option>Transportation</option>
+          <option>Utilities</option>
+          <option>Health & Fitness</option>
+          <option>Shopping</option>
+          <option>Other</option>
         </select>
       </div>
       <div class="action-buttons">
@@ -367,6 +390,7 @@
         displayUpcomingBills(calendar);
         displayCalendar(calendar);
         displayCashFlow(cashflow);
+        document.getElementById('transferCount').textContent = insights.transfers ? `$${insights.transfers.toLocaleString('en-US', {maximumFractionDigits: 0})}` : '$0';
       } catch (e) {
         console.error('Error loading data:', e);
       }
@@ -597,20 +621,35 @@
       }
     }
 
+    function updateCategoryOptions() {
+      const type = document.getElementById('txnType').value;
+      const categoryGroup = document.getElementById('categoryGroup');
+      const categorySelect = document.getElementById('txnCategory');
+      if (type === 'transfer') {
+        categoryGroup.style.display = 'none';
+      } else {
+        categoryGroup.style.display = 'block';
+      }
+    }
+
     async function addTransaction() {
+      const type = document.getElementById('txnType').value;
       const txn = {
         description: document.getElementById('txnDesc').value,
         amount: parseFloat(document.getElementById('txnAmount').value),
-        category: document.getElementById('txnCategory').value,
-        type: document.getElementById('txnType').value
+        category: type === 'transfer' ? 'Transfer' : document.getElementById('txnCategory').value,
+        type: type === 'transfer' ? 'expense' : type
       };
       if (!txn.description || !txn.amount) { alert('Please fill all fields'); return; }
-      if (txn.type === 'expense') txn.amount = -txn.amount;
+      if (txn.type === 'expense' && txn.category !== 'Transfer') txn.amount = -txn.amount;
+      if (txn.category === 'Transfer') txn.amount = -Math.abs(txn.amount);
       try {
         await fetch(API_URL + '/api/transactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(txn) });
         closeModal('transactionModal');
         document.getElementById('txnDesc').value = '';
         document.getElementById('txnAmount').value = '';
+        document.getElementById('txnType').value = 'expense';
+        updateCategoryOptions();
         loadData();
       } catch (e) {
         alert('Failed: ' + e.message);
