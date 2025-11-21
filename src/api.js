@@ -50,93 +50,86 @@ function categorizeTransaction(description) {
 // Store extracted PDF text for debugging
 let lastExtractedText = '';
 
-// Capital One bank statement parser - extract all transactions
+// Capital One bank statement parser - global regex pattern matching
 function extractTransactions(text) {
   const transactions = [];
-  const lines = text.split('\n');
   const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
                     Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
   
   let id = 1;
   
-  console.log(`📋 Processing ${lines.length} lines from PDF...`);
+  // Remove header/footer sections and normalize whitespace
+  let cleanText = text.replace(/Page \d+ of \d+/g, '')
+                       .replace(/capitalone\.com.*?P\.O\. Box.*/g, '')
+                       .replace(/Jacob Emmer.*?STATEMENT/g, '')
+                       .replace(/Account Summary[\s\S]*?Cashflow Summary[\s\S]*?PERIOD/g, '');
+  
+  // Split into lines but keep structure
+  const lines = cleanText.split('\n');
+  
+  console.log(`🔍 Parsing ${lines.length} lines from PDF`);
   
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line || line.trim().length < 10) continue;
+    let line = lines[i];
+    if (!line || line.trim().length < 15) continue;
     
-    // Match: Month Day at the start of line
-    const dateMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+/);
+    // Look for: Month Day ... amounts
+    // More flexible: Month followed by space and 1-2 digits
+    const monthPattern = '(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)';
+    const dateMatch = line.match(new RegExp(`^\\s*${monthPattern}\\s+(\\d{1,2})\\s+(.{5,})`));
     if (!dateMatch) continue;
     
     const month = monthMap[dateMatch[1]];
     const day = dateMatch[2].padStart(2, '0');
+    let remainder = dateMatch[3];
     
-    // Skip specific header lines
-    if (line.includes('Opening Balance') || line.includes('Closing Balance') || 
-        line.includes('Monthly Interest') || line.includes('DATE') || line.includes('DESCRIPTION')) continue;
-    if (line.includes('Rejected') || line.includes('BPF_')) continue;
+    // Skip header rows and special cases
+    if (remainder.match(/^(Opening|Closing|Monthly|DATE|DESCRIPTION|AMOUNT|CATEGORY|Fees|Interest|APY|YTD|Bills|Spending|Savings|Account|Total)/i)) continue;
+    if (remainder.includes('Page ') || remainder.includes('capitalone') || remainder.includes('Rejected')) continue;
     
-    // Get everything after the date
-    const afterDate = line.substring(dateMatch[0].length);
+    // Extract amounts - look for all $ amounts in the remainder
+    const dollarPattern = /[-+]?\s*\$[\d,]+\.?\d{0,2}/g;
+    const amounts = remainder.match(dollarPattern);
     
-    // Look for amount pattern: +/- $X.XX or +/- $X,XXX.XX
-    // Match: optional spaces, +/-, optional spaces, $, digits, optional comma, decimal
-    const amountMatches = afterDate.match(/[-+]\s*\$[\d,]+\.[\d]{2}/g);
-    if (!amountMatches || amountMatches.length === 0) {
-      console.log(`  Line ${i}: No amount found in: "${line.substring(0, 80)}..."`);
-      continue;
-    }
+    if (!amounts || amounts.length === 0) continue;
     
-    // The transaction amount should be the first one (before the balance)
-    const transactionAmountStr = amountMatches[0].trim();
+    // The first amount is typically the transaction amount
+    let amountStr = amounts[0].trim();
     
-    // Find the position - be careful because indexOf might find it in a different spot after regex
-    let amountPos = afterDate.indexOf(transactionAmountStr);
-    if (amountPos === -1) {
-      // Try finding without the exact spacing
-      const amountClean = transactionAmountStr.replace(/\s+/g, '');
-      const afterDateClean = afterDate.replace(/\s+/g, '');
-      const posClean = afterDateClean.indexOf(amountClean);
-      if (posClean === -1) continue;
-      amountPos = posClean;
-    }
+    // Skip if balance looks too large (>100k likely a balance, not transaction)
+    let testAmount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
+    if (Math.abs(testAmount) > 100000) continue;
     
-    // Description is everything before the amount
-    let description = afterDate.substring(0, amountPos).trim();
-    description = description.replace(/\s+/g, ' ').trim();
+    // Get description - everything before the amount
+    const amountIndex = remainder.indexOf(amountStr);
+    if (amountIndex < 5) continue; // Need real description
     
-    // Remove Category labels from description
-    description = description.replace(/\s+(Credit|Debit|Transfer)\s*$/i, '').trim();
+    let description = remainder.substring(0, amountIndex).trim();
     
-    if (!description || description.length < 2) {
-      console.log(`  Line ${i}: Empty description for amount ${transactionAmountStr}`);
-      continue;
-    }
+    // Clean up description
+    description = description.replace(/\s+(Debit|Credit|Transfer)\s*$/i, '')
+                             .replace(/CATEGORY\s*/i, '')
+                             .replace(/\s+/g, ' ')
+                             .trim();
     
-    // Parse the amount
-    let amountStr = transactionAmountStr.replace(/[\$,\s]/g, '');
-    let amount = parseFloat(amountStr);
+    if (!description || description.length < 3) continue;
     
-    if (!amount || amount === 0) {
-      console.log(`  Line ${i}: Invalid amount: "${transactionAmountStr}"`);
-      continue;
-    }
+    // Parse final amount
+    let amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
+    if (!amount || amount === 0) continue;
     
-    // Determine type based on sign
+    // Determine sign from +/- prefix
     let type = 'expense';
-    if (transactionAmountStr.includes('+')) {
+    if (amountStr.includes('+')) {
       type = 'income';
       amount = Math.abs(amount);
-    } else if (transactionAmountStr.includes('-')) {
+    } else if (amountStr.includes('-')) {
       type = 'expense';
       amount = -Math.abs(amount);
     }
     
     const date = `2025-${month}-${day}`;
     const category = categorizeTransaction(description);
-    
-    console.log(`  ✓ Line ${i}: ${date} | ${description.substring(0, 40)} | ${amount}`);
     
     transactions.push({
       id: id++,
