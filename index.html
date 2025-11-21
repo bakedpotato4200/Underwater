@@ -459,7 +459,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, billBuffer] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -470,8 +470,7 @@
           fetch(API_URL + '/api/cash-flow').then(r => r.json()),
           fetch(API_URL + '/api/spending-velocity').then(r => r.json()),
           fetch(API_URL + '/api/alerts').then(r => r.json()),
-          fetch(API_URL + '/api/spending-trends').then(r => r.json()),
-          fetch(API_URL + '/api/bill-buffer').then(r => r.json())
+          fetch(API_URL + '/api/spending-trends').then(r => r.json())
         ]);
 
         displayTransactions(txns);
@@ -489,10 +488,10 @@
         displayUpcomingBills(calendar);
         displayCalendar(calendar);
         displayCashFlow(cashflow);
-        displayBillBuffer(billBuffer);
+        displaySpendingTrends(trends);
+        loadBillBuffer(30);
         displayRecommendations(insights.recommendations);
         displayAnomalies(insights.anomalies);
-        displaySpendingTrends(trends);
       } catch (e) {
         console.error('Error loading data:', e);
       }
@@ -773,12 +772,26 @@
       container.innerHTML = html;
     }
 
+    let currentBufferDays = 30;
+
+    async function loadBillBuffer(days) {
+      currentBufferDays = days;
+      try {
+        const data = await fetch(API_URL + `/api/bill-buffer?days=${days}`).then(r => r.json());
+        displayBillBuffer(data);
+      } catch (e) {
+        console.error('Error loading bill buffer:', e);
+      }
+    }
+
     function displayBillBuffer(data) {
       const container = document.getElementById('billBufferContainer');
       if (!data || !data.nextBills || data.nextBills.length === 0) {
         container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No upcoming bills detected</div>';
         return;
       }
+
+      const timePeriodLabel = {7: '7 Days', 14: '14 Days', 30: '30 Days', 90: '90 Days', 360: '360 Days'}[data.days];
 
       const billsList = data.nextBills.map(b => `
         <div class="bill-item">
@@ -790,9 +803,17 @@
         </div>
       `).join('');
 
+      const periodButtons = [7, 14, 30, 90, 360].map(d => `
+        <button style="background: ${d === data.days ? '#0071e3' : '#e5e5e7'}; color: ${d === data.days ? 'white' : '#000'}; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;" onclick="loadBillBuffer(${d})">${d}d</button>
+      `).join('');
+
       container.innerHTML = `
+        <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+          ${periodButtons}
+        </div>
+
         <div style="margin-bottom: 20px;">
-          <h3 style="font-size: 14px; color: #000; margin-bottom: 12px; font-weight: 600;">Next 4 Bills</h3>
+          <h3 style="font-size: 14px; color: #000; margin-bottom: 12px; font-weight: 600;">Bills in next ${data.days} days (${data.billCount} bills)</h3>
           ${billsList}
         </div>
 
@@ -810,7 +831,7 @@
           <div style="background: #0071e3; padding: 16px; border-radius: 8px; grid-column: 1/-1;">
             <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Required Account Balance</div>
             <div style="font-size: 28px; font-weight: 700; color: white;">$${data.requiredBalance.toFixed(2)}</div>
-            <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 8px;">You'll have $${data.leftoverAfterBills.toFixed(2)} left after paying these 4 bills</div>
+            <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 8px;">You'll have $${data.leftoverAfterBills.toFixed(2)} left after paying all bills in the next ${data.days} days</div>
           </div>
         </div>
       `;

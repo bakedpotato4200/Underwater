@@ -430,8 +430,12 @@ app.get('/api/spending-trends', (req, res) => {
 });
 
 app.get('/api/bill-buffer', (req, res) => {
+  const days = parseInt(req.query.days) || 30;
   const recurring = detectRecurring().filter(r => r.isRecurring);
-  const calendar = generateBillCalendar(3);
+  const calendar = generateBillCalendar(12);
+  
+  const today = new Date();
+  const cutoffDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
   
   const billsWithDates = [];
   Object.entries(calendar).forEach(([date, bills]) => {
@@ -441,19 +445,21 @@ app.get('/api/bill-buffer', (req, res) => {
   });
   
   billsWithDates.sort((a, b) => a.date - b.date);
-  const nextFourBills = billsWithDates.slice(0, 4);
+  const billsInPeriod = billsWithDates.filter(b => b.date <= cutoffDate);
   
-  const totalBillsNeeded = nextFourBills.reduce((sum, bill) => sum + bill.amount, 0);
+  const totalBillsNeeded = billsInPeriod.reduce((sum, bill) => sum + bill.amount, 0);
   const desiredBuffer = totalBillsNeeded * 0.2;
   const requiredBalance = totalBillsNeeded + desiredBuffer;
   
   res.json({
-    nextBills: nextFourBills.map(b => ({
+    days: days,
+    nextBills: billsInPeriod.map(b => ({
       merchant: b.merchant,
       amount: b.amount,
       daysUntilDue: b.daysUntilDue,
       date: b.date.toISOString().split('T')[0]
     })),
+    billCount: billsInPeriod.length,
     totalBillsAmount: totalBillsNeeded,
     recommendedBuffer: desiredBuffer,
     requiredBalance: requiredBalance,
