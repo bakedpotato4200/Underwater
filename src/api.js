@@ -176,6 +176,20 @@ app.get('/api/balance', (req, res) => {
   res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length });
 });
 
+app.get('/api/summary', (req, res) => {
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses });
+});
+
+app.get('/api/daily-breakdown', (req, res) => {
+  const daily = {};
+  transactions.forEach(t => {
+    daily[t.date] = (daily[t.date] || 0) + t.amount;
+  });
+  res.json(daily);
+});
+
 app.post('/api/debts', express.json(), (req, res) => {
   const newDebt = { id: Math.max(...debts.map(d => d.id || 0), 0) + 1, ...req.body };
   debts.push(newDebt);
