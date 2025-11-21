@@ -161,12 +161,71 @@ function calculateSpendingVelocity() {
   };
 }
 
+function detectAnomalies() {
+  if (transactions.length < 3) return [];
+  const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer');
+  if (expenses.length < 3) return [];
+  
+  const amounts = expenses.map(t => Math.abs(t.amount)).sort((a, b) => a - b);
+  const median = amounts[Math.floor(amounts.length / 2)];
+  const q3 = amounts[Math.floor(amounts.length * 0.75)];
+  const iqr = q3 - (amounts[Math.floor(amounts.length * 0.25)] || q3);
+  const upperBound = q3 + (iqr * 1.5);
+  
+  return expenses.filter(t => Math.abs(t.amount) > upperBound * 1.2).slice(-3);
+}
+
+function getSmartRecommendations() {
+  const recs = [];
+  const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded);
+  const categories = {};
+  
+  expenses.forEach(t => {
+    if (t.category !== 'Transfer' && t.category !== 'Income') {
+      categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
+    }
+  });
+  
+  const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+  if (sorted.length > 0) {
+    const topCategory = sorted[0];
+    recs.push({ title: `💡 Cut ${topCategory[0]}`, desc: `Reduce ${topCategory[0].toLowerCase()} by 10% and save $${(topCategory[1] * 0.1).toFixed(2)}/month` });
+  }
+  
+  const recurring = detectRecurring().filter(r => r.isRecurring);
+  if (recurring.length > 0) {
+    const totalRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
+    recs.push({ title: '🔄 Audit Subscriptions', desc: `You pay $${totalRecurring.toFixed(0)}/year in recurring charges. Cancel unused ones?` });
+  }
+  
+  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const savings = totalIncome - totalExpense;
+  
+  if (savings > 0) {
+    recs.push({ title: '🎯 Set Savings Goal', desc: `You save $${savings.toFixed(2)}/month. Create a goal to reach $${(savings * 12).toFixed(0)} this year` });
+  }
+  
+  if (sorted.length > 1 && sorted[1][0] === 'Food & Dining') {
+    const foodAmount = sorted[1][1];
+    recs.push({ title: '🍽️ Optimize Food', desc: `Food spending: $${foodAmount.toFixed(2)}. Meal prep to reduce by 15%?` });
+  }
+  
+  return recs.slice(0, 4);
+}
+
 function generateAlerts() {
   const alerts = [];
   const recurring = detectRecurring().filter(r => r.isRecurring);
   const velocity = calculateSpendingVelocity();
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const anomalies = detectAnomalies();
+
+  if (anomalies.length > 0) {
+    const anomaly = anomalies[0];
+    alerts.push({ type: 'warning', title: '🚨 Unusual Transaction', message: `${anomaly.description} ($${Math.abs(anomaly.amount).toFixed(2)}) seems unusual for ${anomaly.category}` });
+  }
 
   if (velocity.trend === 'increasing' && parseFloat(velocity.trendPercent) > 10) {
     alerts.push({ type: 'warning', title: '📈 Spending Increasing', message: `Your spending is up ${velocity.trendPercent}% vs last month. Monitor budget!` });
@@ -338,21 +397,29 @@ app.get('/api/insights', (req, res) => {
   const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
+  const debtTotal = debts.reduce((s, d) => s + d.balance, 0);
+  const debtRatio = totalIncome > 0 ? (debtTotal / totalIncome).toFixed(1) : 0;
+  const anomalies = detectAnomalies();
   
   let score = 50;
   if (savingsRate > 20) score += 25;
   if (savingsRate > 10) score += 15;
   if (velocity.trend === 'decreasing') score += 15;
+  if (debtRatio < 1) score += 10;
+  if (anomalies.length === 0) score += 5;
   
   res.json({
     financialScore: Math.min(100, score),
     savingsRate,
+    debtRatio,
     recurringTransactions: recurring,
     velocity,
     avgDailySpend: velocity.daily,
     totalTransactions: transactions.length,
     excludedTransactions: transactions.filter(t => t.excluded).length,
-    debtTotal: debts.reduce((s, d) => s + d.balance, 0)
+    debtTotal,
+    anomalies,
+    recommendations: getSmartRecommendations()
   });
 });
 

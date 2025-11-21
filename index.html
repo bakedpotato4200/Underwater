@@ -247,9 +247,23 @@
     <div id="insights" class="tab-content" style="display: none;">
       <div class="dashboard">
         <div class="card full">
-          <h2>🧠 AI Financial Insights</h2>
+          <h2>🧠 AI Financial Insights & Recommendations</h2>
           <div id="insightsContainer">
             <div class="loading">Loading insights...</div>
+          </div>
+        </div>
+
+        <div class="card full">
+          <h2>💡 Smart Recommendations</h2>
+          <div id="recommendationsContainer">
+            <div class="loading">Loading recommendations...</div>
+          </div>
+        </div>
+
+        <div class="card full">
+          <h2>🚨 Anomalies Detected</h2>
+          <div id="anomaliesContainer">
+            <div class="loading">Scanning for unusual transactions...</div>
           </div>
         </div>
       </div>
@@ -423,6 +437,8 @@
         displayCalendar(calendar);
         displayCashFlow(cashflow);
         document.getElementById('transferCount').textContent = insights.transfers ? `$${insights.transfers.toLocaleString('en-US', {maximumFractionDigits: 0})}` : '$0';
+        displayRecommendations(insights.recommendations);
+        displayAnomalies(insights.anomalies);
       } catch (e) {
         console.error('Error loading data:', e);
       }
@@ -497,6 +513,37 @@
       } catch (e) {
         alert('Failed to update transaction: ' + e.message);
       }
+    }
+
+    function displayRecommendations(recs) {
+      const container = document.getElementById('recommendationsContainer');
+      if (!recs || recs.length === 0) {
+        container.innerHTML = '<div style="color: #7f8c8d; text-align: center; padding: 20px;">All set! No optimization opportunities at the moment.</div>';
+        return;
+      }
+      container.innerHTML = recs.map(r => `
+        <div class="insight-box" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); margin-bottom: 10px;">
+          <strong style="font-size: 15px;">${r.title}</strong><br>
+          <span style="font-size: 13px; opacity: 0.95;">${r.desc}</span>
+        </div>
+      `).join('');
+    }
+
+    function displayAnomalies(anomalies) {
+      const container = document.getElementById('anomaliesContainer');
+      if (!anomalies || anomalies.length === 0) {
+        container.innerHTML = '<div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 15px; border-radius: 8px; text-align: center;">✓ No unusual transactions detected - spending looks normal!</div>';
+        return;
+      }
+      container.innerHTML = anomalies.slice(0, 5).map(a => `
+        <div class="bill-item" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); margin-bottom: 10px;">
+          <div>
+            <div class="bill-name">${a.description}</div>
+            <div class="bill-date">${a.date} • ${a.category}</div>
+          </div>
+          <div class="bill-amount" style="font-size: 16px;">$${Math.abs(a.amount).toFixed(2)}</div>
+        </div>
+      `).join('');
     }
 
     function filterTransactions() {
