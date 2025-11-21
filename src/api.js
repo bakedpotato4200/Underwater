@@ -50,94 +50,123 @@ function categorizeTransaction(description) {
 // Store extracted PDF text for debugging
 let lastExtractedText = '';
 
-// Universal parser that works with any bank statement format
+// Smart transaction parser that filters out non-transaction amounts
 function extractTransactions(text) {
   const transactions = [];
   const lines = text.split('\n');
+  const seen = new Set(); // Track duplicates
   
   let id = 1;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line || line.length < 5) continue;
+    if (!line || line.length < 8) continue;
     
-    // Look for amounts (with or without minus sign, with commas or decimals)
-    const amountMatches = line.match(/[-]?\$?\d+[,.]?\d*[,.]?\d{2}|\d+[,.]?\d*[,.]?\d{2}\s*[-+]?/g);
-    if (!amountMatches) continue;
+    // Skip lines that are obviously not transactions
+    if (line.match(/^\s*Page|^\s*Account|^\s*Balance|^\s*Total|^\s*Subtotal|^\s*Summary|^\s*Statement|Date.*Amount/i)) {
+      continue;
+    }
     
     // Look for dates in various formats
     const datePatterns = [
       /(\d{1,2}\/\d{1,2}\/\d{2,4})/,           // MM/DD/YYYY or MM/DD/YY
-      /(\d{1,2}\/\d{1,2})/,                     // MM/DD
+      /(\d{1,2}\/\d{1,2})(?!\/\d{1,2})/,       // MM/DD (not followed by /DD)
       /(\d{4}-\d{1,2}-\d{1,2})/,               // YYYY-MM-DD
-      /([A-Z][a-z]{2}\s+\d{1,2})/,             // Jan 15
+      /([A-Z][a-z]{2}\s+\d{1,2})(?!\s*[A-Z])/,// Jan 15 (not followed by another month)
     ];
     
     let dateStr = null;
-    let dateMatch = null;
     for (const pattern of datePatterns) {
-      dateMatch = line.match(pattern);
-      if (dateMatch) {
-        dateStr = dateMatch[1];
+      const match = line.match(pattern);
+      if (match) {
+        dateStr = match[1];
         break;
       }
     }
     
-    // If we found both date and amount, extract them
-    if (dateStr && amountMatches.length > 0) {
-      let amountStr = amountMatches[amountMatches.length - 1].replace(/\s+/g, '').replace('$', '');
+    if (!dateStr) continue;
+    
+    // Look for amounts - extract all numbers that look like money amounts
+    const amountMatches = line.match(/[-]?\$?\d+[\d,]*\.\d{2}|\d+[\d,]*\.\d{2}|\d+,\d{3}/g);
+    if (!amountMatches) continue;
+    
+    // Filter amounts - only keep reasonable transaction amounts (max $500k, at least $0.01)
+    const validAmounts = [];
+    for (const match of amountMatches) {
+      let cleaned = match.replace(/\$/g, '').replace(/,/g, '');
+      const amount = parseFloat(cleaned);
       
-      // Handle different amount formats
-      if (amountStr.endsWith('+') || amountStr.endsWith('-')) {
-        const sign = amountStr[amountStr.length - 1];
-        amountStr = amountStr.slice(0, -1);
-        if (sign === '-') amountStr = '-' + amountStr;
+      // Filter out unreasonable amounts
+      if (amount >= 0.01 && amount <= 500000 && amount !== 0) {
+        validAmounts.push({ str: cleaned, val: amount });
       }
-      
-      const amount = parseFloat(amountStr.replace(/,/g, ''));
-      if (isNaN(amount) || amount === 0) continue;
-      
-      // Extract description - everything between date and amount
-      let description = line.replace(dateStr, '').replace(amountStr, '').trim();
-      
-      // Clean up description
-      description = description.replace(/^\s*[-+]?\s*/, '').replace(/\s+$/g, '');
-      if (!description || description.length < 2) continue;
-      
-      // Parse date
-      let date;
-      if (dateStr.includes('/')) {
-        const parts = dateStr.split('/');
-        if (parts.length === 2) {
-          date = `2025-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-        } else if (parts.length === 3) {
-          const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
-          date = `${year}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-        }
-      } else if (dateStr.includes('-')) {
-        date = dateStr;
-      } else if (dateStr.match(/[A-Z][a-z]{2}/)) {
-        // Handle "Jan 15" format
-        const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
-                          Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
-        const month = monthMap[dateStr.substring(0, 3)];
-        const day = dateStr.match(/\d+/)[0].padStart(2, '0');
-        date = `2025-${month}-${day}`;
-      }
-      
-      if (!date) continue;
-      
-      const type = amount > 0 ? 'income' : 'expense';
-      const category = categorizeTransaction(description);
-      
-      transactions.push({
-        id: id++,
-        date,
-        amount,
-        category,
-        description,
-        type
-      });
     }
+    
+    if (validAmounts.length === 0) continue;
+    
+    // Use the last/largest amount as the transaction amount (usually the rightmost number)
+    const selectedAmount = validAmounts[validAmounts.length - 1];
+    let amount = selectedAmount.val;
+    let amountStr = selectedAmount.str;
+    
+    // Determine if credit (income) or debit (expense) by checking line context
+    if (line.toLowerCase().includes('debit') || line.toLowerCase().includes('withdrawal') || line.match(/^\s*-/)) {
+      amount = Math.abs(amount) * -1;
+    } else if (line.toLowerCase().includes('credit') || line.toLowerCase().includes('deposit') || line.toLowerCase().includes('payment')) {
+      amount = Math.abs(amount);
+    }
+    
+    // Extract description - text between date and amount
+    let description = line.replace(dateStr, '').replace(amountStr, '').trim();
+    description = description.replace(/^[-+\s]+/, '').replace(/[-+\s]+$/, '').trim();
+    
+    // Filter descriptions
+    if (!description || description.length < 2 || description.match(/^[\d\s.,\-+]+$/)) {
+      continue;
+    }
+    
+    // Skip known non-transaction text
+    if (description.match(/^(Account|Balance|Total|Subtotal|Interest|Fee Summary|Page|Beginning|Ending)/i)) {
+      continue;
+    }
+    
+    // Avoid duplicates
+    const key = `${dateStr}-${amount}-${description}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    
+    // Parse date
+    let date;
+    if (dateStr.includes('/')) {
+      const parts = dateStr.split('/');
+      if (parts.length === 2) {
+        date = `2025-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      } else if (parts.length === 3) {
+        const year = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+        date = `${year}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      }
+    } else if (dateStr.includes('-')) {
+      date = dateStr;
+    } else if (dateStr.match(/[A-Z][a-z]{2}/)) {
+      const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+                        Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
+      const month = monthMap[dateStr.substring(0, 3)];
+      const day = dateStr.match(/\d+/)[0].padStart(2, '0');
+      date = `2025-${month}-${day}`;
+    }
+    
+    if (!date) continue;
+    
+    const type = amount > 0 ? 'income' : 'expense';
+    const category = categorizeTransaction(description);
+    
+    transactions.push({
+      id: id++,
+      date,
+      amount,
+      category,
+      description: description.substring(0, 100), // Cap description length
+      type
+    });
   }
   
   return transactions;
