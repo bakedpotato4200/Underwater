@@ -292,6 +292,13 @@
       <div id="insights" class="tab-content" style="display: none;">
         <div class="dashboard">
           <div class="card full">
+            <h2>Bill Buffer Calculator</h2>
+            <div id="billBufferContainer">
+              <div class="loading">Calculating required balance...</div>
+            </div>
+          </div>
+
+          <div class="card full">
             <h2>Financial Insights</h2>
             <div id="insightsContainer">
               <div class="loading">Loading insights...</div>
@@ -452,7 +459,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, billBuffer] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -463,7 +470,8 @@
           fetch(API_URL + '/api/cash-flow').then(r => r.json()),
           fetch(API_URL + '/api/spending-velocity').then(r => r.json()),
           fetch(API_URL + '/api/alerts').then(r => r.json()),
-          fetch(API_URL + '/api/spending-trends').then(r => r.json())
+          fetch(API_URL + '/api/spending-trends').then(r => r.json()),
+          fetch(API_URL + '/api/bill-buffer').then(r => r.json())
         ]);
 
         displayTransactions(txns);
@@ -481,6 +489,7 @@
         displayUpcomingBills(calendar);
         displayCalendar(calendar);
         displayCashFlow(cashflow);
+        displayBillBuffer(billBuffer);
         displayRecommendations(insights.recommendations);
         displayAnomalies(insights.anomalies);
         displaySpendingTrends(trends);
@@ -762,6 +771,49 @@
         `;
       });
       container.innerHTML = html;
+    }
+
+    function displayBillBuffer(data) {
+      const container = document.getElementById('billBufferContainer');
+      if (!data || !data.nextBills || data.nextBills.length === 0) {
+        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No upcoming bills detected</div>';
+        return;
+      }
+
+      const billsList = data.nextBills.map(b => `
+        <div class="bill-item">
+          <div>
+            <div class="bill-name">${b.merchant}</div>
+            <div class="bill-date">${b.date} (${b.daysUntilDue} days)</div>
+          </div>
+          <div class="bill-amount">$${b.amount.toFixed(2)}</div>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div style="margin-bottom: 20px;">
+          <h3 style="font-size: 14px; color: #000; margin-bottom: 12px; font-weight: 600;">Next 4 Bills</h3>
+          ${billsList}
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px;">
+          <div style="background: #f0f3ff; border: 1px solid #0071e3; padding: 16px; border-radius: 8px;">
+            <div style="color: #86868b; font-size: 12px;">Total Bills</div>
+            <div style="font-size: 24px; font-weight: 700; color: #0071e3;">$${data.totalBillsAmount.toFixed(2)}</div>
+          </div>
+
+          <div style="background: #f0f3ff; border: 1px solid #0071e3; padding: 16px; border-radius: 8px;">
+            <div style="color: #86868b; font-size: 12px;">Safety Buffer (20%)</div>
+            <div style="font-size: 24px; font-weight: 700; color: #0071e3;">$${data.recommendedBuffer.toFixed(2)}</div>
+          </div>
+
+          <div style="background: #0071e3; padding: 16px; border-radius: 8px; grid-column: 1/-1;">
+            <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Required Account Balance</div>
+            <div style="font-size: 28px; font-weight: 700; color: white;">$${data.requiredBalance.toFixed(2)}</div>
+            <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 8px;">You'll have $${data.leftoverAfterBills.toFixed(2)} left after paying these 4 bills</div>
+          </div>
+        </div>
+      `;
     }
 
     function switchTab(tab) {

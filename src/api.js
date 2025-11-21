@@ -429,6 +429,38 @@ app.get('/api/spending-trends', (req, res) => {
   res.json(trends);
 });
 
+app.get('/api/bill-buffer', (req, res) => {
+  const recurring = detectRecurring().filter(r => r.isRecurring);
+  const calendar = generateBillCalendar(3);
+  
+  const billsWithDates = [];
+  Object.entries(calendar).forEach(([date, bills]) => {
+    bills.forEach(bill => {
+      billsWithDates.push({ date: new Date(date), ...bill });
+    });
+  });
+  
+  billsWithDates.sort((a, b) => a.date - b.date);
+  const nextFourBills = billsWithDates.slice(0, 4);
+  
+  const totalBillsNeeded = nextFourBills.reduce((sum, bill) => sum + bill.amount, 0);
+  const desiredBuffer = totalBillsNeeded * 0.2;
+  const requiredBalance = totalBillsNeeded + desiredBuffer;
+  
+  res.json({
+    nextBills: nextFourBills.map(b => ({
+      merchant: b.merchant,
+      amount: b.amount,
+      daysUntilDue: b.daysUntilDue,
+      date: b.date.toISOString().split('T')[0]
+    })),
+    totalBillsAmount: totalBillsNeeded,
+    recommendedBuffer: desiredBuffer,
+    requiredBalance: requiredBalance,
+    leftoverAfterBills: desiredBuffer
+  });
+});
+
 app.get('/api/categories', (req, res) => {
   const categories = {};
   transactions.forEach(t => {
