@@ -33,13 +33,13 @@ args = "Budget App Server"
 name = "Budget App Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node src/api.js &  sleep 2 && python3 -m http.server 5000 --directory ."
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node src/api.js"
+waitForPort = 5000
 
 [[ports]]
 localPort = 3001
@@ -48,7 +48,3 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 38675
-externalPort = 3000

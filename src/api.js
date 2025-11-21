@@ -16,6 +16,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Serve static files
+app.use(express.static(path.join(__dirname, '..')));
+
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -150,5 +153,5 @@ app.get('/api/daily-breakdown', (req, res) => {
   res.json(daily);
 });
 
-const PORT = 3001;
-app.listen(PORT, '0.0.0.0', () => console.log(`API running on port ${PORT}`));
+const PORT = 5000;
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
