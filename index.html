@@ -303,7 +303,7 @@
         <input type="file" id="pdfFile" accept=".pdf">
       </div>
       <div class="action-buttons">
-        <button class="btn btn-primary" onclick="uploadStatement()">Upload</button>
+        <button class="btn btn-primary" onclick="uploadStatement()">✅ Upload</button>
         <button class="btn btn-secondary" onclick="closeModal('uploadModal')">Cancel</button>
       </div>
     </div>
@@ -476,22 +476,31 @@
         alert('Please select a file');
         return;
       }
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.textContent = '⏳ Uploading...';
+      btn.disabled = true;
+      
       const formData = new FormData();
       formData.append('file', file);
       try {
-        console.log('Uploading to:', API_URL + '/api/upload-statement');
         const response = await fetch(API_URL + '/api/upload-statement', { 
           method: 'POST', 
           body: formData
         });
-        console.log('Upload response:', response.status);
         if (!response.ok) throw new Error('Upload failed: ' + response.status);
+        const result = await response.json();
+        
         closeModal('uploadModal');
         document.getElementById('pdfFile').value = '';
-        loadData();
+        alert(`✅ Upload successful! Loaded ${result.transactions} transactions`);
+        await loadData();
       } catch (e) {
         console.error('Upload failed:', e);
-        alert('Upload failed. Please try again: ' + e.message);
+        alert('❌ Upload failed: ' + e.message);
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
       }
     }
 
