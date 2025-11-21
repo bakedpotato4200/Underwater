@@ -292,6 +292,13 @@
       <div id="insights" class="tab-content" style="display: none;">
         <div class="dashboard">
           <div class="card full">
+            <h2>Exclusion Rules</h2>
+            <div id="exclusionRulesContainer">
+              <div class="loading">Loading exclusion rules...</div>
+            </div>
+          </div>
+
+          <div class="card full">
             <h2>Bill Buffer Calculator</h2>
             <div id="billBufferContainer">
               <div class="loading">Calculating required balance...</div>
@@ -459,7 +466,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -470,7 +477,8 @@
           fetch(API_URL + '/api/cash-flow').then(r => r.json()),
           fetch(API_URL + '/api/spending-velocity').then(r => r.json()),
           fetch(API_URL + '/api/alerts').then(r => r.json()),
-          fetch(API_URL + '/api/spending-trends').then(r => r.json())
+          fetch(API_URL + '/api/spending-trends').then(r => r.json()),
+          fetch(API_URL + '/api/exclusion-rules').then(r => r.json())
         ]);
 
         displayTransactions(txns);
@@ -489,6 +497,7 @@
         displayCalendar(calendar);
         displayCashFlow(cashflow);
         displaySpendingTrends(trends);
+        displayExclusionRules(rules);
         loadBillBuffer(30);
         displayRecommendations(insights.recommendations);
         displayAnomalies(insights.anomalies);
@@ -811,6 +820,56 @@
       } catch (e) {
         console.error('Error loading bill buffer:', e);
       }
+    }
+
+    async function toggleExclude(id) {
+      try {
+        await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ learnRule: true })
+        });
+        loadData();
+      } catch (e) {
+        alert('Failed to exclude: ' + e.message);
+      }
+    }
+
+    async function removeExclusionRule(index) {
+      try {
+        await fetch(API_URL + `/api/exclusion-rules/${index}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        loadData();
+      } catch (e) {
+        alert('Failed to remove rule: ' + e.message);
+      }
+    }
+
+    function displayExclusionRules(rules) {
+      const container = document.getElementById('exclusionRulesContainer');
+      if (!Array.isArray(rules) || rules.length === 0) {
+        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No exclusion rules yet. Exclude transactions to create rules that auto-exclude similar ones.</div>';
+        return;
+      }
+
+      const rulesHtml = rules.map((rule, idx) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border: 1px solid #e5e5e7; border-radius: 6px; margin-bottom: 8px;">
+          <div>
+            <div style="font-weight: 600; color: #000; font-size: 13px;">${rule.pattern}</div>
+            <div style="font-size: 11px; color: #86868b; margin-top: 2px;">Auto-excludes by ${rule.type}</div>
+          </div>
+          <button class="btn btn-small" style="background: #ff3b30; color: white; cursor: pointer;" onclick="removeExclusionRule(${idx})">Remove</button>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div style="margin-bottom: 12px; padding: 12px; background: #f0f3ff; border-radius: 6px; font-size: 12px; color: #0071e3; border-left: 3px solid #0071e3;">
+          Exclude a transaction to automatically exclude similar future transactions by merchant name.
+        </div>
+        ${rulesHtml}
+      `;
     }
 
     function displayBillBuffer(data) {

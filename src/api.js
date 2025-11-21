@@ -30,6 +30,7 @@ const transactionsFile = path.join(dataDir, 'transactions.json');
 const debtsFile = path.join(dataDir, 'debts.json');
 const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
 const goalsFile = path.join(dataDir, 'goals.json');
+const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
 
 // Load/Save functions
 function loadData(file) {
@@ -56,6 +57,28 @@ let transactions = loadData(transactionsFile);
 let debts = loadData(debtsFile);
 let subscriptions = loadData(subscriptionsFile);
 let goals = loadData(goalsFile);
+let exclusionRules = loadData(exclusionRulesFile);
+
+function shouldExcludeByRule(txn) {
+  if (!Array.isArray(exclusionRules)) return false;
+  return exclusionRules.some(rule => {
+    if (rule.type === 'merchant') {
+      return txn.description.toLowerCase().includes(rule.pattern.toLowerCase());
+    }
+    if (rule.type === 'category') {
+      return txn.category === rule.pattern;
+    }
+    return false;
+  });
+}
+
+function applyExclusionRules() {
+  transactions.forEach(txn => {
+    if (!txn.excluded && shouldExcludeByRule(txn)) {
+      txn.excluded = true;
+    }
+  });
+}
 
 console.log(`Loaded ${transactions.length} transactions, ${debts.length} debts, ${goals.length} goals`);
 
@@ -383,10 +406,44 @@ app.post('/api/transactions/:id/toggle-exclude', express.json(), (req, res) => {
   const txn = transactions.find(t => t.id == req.params.id);
   if (txn) {
     txn.excluded = !txn.excluded;
+    
+    if (txn.excluded && req.body.learnRule) {
+      const merchant = txn.description.split(' ')[0];
+      const existingRule = exclusionRules.find(r => r.pattern === merchant);
+      if (!existingRule) {
+        exclusionRules.push({ type: 'merchant', pattern: merchant });
+        saveData(exclusionRulesFile, exclusionRules);
+      }
+    }
+    
     saveData(transactionsFile, transactions);
     res.json({ success: true, excluded: txn.excluded });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
+  }
+});
+
+app.get('/api/exclusion-rules', (req, res) => {
+  res.json(exclusionRules);
+});
+
+app.delete('/api/exclusion-rules/:index', express.json(), (req, res) => {
+  const idx = parseInt(req.params.index);
+  if (idx >= 0 && idx < exclusionRules.length) {
+    const removed = exclusionRules.splice(idx, 1);
+    saveData(exclusionRulesFile, exclusionRules);
+    transactions.forEach(txn => {
+      if (txn.excluded && shouldExcludeByRule(txn) === false && removed[0].type === 'merchant') {
+        const merchant = txn.description.split(' ')[0];
+        if (merchant.toLowerCase() === removed[0].pattern.toLowerCase()) {
+          txn.excluded = false;
+        }
+      }
+    });
+    saveData(transactionsFile, transactions);
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ error: 'Rule not found' });
   }
 });
 
