@@ -63,55 +63,52 @@ function extractTransactions(text) {
     const line = lines[i];
     if (!line || line.length < 20) continue;
     
-    // Match: Month Day Description Amount(s) with potential extra spaces
-    const lineMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+(.+)/);
-    if (!lineMatch) continue;
+    // Match: Month Day at the start of line
+    const dateMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+/);
+    if (!dateMatch) continue;
     
-    const month = monthMap[lineMatch[1]];
-    const day = lineMatch[2].padStart(2, '0');
-    const restOfLine = lineMatch[3];
+    const month = monthMap[dateMatch[1]];
+    const day = dateMatch[2].padStart(2, '0');
     
-    // Find all dollar amounts on this line
-    const amounts = restOfLine.match(/[-+]?\s*\$[\d,]+\.?\d{0,2}/g);
-    if (!amounts || amounts.length === 0) continue;
+    // Get everything after the date
+    const afterDate = line.substring(dateMatch[0].length);
     
-    // Skip if it's a header line or summary
-    if (restOfLine.match(/^(DESCRIPTION|CATEGORY|AMOUNT|BALANCE|Credit|Debit|Category|Opening|Closing)/i)) continue;
-    if (restOfLine.includes('Rejected')) continue;
+    // Skip lines with headers or rejected transactions
+    if (afterDate.match(/^(Opening Balance|Closing Balance|DESCRIPTION|Monthly Interest|AMOUNT|CATEGORY)/i)) continue;
+    if (afterDate.includes('Rejected')) continue;
+    if (afterDate.includes('BPF_')) continue;
     
-    // The transaction amount is typically before the final balance amount
-    // Most Capital One statements have: TransactionAmount ... BalanceAmount
-    // Take the first significant amount as the transaction
-    let transactionAmount = amounts[0];
+    // Look for amount pattern: +/- $X.XX anywhere in the line
+    const amountMatches = afterDate.match(/([-+]\s*\$[\d,]+\.\d{2})/g);
+    if (!amountMatches || amountMatches.length === 0) continue;
     
-    // Extract description - part before the first amount
-    const amountIndex = restOfLine.indexOf(transactionAmount);
-    let description = restOfLine.substring(0, amountIndex).trim();
+    // The transaction amount should be the first one (before the balance)
+    const transactionAmountStr = amountMatches[0];
+    const amountPos = afterDate.indexOf(transactionAmountStr);
+    
+    // Description is everything before the amount
+    let description = afterDate.substring(0, amountPos).trim();
     description = description.replace(/\s+/g, ' ').trim();
     
-    if (!description || description.length < 2) continue;
-    if (description.match(/^(Credit|Debit|Category)/i)) continue;
+    // Clean up description - remove category labels
+    description = description.replace(/\s+(Credit|Debit|Transfer)$/, '').trim();
     
-    // Parse amount
-    let amountStr = transactionAmount.replace(/[\$,\s]/g, '');
+    if (!description || description.length < 2) continue;
+    
+    // Parse the amount
+    let amountStr = transactionAmountStr.replace(/[\$,\s]/g, '');
     let amount = parseFloat(amountStr);
     
     if (!amount || amount === 0) continue;
     
-    // Determine type
+    // Determine type based on sign
     let type = 'expense';
-    if (transactionAmount.includes('+')) {
+    if (transactionAmountStr.includes('+')) {
       type = 'income';
       amount = Math.abs(amount);
-    } else if (transactionAmount.includes('-')) {
+    } else if (transactionAmountStr.includes('-')) {
       type = 'expense';
       amount = -Math.abs(amount);
-    } else if (description.toLowerCase().includes('debit') || description.toLowerCase().includes('withdrawal')) {
-      type = 'expense';
-      amount = -Math.abs(amount);
-    } else if (description.toLowerCase().includes('credit') || description.toLowerCase().includes('deposit')) {
-      type = 'income';
-      amount = Math.abs(amount);
     }
     
     const date = `2025-${month}-${day}`;
