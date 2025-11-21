@@ -521,6 +521,7 @@
         fullList.innerHTML = '<div class="loading">No transactions</div>';
         return;
       }
+      
       const html = txns.slice(-30).map(t => `
         <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}">
           <div style="flex: 1;">
@@ -538,22 +539,50 @@
         </li>
       `).join('');
       list.innerHTML = html;
-      fullList.innerHTML = txns.map(t => `
-        <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}">
-          <div style="flex: 1;">
-            <div class="transaction-date">${t.date}</div>
-            <div class="transaction-desc">${t.description}</div>
-            <span style="font-size: 11px; color: #86868b;">${t.category}</span>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <div class="transaction-amount ${t.type}">
-              ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+
+      const months = {};
+      txns.forEach(t => {
+        const date = new Date(t.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (!months[monthKey]) months[monthKey] = [];
+        months[monthKey].push(t);
+      });
+
+      const sortedMonths = Object.keys(months).sort().reverse();
+      let fullHtml = '';
+      
+      sortedMonths.forEach(monthKey => {
+        const [year, month] = monthKey.split('-');
+        const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+        const monthTotal = months[monthKey].reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
+        
+        fullHtml += `<div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
+            <div>${monthName}</div>
+            <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
+          </div>`;
+        
+        months[monthKey].forEach(t => {
+          fullHtml += `<li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
+            <div style="flex: 1;">
+              <div class="transaction-date">${t.date}</div>
+              <div class="transaction-desc">${t.description}</div>
+              <span style="font-size: 11px; color: #86868b;">${t.category}</span>
             </div>
-            <button class="btn btn-small" style="background: #0071e3; color: white; cursor: pointer;" onclick="showNoteModal(${t.id}, '${(t.note || '').replace(/'/g, "\\'")}')">Note</button>
-            <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'}; cursor: pointer;" onclick="toggleExclude(${t.id})">Excl</button>
-          </div>
-        </li>
-      `).join('');
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div class="transaction-amount ${t.type}">
+                ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+              </div>
+              <button class="btn btn-small" style="background: #0071e3; color: white; cursor: pointer;" onclick="showNoteModal(${t.id}, '${(t.note || '').replace(/'/g, "\\'")}')">Note</button>
+              <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'}; cursor: pointer;" onclick="toggleExclude(${t.id})">Excl</button>
+            </div>
+          </li>`;
+        });
+        
+        fullHtml += '</div>';
+      });
+      
+      fullList.innerHTML = fullHtml;
     }
 
     function filterTransactions() {
