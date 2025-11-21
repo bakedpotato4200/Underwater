@@ -47,6 +47,9 @@ function categorizeTransaction(description) {
   return 'Other';
 }
 
+// Store extracted PDF text for debugging
+let lastExtractedText = '';
+
 // Parse transactions from uploaded PDF
 app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
   try {
@@ -58,66 +61,117 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
     const pdfBuffer = fs.readFileSync(req.file.path);
     const pdfData = await pdfParse(pdfBuffer);
     const text = pdfData.text;
+    lastExtractedText = text; // Store for debugging
     
-    // Parse transactions from PDF text
+    console.log('PDF Text extracted (first 500 chars):', text.substring(0, 500));
+    
+    // Parse transactions from PDF text using multiple patterns
     const parsedTransactions = [];
     const lines = text.split('\n');
     
-    // Pattern to match transaction lines (date, description, amount)
-    // Supports formats like: 11/15/2025 Starbucks -50.00 or similar
-    const transactionPattern = /(\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{1,2}-\d{1,2})\s+(.+?)\s+([-]?\d+[\.,]\d{2})/;
+    // Multiple patterns to handle different bank statement formats
+    const patterns = [
+      // Pattern 1: Date Description Amount (e.g., "11/15/2025 Starbucks -50.00")
+      /(\d{1,2}\/\d{1,2}\/\d{4})\s+(.+?)\s+([-]?\d+[\.,]\d{2})\s*$/,
+      // Pattern 2: Date Description Debit/Credit (e.g., "11/15 Starbucks 50.00 -")
+      /(\d{1,2}\/\d{1,2})\s+(.+?)\s+(\d+[\.,]\d{2})\s+([-]?)\s*$/,
+      // Pattern 3: ISO date format
+      /(\d{4}-\d{1,2}-\d{1,2})\s+(.+?)\s+([-]?\d+[\.,]\d{2})/,
+      // Pattern 4: Description with amount at end
+      /^(.+?)\s{2,}([-]?\d+[\.,]\d{2})\s*$/,
+    ];
     
     let id = 1;
-    for (const line of lines) {
-      const match = line.match(transactionPattern);
-      if (match) {
-        let [, dateStr, description, amountStr] = match;
-        
-        // Parse date
-        let date;
-        if (dateStr.includes('/')) {
-          const [month, day, year] = dateStr.split('/');
-          date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        } else {
-          date = dateStr;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line || line.length < 5) continue;
+      
+      let matched = false;
+      
+      for (const pattern of patterns) {
+        const match = line.match(pattern);
+        if (match && match.length >= 3) {
+          let dateStr, description, amountStr;
+          
+          if (match.length === 4 && !isNaN(parseFloat(match[3]))) {
+            // Pattern 1 or 3
+            dateStr = match[1];
+            description = match[2];
+            amountStr = match[3];
+          } else if (match.length === 5) {
+            // Pattern 2
+            dateStr = match[1];
+            description = match[2];
+            amountStr = match[3];
+            if (match[4] === '-') amountStr = '-' + amountStr;
+          } else if (match.length === 3) {
+            // Pattern 4
+            description = match[1];
+            amountStr = match[2];
+            dateStr = new Date().toISOString().split('T')[0];
+          } else {
+            continue;
+          }
+          
+          // Parse date
+          let date;
+          if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 2) {
+              // MM/DD - assume current year
+              date = `2025-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+            } else if (parts.length === 3) {
+              // MM/DD/YYYY
+              const [month, day, year] = parts;
+              date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+          } else {
+            date = dateStr;
+          }
+          
+          // Parse amount
+          const amount = parseFloat(amountStr.replace(/,/g, '.'));
+          if (isNaN(amount)) continue;
+          
+          const type = amount > 0 ? 'income' : 'expense';
+          const category = categorizeTransaction(description);
+          
+          parsedTransactions.push({
+            id: id++,
+            date,
+            amount,
+            category,
+            description: description.trim(),
+            type
+          });
+          
+          matched = true;
+          break;
         }
-        
-        // Parse amount
-        const amount = parseFloat(amountStr.replace(',', '.'));
-        const type = amount > 0 ? 'income' : 'expense';
-        const category = categorizeTransaction(description);
-        
-        parsedTransactions.push({
-          id: id++,
-          date,
-          amount,
-          category,
-          description: description.trim(),
-          type
-        });
       }
     }
     
-    // If no transactions found via pattern, use mock data as fallback
-    if (parsedTransactions.length === 0) {
-      transactions = [
-        { id: 1, date: '2025-11-15', amount: -50, category: 'Food & Dining', description: 'Starbucks', type: 'expense' },
-        { id: 2, date: '2025-11-14', amount: -120, category: 'Groceries', description: 'Whole Foods', type: 'expense' },
-        { id: 3, date: '2025-11-13', amount: -25, category: 'Entertainment', description: 'Netflix', type: 'subscription' },
-        { id: 4, date: '2025-11-12', amount: 5000, category: 'Income', description: 'Salary', type: 'income' },
-        { id: 5, date: '2025-11-10', amount: -200, category: 'Utilities', description: 'Electric Bill', type: 'expense' },
-        { id: 6, date: '2025-11-08', amount: -75, category: 'Transportation', description: 'Gas', type: 'expense' },
-      ];
-    } else {
+    if (parsedTransactions.length > 0) {
       transactions = parsedTransactions;
+      console.log(`Parsed ${parsedTransactions.length} transactions from PDF`);
+    } else {
+      console.log('No transactions found with patterns, showing first few lines:', lines.slice(0, 20).join('\n'));
+      return res.status(400).json({ 
+        error: 'Could not parse transactions from PDF. Please check the format.',
+        preview: lines.slice(0, 10).join('\n'),
+        message: 'Bank statement format not recognized. Make sure it has: Date | Description | Amount'
+      });
     }
     
-    // Clean up uploaded file
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error('Error deleting file:', err);
-    });
+    // Keep the file for inspection
+    const newPath = path.join(uploadDir, `statement-${Date.now()}.pdf`);
+    fs.renameSync(req.file.path, newPath);
     
-    res.json({ success: true, transactions: transactions.length, parsed: parsedTransactions.length });
+    res.json({ 
+      success: true, 
+      transactions: transactions.length,
+      message: `Successfully loaded ${transactions.length} transactions`
+    });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Upload failed: ' + error.message });

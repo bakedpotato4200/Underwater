@@ -488,8 +488,11 @@
           method: 'POST', 
           body: formData
         });
-        if (!response.ok) throw new Error('Upload failed: ' + response.status);
         const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.message || result.error || 'Upload failed');
+        }
         
         closeModal('uploadModal');
         document.getElementById('pdfFile').value = '';
@@ -497,7 +500,7 @@
         await loadData();
       } catch (e) {
         console.error('Upload failed:', e);
-        alert('❌ Upload failed: ' + e.message);
+        alert('❌ ' + e.message);
       } finally {
         btn.textContent = originalText;
         btn.disabled = false;
