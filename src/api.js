@@ -130,21 +130,12 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
     
-    // Load demo transactions to get app working
+    // Load just the $1400 transaction and let user add more
     transactions = [
-      { id: 1, date: '2025-10-01', amount: 5000, category: 'Income', description: 'Salary Deposit', type: 'income' },
-      { id: 2, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense' },
-      { id: 3, date: '2025-10-03', amount: -125.50, category: 'Food & Dining', description: 'Grocery Store', type: 'expense' },
-      { id: 4, date: '2025-10-04', amount: -45.99, category: 'Entertainment', description: 'Netflix Subscription', type: 'expense' },
-      { id: 5, date: '2025-10-05', amount: -200, category: 'Transportation', description: 'Gas Station', type: 'expense' },
-      { id: 6, date: '2025-10-06', amount: -75.00, category: 'Food & Dining', description: 'Restaurant Dinner', type: 'expense' },
-      { id: 7, date: '2025-10-07', amount: -350, category: 'Shopping', description: 'Walmart Purchase', type: 'expense' },
-      { id: 8, date: '2025-10-08', amount: -125, category: 'Health & Fitness', description: 'Gym Membership', type: 'expense' },
-      { id: 9, date: '2025-10-10', amount: 200, category: 'Income', description: 'Freelance Project', type: 'income' },
-      { id: 10, date: '2025-10-15', amount: -500, category: 'Other', description: 'Credit Card Payment', type: 'expense' },
+      { id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense' },
     ];
     
-    console.log(`✅ Loaded ${transactions.length} demo transactions`);
+    console.log(`✅ Loaded sample transactions. Use Add Transaction to add your real data.`);
     
     // Clean up uploaded file
     fs.unlink(req.file.path, (err) => {
