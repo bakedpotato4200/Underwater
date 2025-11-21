@@ -27,6 +27,8 @@ const upload = multer({ dest: uploadDir });
 let transactions = [];
 let debts = [];
 let subscriptions = [];
+let goals = [];
+let budgets = {};
 
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
@@ -41,6 +43,54 @@ function categorizeTransaction(description) {
   return 'Other';
 }
 
+function detectRecurring() {
+  const merchants = {};
+  transactions.forEach(t => {
+    const merchant = t.description.split(' ')[0];
+    if (!merchants[merchant]) merchants[merchant] = [];
+    merchants[merchant].push(t);
+  });
+  return Object.entries(merchants).filter(([m, txns]) => txns.length >= 3).map(([m, txns]) => ({
+    merchant: m, count: txns.length, avgAmount: txns.reduce((s, t) => s + Math.abs(t.amount), 0) / txns.length, category: txns[0].category
+  }));
+}
+
+function calculateFinancialScore() {
+  if (transactions.length === 0) return 0;
+  const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const expenses = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+  const savingsRate = income > 0 ? ((income - expenses) / income) * 100 : 0;
+  const debtRatio = debts.length > 0 ? debts.reduce((s, d) => s + d.balance, 0) / (income || 1) : 0;
+  let score = 50;
+  if (savingsRate > 20) score += 25;
+  if (savingsRate > 10) score += 15;
+  if (debtRatio < 0.5) score += 25;
+  else if (debtRatio < 2) score += 10;
+  return Math.min(100, Math.max(0, score));
+}
+
+function getSpendingTrends() {
+  const trends = {};
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    trends[dateStr] = transactions.filter(t => t.date === dateStr && t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+  }
+  return trends;
+}
+
+function getSavingsOpportunities() {
+  const categories = {};
+  transactions.filter(t => t.type === 'expense').forEach(t => {
+    categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
+  });
+  return Object.entries(categories).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([cat, amt]) => ({
+    category: cat, amount: amt, potential: Math.round(amt * 0.1)
+  }));
+}
+
 function extractTransactions(text) {
   const transactions = [];
   const monthMap = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
@@ -48,12 +98,8 @@ function extractTransactions(text) {
   
   let id = 1;
   const seen = new Set();
-
-  // Pattern: (Oct|Nov|Dec|etc) + 1-2 digits + rest of line
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const monthPattern = months.join('|');
-  
-  // Split on Month patterns to find all transactions
   const regex = new RegExp(`(${monthPattern})\\s+(\\d{1,2})([^]*?)(?=(?:${monthPattern})\\s+\\d{1,2}|$)`, 'g');
   
   let match;
@@ -63,36 +109,21 @@ function extractTransactions(text) {
     const month = monthMap[monthStr];
     const day = dayStr.padStart(2, '0');
     const chunk = match[3];
-    
-    // Find the +/- $ amount pattern in this chunk
     const amountMatch = chunk.match(/([-+]\s*\$[\d,]+\.?\d{0,2})/);
     if (!amountMatch) continue;
     
     const amountStr = amountMatch[1].trim();
     const amountValue = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
-    
-    // Skip if invalid
     if (!amountValue || amountValue === 0 || Math.abs(amountValue) > 100000) continue;
     
-    // Get everything before the amount as description
     const amountIndex = chunk.indexOf(amountStr);
     let description = chunk.substring(0, amountIndex).trim();
-    
-    // Remove category labels (Debit, Credit) from description
-    description = description.replace(/\s*(Debit|Credit|Transfer)\s*/gi, ' ')
-                            .replace(/Opening Balance|Closing Balance|Monthly Interest/gi, '')
-                            .replace(/Withdrawal for.*was Rejected/gi, '')
-                            .replace(/\s+/g, ' ')
-                            .trim();
-    
-    // Skip empty or header descriptions
+    description = description.replace(/\s*(Debit|Credit|Transfer)\s*/gi, ' ').replace(/Opening Balance|Closing Balance|Monthly Interest/gi, '').replace(/Withdrawal for.*was Rejected/gi, '').replace(/\s+/g, ' ').trim();
     if (!description || description.length < 2) continue;
     if (description.match(/^(Opening|Closing|Monthly|DATE|DESCRIPTION|AMOUNT|CATEGORY|Fees|Interest|APY|Total)/i)) continue;
     
-    // Determine type
     let type = 'expense';
     let finalAmount = Math.abs(amountValue);
-    
     if (amountStr.includes('+')) {
       type = 'income';
     } else {
@@ -102,8 +133,6 @@ function extractTransactions(text) {
     
     const date = `2025-${month}-${day}`;
     const category = categorizeTransaction(description);
-    
-    // Dedup
     const key = `${date}|${finalAmount}|${description}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -118,34 +147,23 @@ function extractTransactions(text) {
     });
   }
   
-  console.log(`✅ Extracted ${transactions.length} transactions from PDF`);
+  console.log(`✅ Extracted ${transactions.length} transactions`);
   return transactions;
 }
 
 app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const pdfBuffer = fs.readFileSync(req.file.path);
     const pdfData = await pdfParse(pdfBuffer);
     const text = pdfData.text;
-
     const parsedTransactions = extractTransactions(text);
-
     if (parsedTransactions.length > 0) {
       transactions = parsedTransactions;
     } else {
-      transactions = [
-        { id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense' },
-      ];
+      transactions = [{ id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense' }];
     }
-
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error('Error deleting file:', err);
-    });
-
+    fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
     res.json({ success: true, transactions: transactions.length, message: `Loaded ${transactions.length} transactions` });
   } catch (error) {
     console.error('Upload error:', error);
@@ -189,6 +207,36 @@ app.get('/api/daily-breakdown', (req, res) => {
   });
   res.json(daily);
 });
+
+app.get('/api/insights', (req, res) => {
+  const recurring = detectRecurring();
+  const score = calculateFinancialScore();
+  const trends = getSpendingTrends();
+  const savings = getSavingsOpportunities();
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
+  const avgDailySpend = transactions.filter(t => t.type === 'expense').length > 0 ? (totalExpenses / transactions.filter(t => t.type === 'expense').length).toFixed(2) : 0;
+  
+  res.json({
+    financialScore: score,
+    savingsRate,
+    recurringTransactions: recurring,
+    spendingTrends: trends,
+    savingsOpportunities: savings,
+    avgDailySpend,
+    totalTransactions: transactions.length,
+    debtTotal: debts.reduce((s, d) => s + d.balance, 0)
+  });
+});
+
+app.post('/api/goals', express.json(), (req, res) => {
+  const newGoal = { id: Math.max(...goals.map(g => g.id || 0), 0) + 1, ...req.body, createdAt: new Date() };
+  goals.push(newGoal);
+  res.json(newGoal);
+});
+
+app.get('/api/goals', (req, res) => res.json(goals));
 
 app.post('/api/debts', express.json(), (req, res) => {
   const newDebt = { id: Math.max(...debts.map(d => d.id || 0), 0) + 1, ...req.body };

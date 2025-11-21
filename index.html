@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Budget Tracker</title>
+  <title>Smart Budget Tracker - AI-Powered Finance</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -12,229 +12,102 @@
       min-height: 100vh;
       padding: 20px;
     }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .header {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    .header h1 { color: #2c3e50; font-size: 32px; margin-bottom: 10px; }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
+    .container { max-width: 1600px; margin: 0 auto; }
+    .header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .header h1 { color: #2c3e50; font-size: 32px; margin-bottom: 5px; }
+    .header p { color: #7f8c8d; font-size: 14px; }
+    
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+    .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; }
     .stat-card.income { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
     .stat-card.expenses { background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); }
     .stat-card.balance { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .stat-card.score { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .stat-value { font-size: 28px; font-weight: bold; }
     .stat-label { font-size: 12px; opacity: 0.9; margin-top: 5px; }
     
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .card h2 { color: #2c3e50; margin-bottom: 15px; font-size: 18px; }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; flex-wrap: wrap; }
+    .nav-tabs button { background: none; border: none; padding: 10px 20px; cursor: pointer; color: #7f8c8d; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 500; }
+    .nav-tabs button.active { color: #3498db; border-bottom-color: #3498db; }
     
-    .category-list {
-      list-style: none;
-    }
-    .category-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #ecf0f1;
-    }
+    .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .card h2 { color: #2c3e50; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+    .card.full { grid-column: 1/-1; }
+    
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-primary:hover { background: #2980b9; }
+    .btn-secondary { background: #ecf0f1; color: #2c3e50; }
+    .btn-secondary:hover { background: #bdc3c7; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+    
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #2c3e50; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500; font-size: 14px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ecf0f1; border-radius: 8px; font-size: 14px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+    .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+    .action-buttons button { flex: 1; }
+    
+    .category-list { list-style: none; }
+    .category-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #ecf0f1; }
     .category-item:last-child { border-bottom: none; }
     .category-name { color: #2c3e50; font-weight: 500; }
     .category-amount { color: #e74c3c; font-weight: bold; }
-    .category-bar {
-      width: 100%;
-      height: 6px;
-      background: #ecf0f1;
-      border-radius: 3px;
-      margin: 8px 0;
-      overflow: hidden;
-    }
-    .category-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      border-radius: 3px;
-    }
+    .category-bar { width: 100%; height: 6px; background: #ecf0f1; border-radius: 3px; margin: 8px 0; }
+    .category-fill { height: 100%; background: linear-gradient(90deg, #3498db, #2ecc71); border-radius: 3px; }
     
-    .debt-list {
-      list-style: none;
-    }
-    .debt-item {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      border-left: 4px solid #e74c3c;
-    }
-    .debt-item.low-priority { border-left-color: #f39c12; }
-    .debt-item.paid { border-left-color: #27ae60; }
-    .debt-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .debt-name { font-weight: 600; color: #2c3e50; }
-    .debt-balance { color: #e74c3c; font-weight: bold; }
-    .debt-rate { font-size: 12px; color: #7f8c8d; }
-    .debt-payoff { font-size: 12px; color: #27ae60; margin-top: 5px; }
-    
-    .transactions {
-      list-style: none;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    .transaction-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #ecf0f1;
-    }
+    .transaction-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #ecf0f1; font-size: 13px; }
     .transaction-item:last-child { border-bottom: none; }
-    .transaction-left {
-      flex: 1;
-    }
-    .transaction-date { font-size: 12px; color: #7f8c8d; }
-    .transaction-desc { color: #2c3e50; font-weight: 500; margin-top: 2px; }
-    .transaction-amount {
-      text-align: right;
-      font-weight: bold;
-    }
-    .transaction-amount.income { color: #27ae60; }
-    .transaction-amount.expense { color: #e74c3c; }
+    .transaction-date { color: #7f8c8d; font-size: 12px; }
+    .transaction-desc { color: #2c3e50; font-weight: 500; margin: 5px 0 0 0; }
+    .transaction-amount.income { color: #27ae60; font-weight: bold; }
+    .transaction-amount.expense { color: #e74c3c; font-weight: bold; }
     
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    .btn {
-      flex: 1;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.2s;
-    }
-    .btn:hover { transform: translateY(-2px); }
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    .btn-secondary {
-      background: #ecf0f1;
-      color: #2c3e50;
-    }
+    .insight-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+    .insight-box.warning { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+    .insight-box.success { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); }
+    .insight-title { font-weight: bold; margin-bottom: 5px; }
+    .insight-value { font-size: 20px; font-weight: bold; }
     
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal.active { display: flex; }
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    }
-    .modal-content h3 { margin-bottom: 20px; color: #2c3e50; }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #2c3e50;
-      font-weight: 500;
-    }
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #bdc3c7;
-      border-radius: 6px;
-      font-size: 14px;
-    }
+    .recurring-item { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+    .recurring-name { font-weight: 500; color: #2c3e50; }
+    .recurring-detail { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
     
-    .chart-container { margin: 20px 0; }
-    .daily-chart {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      height: 200px;
-      margin-top: 10px;
-    }
-    .chart-bar {
-      flex: 1;
-      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-      border-radius: 4px 4px 0 0;
-      position: relative;
-      cursor: pointer;
-    }
-    .chart-bar:hover { opacity: 0.8; }
+    .goal-item { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+    .goal-name { font-weight: bold; margin-bottom: 5px; }
+    .goal-progress { width: 100%; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; margin: 10px 0; }
+    .goal-bar { height: 100%; background: #2ecc71; border-radius: 4px; }
+    .goal-detail { font-size: 12px; opacity: 0.9; }
     
-    .ai-plan {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 15px;
-    }
-    .ai-plan h4 { margin-bottom: 10px; }
-    .plan-item {
-      background: rgba(255,255,255,0.2);
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
+    .loading { color: #7f8c8d; text-align: center; padding: 20px; }
+    .chart-bar { display: inline-block; height: 30px; background: linear-gradient(180deg, #3498db, #2ecc71); margin: 0 2px; border-radius: 4px; transition: all 0.3s; }
+    .chart-bar:hover { transform: scaleY(1.1); }
     
-    .loading { text-align: center; color: #7f8c8d; }
-    .error { color: #e74c3c; padding: 10px; background: #fadbd8; border-radius: 6px; }
+    .search-box { width: 100%; padding: 10px; border: 1px solid #ecf0f1; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
+    .search-box:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+    
+    .debt-item { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #e74c3c; }
+    .debt-name { font-weight: 500; color: #2c3e50; }
+    .debt-detail { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+    
+    @media (max-width: 768px) {
+      .dashboard { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .nav-tabs { gap: 5px; }
+      .nav-tabs button { padding: 8px 12px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>💰 Smart Budget Tracker</h1>
-      <p style="color: #7f8c8d; margin-bottom: 15px;">AI-powered debt management and expense tracking</p>
-      
+      <p>AI-powered personal finance with intelligent insights</p>
       <div class="stats">
         <div class="stat-card income">
           <div class="stat-value" id="totalIncome">$0</div>
@@ -248,78 +121,176 @@
           <div class="stat-value" id="netBalance">$0</div>
           <div class="stat-label">Net Balance</div>
         </div>
+        <div class="stat-card score">
+          <div class="stat-value" id="financialScore">0</div>
+          <div class="stat-label">Financial Health</div>
+        </div>
       </div>
-
-      <div class="action-buttons">
-        <button class="btn btn-primary" onclick="showUploadModal()">📄 Upload Bank Statement</button>
-        <button class="btn btn-secondary" onclick="showAddTransactionModal()">➕ Add Transaction</button>
+      <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="showUploadModal()">📊 Upload Statement</button>
+        <button class="btn btn-primary" onclick="showAddTransactionModal()">➕ Add Transaction</button>
+        <button class="btn btn-secondary" onclick="showAddGoalModal()">🎯 Set Goal</button>
+        <button class="btn btn-secondary" onclick="showAddDebtModal()">💳 Add Debt</button>
       </div>
     </div>
 
-    <div class="dashboard">
-      <div class="card">
-        <h2>📊 Spending by Category</h2>
-        <ul class="category-list" id="categoriesList">
-          <li class="loading">Loading categories...</li>
-        </ul>
-      </div>
+    <div class="nav-tabs">
+      <button class="active" onclick="switchTab('overview')">Overview</button>
+      <button onclick="switchTab('insights')">🧠 AI Insights</button>
+      <button onclick="switchTab('goals')">🎯 Goals</button>
+      <button onclick="switchTab('debt')">💳 Debt Manager</button>
+      <button onclick="switchTab('transactions')">📋 Transactions</button>
+    </div>
 
-      <div class="card">
-        <h2>💳 Your Debts</h2>
-        <ul class="debt-list" id="debtsList">
-          <li class="loading">Loading debts...</li>
-        </ul>
-      </div>
+    <div id="overview" class="tab-content">
+      <div class="dashboard">
+        <div class="card">
+          <h2>📊 Spending by Category</h2>
+          <ul class="category-list" id="categoriesList">
+            <li class="loading">Loading categories...</li>
+          </ul>
+        </div>
 
-      <div class="card">
-        <h2>📈 Daily Income Flow</h2>
-        <div class="chart-container">
-          <div class="daily-chart" id="dailyChart"></div>
+        <div class="card">
+          <h2>💳 Your Debts</h2>
+          <div id="debtsList" style="max-height: 400px; overflow-y: auto;">
+            <div class="loading">No debts added</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🔄 Recurring Transactions</h2>
+          <div id="recurringList" style="max-height: 400px; overflow-y: auto;">
+            <div class="loading">Detecting recurring...</div>
+          </div>
+        </div>
+
+        <div class="card full">
+          <h2>📈 Daily Spending Trends</h2>
+          <div id="dailyChart" style="display: flex; align-items: flex-end; justify-content: space-around; height: 100px; gap: 5px;">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🌟 Savings Rate</h2>
+          <div id="savingsRate" style="font-size: 24px; font-weight: bold; color: #27ae60; margin: 20px 0;">0%</div>
+          <p style="color: #7f8c8d; font-size: 14px;">% of income saved this month</p>
+        </div>
+
+        <div class="card">
+          <h2>💰 Recent Transactions</h2>
+          <ul id="transactionsList" style="max-height: 400px; overflow-y: auto;">
+            <li class="loading">No transactions</li>
+          </ul>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>🧠 Smart Debt Payoff Plan</h2>
-        <button class="btn btn-primary" style="width: 48%; margin-right: 2%; margin-bottom: 10px;" onclick="generateDebtPlan('avalanche')">Avalanche (Interest First)</button>
-        <button class="btn btn-secondary" style="width: 48%; margin-bottom: 10px;" onclick="generateDebtPlan('snowball')">Snowball (Balance First)</button>
-        <div id="debtPlan"></div>
+    <div id="insights" class="tab-content" style="display: none;">
+      <div class="dashboard">
+        <div class="card full">
+          <h2>🧠 AI Financial Insights</h2>
+          <div id="insightsContainer">
+            <div class="loading">Loading insights...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>💡 Savings Opportunities</h2>
+          <div id="savingsOpportunitiesList">
+            <div class="loading">Analyzing...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📊 Average Daily Spend</h2>
+          <div id="avgSpend" style="font-size: 24px; font-weight: bold; color: #e74c3c; margin: 20px 0;">$0</div>
+          <p style="color: #7f8c8d; font-size: 14px;">Based on your transaction history</p>
+        </div>
+
+        <div class="card full">
+          <h2>🎯 Smart Recommendations</h2>
+          <div id="recommendationsList">
+            <div class="loading">Generating recommendations...</div>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div class="card" style="grid-column: span 2;">
-        <h2>💳 Recent Transactions</h2>
-        <ul class="transactions" id="transactionsList">
-          <li class="loading">Loading transactions...</li>
-        </ul>
+    <div id="goals" class="tab-content" style="display: none;">
+      <div class="dashboard">
+        <div class="card full">
+          <h2>🎯 Savings Goals</h2>
+          <div id="goalsList">
+            <div class="loading">No goals yet</div>
+          </div>
+          <button class="btn btn-primary" onclick="showAddGoalModal()" style="margin-top: 15px;">➕ Create New Goal</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="debt" class="tab-content" style="display: none;">
+      <div class="dashboard">
+        <div class="card">
+          <h2>💳 Debt Overview</h2>
+          <div id="debtOverviewList">
+            <div class="loading">No debts</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📊 Payoff Strategy</h2>
+          <button class="btn btn-primary btn-small" onclick="generateStrategy('avalanche')" style="margin-bottom: 10px;">Avalanche (Interest First)</button>
+          <button class="btn btn-secondary btn-small" onclick="generateStrategy('snowball')" style="margin-bottom: 10px;">Snowball (Balance First)</button>
+          <div id="strategyResult" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="card full">
+          <h2>💰 Add New Debt</h2>
+          <button class="btn btn-primary" onclick="showAddDebtModal()">➕ Add Debt</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="transactions" class="tab-content" style="display: none;">
+      <div class="card full">
+        <h2>📋 Transaction History</h2>
+        <input type="text" class="search-box" id="searchBox" placeholder="Search transactions..." onkeyup="filterTransactions()">
+        <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
+          <div class="loading">No transactions</div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Upload Modal -->
-  <div class="modal" id="uploadModal">
+  <div id="uploadModal" class="modal">
     <div class="modal-content">
-      <h3>Upload Bank Statement</h3>
+      <div class="modal-header">📊 Upload Bank Statement</div>
       <div class="form-group">
-        <label>Select PDF file</label>
+        <label>PDF File</label>
         <input type="file" id="pdfFile" accept=".pdf">
       </div>
+      <p style="color: #7f8c8d; font-size: 12px; margin-bottom: 15px;">📌 Supports Capital One 360 statements</p>
       <div class="action-buttons">
-        <button class="btn btn-primary" onclick="uploadStatement()">✅ Upload</button>
+        <button class="btn btn-primary" onclick="uploadStatement(event)">Upload</button>
         <button class="btn btn-secondary" onclick="closeModal('uploadModal')">Cancel</button>
       </div>
     </div>
   </div>
 
   <!-- Add Transaction Modal -->
-  <div class="modal" id="transactionModal">
+  <div id="transactionModal" class="modal">
     <div class="modal-content">
-      <h3>Add Transaction</h3>
+      <div class="modal-header">➕ Add Transaction</div>
       <div class="form-group">
         <label>Description</label>
-        <input type="text" id="txnDesc" placeholder="e.g., Grocery shopping">
+        <input type="text" id="txnDesc" placeholder="e.g., Coffee at Starbucks">
       </div>
       <div class="form-group">
         <label>Amount</label>
-        <input type="number" id="txnAmount" placeholder="0.00">
+        <input type="number" id="txnAmount" placeholder="0.00" step="0.01">
       </div>
       <div class="form-group">
         <label>Category</label>
@@ -339,7 +310,6 @@
         <select id="txnType">
           <option value="expense">Expense</option>
           <option value="income">Income</option>
-          <option value="subscription">Subscription</option>
         </select>
       </div>
       <div class="action-buttons">
@@ -349,37 +319,84 @@
     </div>
   </div>
 
+  <!-- Add Goal Modal -->
+  <div id="goalModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">🎯 Create Savings Goal</div>
+      <div class="form-group">
+        <label>Goal Name</label>
+        <input type="text" id="goalName" placeholder="e.g., Vacation Fund">
+      </div>
+      <div class="form-group">
+        <label>Target Amount ($)</label>
+        <input type="number" id="goalAmount" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Target Date</label>
+        <input type="date" id="goalDate">
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="addGoal()">Create</button>
+        <button class="btn btn-secondary" onclick="closeModal('goalModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Debt Modal -->
+  <div id="debtModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">💳 Add Debt</div>
+      <div class="form-group">
+        <label>Creditor Name</label>
+        <input type="text" id="debtName" placeholder="e.g., Credit Card">
+      </div>
+      <div class="form-group">
+        <label>Balance ($)</label>
+        <input type="number" id="debtBalance" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Interest Rate (%)</label>
+        <input type="number" id="debtRate" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Minimum Payment ($)</label>
+        <input type="number" id="debtMinPayment" placeholder="0.00" step="0.01">
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="addDebt()">Add</button>
+        <button class="btn btn-secondary" onclick="closeModal('debtModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Use same origin since API is on same server
     const API_URL = window.location.origin;
     console.log('API URL:', API_URL);
 
     async function loadData() {
       try {
-        // Load transactions
-        const txns = await fetch(API_URL + '/api/transactions').then(r => {
-          if (!r.ok) throw new Error('Failed to load transactions: ' + r.status);
-          return r.json();
-        });
+        const txns = await fetch(API_URL + '/api/transactions').then(r => r.json());
         displayTransactions(txns);
 
-        // Load summary
         const summary = await fetch(API_URL + '/api/summary').then(r => r.json());
-        document.getElementById('totalIncome').textContent = '$' + summary.totalIncome.toLocaleString();
-        document.getElementById('totalExpenses').textContent = '$' + summary.totalExpenses.toLocaleString();
-        document.getElementById('netBalance').textContent = '$' + summary.balance.toLocaleString();
+        document.getElementById('totalIncome').textContent = '$' + summary.totalIncome.toLocaleString('en-US', {maximumFractionDigits: 0});
+        document.getElementById('totalExpenses').textContent = '$' + summary.totalExpenses.toLocaleString('en-US', {maximumFractionDigits: 0});
+        document.getElementById('netBalance').textContent = '$' + summary.balance.toLocaleString('en-US', {maximumFractionDigits: 0});
 
-        // Load categories
         const categories = await fetch(API_URL + '/api/categories').then(r => r.json());
         displayCategories(categories);
 
-        // Load debts
         const debts = await fetch(API_URL + '/api/debts').then(r => r.json());
         displayDebts(debts);
 
-        // Load daily breakdown
         const daily = await fetch(API_URL + '/api/daily-breakdown').then(r => r.json());
         displayDailyChart(daily);
+
+        const insights = await fetch(API_URL + '/api/insights').then(r => r.json());
+        displayInsights(insights);
+
+        const goals = await fetch(API_URL + '/api/goals').then(r => r.json());
+        displayGoals(goals);
       } catch (e) {
         console.error('Error loading data:', e);
       }
@@ -387,27 +404,41 @@
 
     function displayTransactions(txns) {
       const list = document.getElementById('transactionsList');
+      const fullList = document.getElementById('fullTransactionsList');
       if (!txns.length) {
         list.innerHTML = '<li class="loading">No transactions yet</li>';
+        fullList.innerHTML = '<div class="loading">No transactions yet</div>';
         return;
       }
-      list.innerHTML = txns.map(t => `
+      const html = txns.map(t => `
         <li class="transaction-item">
-          <div class="transaction-left">
+          <div>
             <div class="transaction-date">${t.date}</div>
             <div class="transaction-desc">${t.description}</div>
+            <span style="font-size: 11px; color: #95a5a6;">${t.category}</span>
           </div>
           <div class="transaction-amount ${t.type}">
             ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
           </div>
         </li>
       `).join('');
+      list.innerHTML = html;
+      fullList.innerHTML = html;
+    }
+
+    function filterTransactions() {
+      const search = document.getElementById('searchBox').value.toLowerCase();
+      const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(search) ? 'flex' : 'none';
+      });
     }
 
     function displayCategories(cats) {
       const list = document.getElementById('categoriesList');
-      const max = Math.max(...Object.values(cats));
-      list.innerHTML = Object.entries(cats).map(([cat, amount]) => `
+      const max = Math.max(...Object.values(cats), 1);
+      list.innerHTML = Object.entries(cats).sort((a, b) => b[1] - a[1]).map(([cat, amount]) => `
         <li class="category-item">
           <div>
             <div class="category-name">${cat}</div>
@@ -420,90 +451,159 @@
 
     function displayDebts(debts) {
       const list = document.getElementById('debtsList');
-      list.innerHTML = debts.map(d => `
-        <li class="debt-item">
-          <div class="debt-header">
-            <span class="debt-name">${d.name}</span>
-            <span class="debt-balance">$${d.balance.toLocaleString()}</span>
-          </div>
-          <div class="debt-rate">Interest: ${d.rate}% • Min Payment: $${d.minPayment}</div>
-          <div class="debt-payoff">Due: ${d.dueDate}</div>
-        </li>
+      const overview = document.getElementById('debtOverviewList');
+      if (!debts.length) {
+        list.innerHTML = '<div class="loading">No debts added</div>';
+        overview.innerHTML = '<div class="loading">No debts added</div>';
+        return;
+      }
+      const html = debts.map(d => `
+        <div class="debt-item">
+          <div class="debt-name">${d.name || d.creditor}</div>
+          <div class="debt-detail">Balance: $${(d.balance || 0).toLocaleString()} | Interest: ${d.rate || d.interestRate || 0}%</div>
+          <div class="debt-detail">Min Payment: $${(d.minPayment || d.minimumPayment || 0).toFixed(2)}</div>
+        </div>
       `).join('');
+      list.innerHTML = html;
+      overview.innerHTML = html;
     }
 
     function displayDailyChart(daily) {
       const chart = document.getElementById('dailyChart');
-      const maxAmount = Math.max(...Object.values(daily).map(v => Math.abs(v)));
+      const values = Object.values(daily);
+      const maxAmount = Math.max(...values.map(v => Math.abs(v)), 1);
       chart.innerHTML = Object.entries(daily).sort().map(([date, amount]) => {
         const height = (Math.abs(amount) / maxAmount) * 100;
-        return `<div class="chart-bar" style="height: ${height}%" title="${date}: $${amount}"></div>`;
+        const isNegative = amount < 0;
+        return `<div class="chart-bar" style="height: ${Math.max(height, 10)}%; background: ${isNegative ? 'linear-gradient(180deg, #e74c3c, #c0392b)' : 'linear-gradient(180deg, #2ecc71, #27ae60)'};" title="${date}: $${amount.toFixed(2)}"></div>`;
       }).join('');
     }
 
-    async function generateDebtPlan(strategy) {
+    function displayInsights(insights) {
+      document.getElementById('financialScore').textContent = Math.round(insights.financialScore);
+      document.getElementById('savingsRate').textContent = insights.savingsRate + '%';
+      document.getElementById('avgSpend').textContent = '$' + insights.avgDailySpend;
+
+      let html = `
+        <div class="insight-box success">
+          <div class="insight-title">✅ Financial Health Score</div>
+          <div class="insight-value">${Math.round(insights.financialScore)}/100</div>
+        </div>
+        <div class="insight-box">
+          <div class="insight-title">💰 Savings Rate</div>
+          <div class="insight-value">${insights.savingsRate}%</div>
+        </div>
+      `;
+
+      if (insights.recurringTransactions.length > 0) {
+        html += '<div style="margin-top: 20px;"><h3 style="color: #2c3e50; margin-bottom: 10px;">🔄 Recurring Transactions Detected</h3>';
+        insights.recurringTransactions.forEach(r => {
+          html += `
+            <div class="recurring-item">
+              <div class="recurring-name">${r.merchant}</div>
+              <div class="recurring-detail">Avg: $${r.avgAmount.toFixed(2)} • Frequency: ${r.count} times • Category: ${r.category}</div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+
+      document.getElementById('insightsContainer').innerHTML = html;
+
+      if (insights.savingsOpportunities.length > 0) {
+        const oppHtml = insights.savingsOpportunities.map(opp => `
+          <div class="insight-box warning">
+            <div class="recurring-name">${opp.category}</div>
+            <div class="recurring-detail">Spending: $${opp.amount.toFixed(2)} | Potential savings: $${opp.potential} (10%)</div>
+          </div>
+        `).join('');
+        document.getElementById('savingsOpportunitiesList').innerHTML = oppHtml;
+      }
+
+      const recommendations = generateRecommendations(insights);
+      document.getElementById('recommendationsList').innerHTML = recommendations.map((r, i) => `
+        <div class="insight-box" style="background: linear-gradient(135deg, ${['#667eea', '#f39c12', '#27ae60', '#3498db'][i % 4]} 0%, ${['#764ba2', '#e67e22', '#2ecc71', '#2980b9'][i % 4]} 100%);">
+          <div class="insight-title">${r.title}</div>
+          <div class="recurring-detail">${r.message}</div>
+        </div>
+      `).join('');
+    }
+
+    function generateRecommendations(insights) {
+      const recs = [];
+      if (insights.savingsRate < 10) recs.push({ title: '💡 Boost Savings', message: 'Your savings rate is below 10%. Try cutting discretionary spending by 5-10%.' });
+      if (insights.recurringTransactions.length > 5) recs.push({ title: '🎯 Review Subscriptions', message: `You have ${insights.recurringTransactions.length} recurring transactions. Review for unused services.` });
+      if (insights.debtTotal > 0) recs.push({ title: '💳 Debt Payoff Plan', message: 'Consider our Avalanche strategy to minimize interest payments over time.' });
+      if (insights.financialScore > 80) recs.push({ title: '🌟 Excellent Progress!', message: 'Your financial health is excellent! Keep maintaining this level.' });
+      return recs.length > 0 ? recs : [{ title: '📊 Keep Tracking', message: 'Continue recording transactions to get more insights.' }];
+    }
+
+    function displayGoals(goals) {
+      const list = document.getElementById('goalsList');
+      if (!goals.length) {
+        list.innerHTML = '<div class="loading">No goals yet. Create your first savings goal!</div>';
+        return;
+      }
+      list.innerHTML = goals.map(g => {
+        const target = parseFloat(g.target || g.amount || 0);
+        const current = parseFloat(g.current || 0);
+        const progress = target > 0 ? (current / target) * 100 : 0;
+        return `
+          <div class="goal-item">
+            <div class="goal-name">🎯 ${g.name}</div>
+            <div class="goal-progress"><div class="goal-bar" style="width: ${Math.min(progress, 100)}%"></div></div>
+            <div class="goal-detail">$${current.toFixed(2)} / $${target.toFixed(2)} • Target: ${g.date || 'No date set'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function generateStrategy(strategy) {
       try {
-        const plan = await fetch(API_URL + '/api/debt-plan', {
+        const plan = await fetch(API_URL + '/api/payoff-strategy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ strategy })
         }).then(r => r.json());
 
-        const planDiv = document.getElementById('debtPlan');
-        planDiv.innerHTML = `
-          <div class="ai-plan">
-            <h4>🎯 ${strategy.toUpperCase()} Strategy</h4>
-            ${plan.plan.map(d => `
-              <div class="plan-item">
-                <strong>${d.name}</strong><br>
-                Balance: $${d.balance.toLocaleString()} | Payoff: ${d.payoffMonths} months | Est. Interest: $${d.totalInterest}
-              </div>
-            `).join('')}
-          </div>
-        `;
+        let html = `<h3 style="color: #2c3e50; margin: 15px 0;">🎯 ${strategy.toUpperCase()} Strategy</h3>`;
+        plan.debts.forEach((d, i) => {
+          html += `<div class="debt-item" style="border-left: 4px solid ${['#e74c3c', '#f39c12', '#2ecc71'][i % 3]};"><strong>${i+1}. ${d.name || d.creditor}</strong><br>Balance: $${(d.balance || 0).toLocaleString()} | Interest: ${d.rate || d.interestRate || 0}%</div>`;
+        });
+        document.getElementById('strategyResult').innerHTML = html;
       } catch (e) {
-        console.error('Error generating plan:', e);
+        console.error('Error:', e);
       }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).style.display = 'block';
+      event.target.classList.add('active');
     }
 
     function showUploadModal() { document.getElementById('uploadModal').classList.add('active'); }
     function showAddTransactionModal() { document.getElementById('transactionModal').classList.add('active'); }
+    function showAddGoalModal() { document.getElementById('goalModal').classList.add('active'); }
+    function showAddDebtModal() { document.getElementById('debtModal').classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-    async function uploadStatement() {
+    async function uploadStatement(event) {
       const file = document.getElementById('pdfFile').files[0];
-      if (!file) {
-        alert('Please select a file');
-        return;
-      }
-      const btn = event.target;
-      const originalText = btn.textContent;
-      btn.textContent = '⏳ Uploading...';
-      btn.disabled = true;
-      
+      if (!file) { alert('Please select a file'); return; }
       const formData = new FormData();
       formData.append('file', file);
       try {
-        const response = await fetch(API_URL + '/api/upload-statement', { 
-          method: 'POST', 
-          body: formData
-        });
+        const response = await fetch(API_URL + '/api/upload-statement', { method: 'POST', body: formData });
         const result = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(result.message || result.error || 'Upload failed');
-        }
-        
+        if (!response.ok) throw new Error(result.message || result.error || 'Upload failed');
         closeModal('uploadModal');
         document.getElementById('pdfFile').value = '';
-        alert(`✅ Upload successful! Loaded ${result.transactions} transactions`);
-        await loadData();
+        alert(`✅ Loaded ${result.transactions} transactions!`);
+        loadData();
       } catch (e) {
-        console.error('Upload failed:', e);
         alert('❌ ' + e.message);
-      } finally {
-        btn.textContent = originalText;
-        btn.disabled = false;
       }
     }
 
@@ -514,31 +614,62 @@
         category: document.getElementById('txnCategory').value,
         type: document.getElementById('txnType').value
       };
-      if (!txn.description || !txn.amount) {
-        alert('Please fill all fields');
-        return;
-      }
+      if (!txn.description || !txn.amount) { alert('Please fill all fields'); return; }
       if (txn.type === 'expense') txn.amount = -txn.amount;
       try {
-        const response = await fetch(API_URL + '/api/transactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(txn)
-        });
-        if (!response.ok) throw new Error('Failed to add transaction: ' + response.status);
+        await fetch(API_URL + '/api/transactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(txn) });
         closeModal('transactionModal');
         document.getElementById('txnDesc').value = '';
         document.getElementById('txnAmount').value = '';
         loadData();
       } catch (e) {
-        console.error('Add failed:', e);
-        alert('Failed to add transaction: ' + e.message);
+        alert('Failed: ' + e.message);
       }
     }
 
-    // Load data on page load
+    async function addGoal() {
+      const goal = {
+        name: document.getElementById('goalName').value,
+        target: parseFloat(document.getElementById('goalAmount').value),
+        date: document.getElementById('goalDate').value,
+        current: 0
+      };
+      if (!goal.name || !goal.target) { alert('Please fill all fields'); return; }
+      try {
+        await fetch(API_URL + '/api/goals', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(goal) });
+        closeModal('goalModal');
+        document.getElementById('goalName').value = '';
+        document.getElementById('goalAmount').value = '';
+        document.getElementById('goalDate').value = '';
+        loadData();
+      } catch (e) {
+        alert('Failed: ' + e.message);
+      }
+    }
+
+    async function addDebt() {
+      const debt = {
+        name: document.getElementById('debtName').value,
+        balance: parseFloat(document.getElementById('debtBalance').value),
+        interestRate: parseFloat(document.getElementById('debtRate').value),
+        minPayment: parseFloat(document.getElementById('debtMinPayment').value)
+      };
+      if (!debt.name || !debt.balance) { alert('Please fill all fields'); return; }
+      try {
+        await fetch(API_URL + '/api/debts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(debt) });
+        closeModal('debtModal');
+        document.getElementById('debtName').value = '';
+        document.getElementById('debtBalance').value = '';
+        document.getElementById('debtRate').value = '';
+        document.getElementById('debtMinPayment').value = '';
+        loadData();
+      } catch (e) {
+        alert('Failed: ' + e.message);
+      }
+    }
+
     window.addEventListener('load', loadData);
-    setInterval(loadData, 30000); // Refresh every 30 seconds
+    setInterval(loadData, 30000);
   </script>
 </body>
 </html>
