@@ -30,14 +30,14 @@ let subscriptions = [];
 
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
-  if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|groceries|inola|supercell|fs super/)) return 'Food & Dining';
-  if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|harps/)) return 'Groceries';
-  if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|harley|car payment|motorcycle|wells fargo|chase|capital one|amex|discover|payment/)) return 'Utilities';
-  if (desc.match(/netflix|hulu|spotify|disney|prime|subscription|gym|apple|xbox|crunch|fitness|staxx/)) return 'Entertainment';
-  if (desc.match(/shell|chevron|exxon|bp|gas station|fuel|parking|metro|transit|lyft|qt|murphy|carwash|armstrong|bank|autopay|cash app|dollar general|inola/)) return 'Transportation';
-  if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|staxx|walmart|ctlp|foto|armstrong/)) return 'Shopping';
+  if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|inola|sinclair/)) return 'Food & Dining';
+  if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super/)) return 'Groceries';
+  if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|harley|davidson|car payment|motorcycle|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt|crunch|fit/)) return 'Utilities';
+  if (desc.match(/netflix|hulu|spotify|disney|prime|subscription|gym|apple|xbox/)) return 'Entertainment';
+  if (desc.match(/shell|chevron|exxon|bp|gas|fuel|parking|metro|transit|lyft|qt|murphy|carwash|armstrong|bank/)) return 'Transportation';
+  if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|staxx/)) return 'Shopping';
   if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|ctlp|foto/)) return 'Health & Fitness';
-  if (desc.match(/salary|paycheck|deposit|transfer|income|bonus|interest|deposit from|withdrawal from/)) return 'Income';
+  if (desc.match(/salary|paycheck|deposit|transfer|income|bonus|interest|cash app/)) return 'Income';
   return 'Other';
 }
 
@@ -46,52 +46,50 @@ function extractTransactions(text) {
   const monthMap = { 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
                     'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12' };
   
-  // Save raw text for debugging
-  fs.writeFileSync('/tmp/pdf_debug.txt', text.substring(0, 5000));
-  
   let id = 1;
   const seen = new Set();
 
-  // Split by lines and process each
-  const lines = text.split('\n');
+  // Pattern: (Oct|Nov|Dec|etc) + 1-2 digits + rest of line
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthPattern = months.join('|');
   
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+  // Split on Month patterns to find all transactions
+  const regex = new RegExp(`(${monthPattern})\\s+(\\d{1,2})([^]*?)(?=(?:${monthPattern})\\s+\\d{1,2}|$)`, 'g');
+  
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    const monthStr = match[1];
+    const dayStr = match[2];
+    const month = monthMap[monthStr];
+    const day = dayStr.padStart(2, '0');
+    const chunk = match[3];
     
-    // Must start with Month Day
-    const monthDayMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+/);
-    if (!monthDayMatch) continue;
+    // Find the +/- $ amount pattern in this chunk
+    const amountMatch = chunk.match(/([-+]\s*\$[\d,]+\.?\d{0,2})/);
+    if (!amountMatch) continue;
     
-    const month = monthMap[monthDayMatch[1]];
-    const day = monthDayMatch[2].padStart(2, '0');
-    const afterMonthDay = line.substring(monthDayMatch[0].length);
-    
-    // Skip headers and special lines
-    if (afterMonthDay.match(/^(Opening|Closing|Monthly|DATE|DESCRIPTION|AMOUNT|CATEGORY|Fees|Interest|APY|Total)/i)) continue;
-    if (afterMonthDay.includes('Rejected') || afterMonthDay.includes('BPF_')) continue;
-    
-    // Find the first +/- $ amount (transaction amount, not balance)
-    const amounts = afterMonthDay.match(/[-+]\s*\$[\d,]+\.?\d{0,2}/g);
-    if (!amounts || amounts.length === 0) continue;
-    
-    const amountStr = amounts[0].trim();
+    const amountStr = amountMatch[1].trim();
     const amountValue = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
     
-    // Skip if amount is 0, very large (balance), or invalid
+    // Skip if invalid
     if (!amountValue || amountValue === 0 || Math.abs(amountValue) > 100000) continue;
     
-    // Extract description - everything before the amount
-    const amountIndex = afterMonthDay.indexOf(amountStr);
-    let description = afterMonthDay.substring(0, amountIndex).trim();
+    // Get everything before the amount as description
+    const amountIndex = chunk.indexOf(amountStr);
+    let description = chunk.substring(0, amountIndex).trim();
     
-    // Clean description
-    description = description.replace(/\s+(Debit|Credit|Transfer|Category)\s*/gi, ' ')
+    // Remove category labels (Debit, Credit) from description
+    description = description.replace(/\s*(Debit|Credit|Transfer)\s*/gi, ' ')
+                            .replace(/Opening Balance|Closing Balance|Monthly Interest/gi, '')
+                            .replace(/Withdrawal for.*was Rejected/gi, '')
                             .replace(/\s+/g, ' ')
                             .trim();
     
+    // Skip empty or header descriptions
     if (!description || description.length < 2) continue;
+    if (description.match(/^(Opening|Closing|Monthly|DATE|DESCRIPTION|AMOUNT|CATEGORY|Fees|Interest|APY|Total)/i)) continue;
     
-    // Determine type from +/- sign
+    // Determine type
     let type = 'expense';
     let finalAmount = Math.abs(amountValue);
     
@@ -106,7 +104,7 @@ function extractTransactions(text) {
     const category = categorizeTransaction(description);
     
     // Dedup
-    const key = `${date}|${finalAmount}|${description.substring(0, 50)}`;
+    const key = `${date}|${finalAmount}|${description}`;
     if (seen.has(key)) continue;
     seen.add(key);
     
@@ -120,7 +118,7 @@ function extractTransactions(text) {
     });
   }
   
-  console.log(`✅ Extracted ${transactions.length} transactions`);
+  console.log(`✅ Extracted ${transactions.length} transactions from PDF`);
   return transactions;
 }
 
