@@ -50,82 +50,47 @@ function categorizeTransaction(description) {
 // Store extracted PDF text for debugging
 let lastExtractedText = '';
 
-// Transaction parser - flexible to handle any bank statement format
+// Ultra-simple transaction parser - just find date + amount patterns
 function extractTransactions(text) {
   const transactions = [];
-  const lines = text.split('\n');
-  
   const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
                     Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
   
+  // Find all transaction lines that have date + amount
+  // Match: Oct 1 ... $153.00 or Oct 1 ... + $153.00
+  const txnPattern = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+(.+?)\s+([-+]?\$[\d,]+\.?\d{0,2})/g;
+  
+  let match;
   let id = 1;
   
-  for (let i = 0; i < lines.length; i++) {
-    const rawLine = lines[i];
-    const line = rawLine.trim();
+  while ((match = txnPattern.exec(text)) !== null) {
+    const month = monthMap[match[1]];
+    const day = match[2].padStart(2, '0');
+    let description = match[3].trim().replace(/\s+/g, ' ');
+    let amountStr = match[4];
     
-    if (!line || line.length < 15) continue;
-    
-    // Skip headers and summaries
-    if (line.match(/^(DATE|DESCRIPTION|CATEGORY|AMOUNT|BALANCE|Page \d|Account|Opening Balance|Closing Balance|Monthly|Fees Summary|ACCOUNT NAME|Bills|Spending|Savings|All Accounts|Summary|APY|YTD|^[A-Z\s]+:\s*\$)/i)) {
+    // Skip headers and non-transactions
+    if (description.match(/^(DESCRIPTION|DATE|CATEGORY|AMOUNT|Opening|Closing|Page|Account|Bills|Spending|Savings|Monthly|Total|APY|YTD|Fees|Interest)/i)) {
       continue;
     }
     
-    // Skip rejected transactions and balance lines
-    if (line.includes('Rejected') || line.includes('BPF_')) continue;
+    if (description.includes('Rejected') || description.includes('BPF_')) continue;
     
-    // Extract date (month name and day)
-    let dateStr = null;
-    let dayNum = null;
-    const dateMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\b/);
-    
-    if (dateMatch) {
-      dateStr = dateMatch[1];
-      dayNum = dateMatch[2];
-    } else {
-      continue;
-    }
-    
-    // Extract amount - look for $ signs or amounts in the line
-    // Capital One uses format like: + $153.00 or - $47.00
-    const amountMatch = line.match(/([-+]?)\s*\$?([\d,]+)\.(\d{2})/);
-    if (!amountMatch) continue;
-    
-    const sign = amountMatch[1];
-    const dollarPart = amountMatch[2].replace(/,/g, '');
-    const centPart = amountMatch[3];
-    const amountStr = dollarPart + '.' + centPart;
-    let amount = parseFloat(amountStr);
-    
-    // Skip zero or invalid amounts
+    // Parse amount
+    let amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
     if (!amount || amount === 0) continue;
     
-    // Determine type based on sign and keywords
+    // Determine type
     let type = 'expense';
-    if (sign === '+' || line.toLowerCase().includes('credit') || line.toLowerCase().includes('deposit')) {
+    if (amountStr.includes('+') || description.toLowerCase().includes('credit') || description.toLowerCase().includes('deposit')) {
       type = 'income';
       amount = Math.abs(amount);
-    } else if (sign === '-' || line.toLowerCase().includes('debit') || line.toLowerCase().includes('withdrawal')) {
+    } else if (amountStr.includes('-') || description.toLowerCase().includes('debit') || description.toLowerCase().includes('withdrawal')) {
       type = 'expense';
       amount = Math.abs(amount) * -1;
     }
     
-    // Extract description - everything between date and amount
-    const dateEnd = dateMatch[0].length;
-    const amountStart = line.indexOf(amountMatch[0]);
-    
-    let description = line.substring(dateEnd, amountStart).trim();
-    description = description.replace(/\s+/g, ' ').trim();
-    
-    // Remove common keywords that aren't descriptions
-    if (!description || description.length < 2) continue;
-    if (description.match(/^(Credit|Debit|Category|from|to|for)$/i)) continue;
-    
-    // Build date
-    const month = monthMap[dateStr];
-    const day = dayNum.padStart(2, '0');
     const date = `2025-${month}-${day}`;
-    
     const category = categorizeTransaction(description);
     
     transactions.push({
