@@ -204,6 +204,6 @@ app.post('/api/subscriptions', express.json(), (req, res) => {
 });
 
 app.get('/api/subscriptions', (req, res) => res.json(subscriptions));
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
