@@ -18,9 +18,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '..')));
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const upload = multer({ dest: uploadDir });
 
@@ -28,13 +26,12 @@ let transactions = [];
 let debts = [];
 let subscriptions = [];
 let goals = [];
-let budgets = {};
 
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
   if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|inola|sinclair/)) return 'Food & Dining';
   if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super/)) return 'Groceries';
-  if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|harley|davidson|car payment|motorcycle|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt|crunch|fit/)) return 'Utilities';
+  if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|harley|davidson|car payment|motorcycle|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt|crunch|fit|payment/)) return 'Utilities';
   if (desc.match(/netflix|hulu|spotify|disney|prime|subscription|gym|apple|xbox/)) return 'Entertainment';
   if (desc.match(/shell|chevron|exxon|bp|gas|fuel|parking|metro|transit|lyft|qt|murphy|carwash|armstrong|bank/)) return 'Transportation';
   if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|staxx/)) return 'Shopping';
@@ -50,45 +47,155 @@ function detectRecurring() {
     if (!merchants[merchant]) merchants[merchant] = [];
     merchants[merchant].push(t);
   });
-  return Object.entries(merchants).filter(([m, txns]) => txns.length >= 3).map(([m, txns]) => ({
-    merchant: m, count: txns.length, avgAmount: txns.reduce((s, t) => s + Math.abs(t.amount), 0) / txns.length, category: txns[0].category
-  }));
-}
-
-function calculateFinancialScore() {
-  if (transactions.length === 0) return 0;
-  const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const expenses = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
-  const savingsRate = income > 0 ? ((income - expenses) / income) * 100 : 0;
-  const debtRatio = debts.length > 0 ? debts.reduce((s, d) => s + d.balance, 0) / (income || 1) : 0;
-  let score = 50;
-  if (savingsRate > 20) score += 25;
-  if (savingsRate > 10) score += 15;
-  if (debtRatio < 0.5) score += 25;
-  else if (debtRatio < 2) score += 10;
-  return Math.min(100, Math.max(0, score));
-}
-
-function getSpendingTrends() {
-  const trends = {};
-  const now = new Date();
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    trends[dateStr] = transactions.filter(t => t.date === dateStr && t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
-  }
-  return trends;
-}
-
-function getSavingsOpportunities() {
-  const categories = {};
-  transactions.filter(t => t.type === 'expense').forEach(t => {
-    categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
+  return Object.entries(merchants).filter(([m, txns]) => txns.length >= 2).map(([m, txns]) => {
+    const sorted = txns.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const intervals = [];
+    for (let i = 1; i < sorted.length; i++) {
+      const d1 = new Date(sorted[i].date);
+      const d2 = new Date(sorted[i-1].date);
+      intervals.push(Math.round((d1 - d2) / (1000 * 60 * 60 * 24)));
+    }
+    const avgInterval = intervals.length > 0 ? Math.round(intervals.reduce((a, b) => a + b) / intervals.length) : 30;
+    return {
+      merchant: m,
+      count: txns.length,
+      avgAmount: Math.abs(txns.reduce((s, t) => s + t.amount, 0) / txns.length),
+      category: txns[0].category,
+      avgInterval,
+      lastTransaction: txns[txns.length - 1].date,
+      isRecurring: txns.length >= 2,
+      nextDueDate: new Date(new Date(txns[txns.length - 1].date).getTime() + avgInterval * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    };
   });
-  return Object.entries(categories).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([cat, amt]) => ({
-    category: cat, amount: amt, potential: Math.round(amt * 0.1)
-  }));
+}
+
+function generateBillCalendar(months = 3) {
+  const recurring = detectRecurring().filter(r => r.isRecurring);
+  const calendar = {};
+  const today = new Date();
+
+  for (let m = 0; m < months; m++) {
+    for (let d = 1; d <= 31; d++) {
+      const date = new Date(today.getFullYear(), today.getMonth() + m, d);
+      if (date.getMonth() !== (today.getMonth() + m) % 12) break;
+      const dateStr = date.toISOString().split('T')[0];
+      calendar[dateStr] = [];
+
+      recurring.forEach(bill => {
+        const lastDate = new Date(bill.lastTransaction);
+        const nextDate = new Date(lastDate.getTime() + bill.avgInterval * 24 * 60 * 60 * 1000);
+        
+        if (date.getDate() === nextDate.getDate() && date.getMonth() === nextDate.getMonth()) {
+          calendar[dateStr].push({
+            merchant: bill.merchant,
+            amount: bill.avgAmount,
+            category: bill.category,
+            daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
+            frequency: bill.avgInterval
+          });
+        }
+      });
+    }
+  }
+
+  return Object.entries(calendar).filter(([_, bills]) => bills.length > 0).reduce((acc, [date, bills]) => {
+    acc[date] = bills;
+    return acc;
+  }, {});
+}
+
+function calculateCashFlow(months = 6) {
+  const projection = {};
+  const today = new Date();
+  const recurring = detectRecurring().filter(r => r.isRecurring);
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const avgDailyExpense = transactions.filter(t => t.type === 'expense').length > 0 
+    ? transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0) / Math.max(transactions.filter(t => t.type === 'expense').length, 1)
+    : 0;
+
+  for (let m = 0; m < months; m++) {
+    const month = new Date(today.getFullYear(), today.getMonth() + m, 1).toISOString().slice(0, 7);
+    let balance = totalIncome;
+    let billsThisMonth = 0;
+
+    recurring.forEach(bill => {
+      const monthBills = Math.floor(30 / bill.avgInterval);
+      balance -= bill.avgAmount * monthBills;
+      billsThisMonth += bill.avgAmount * monthBills;
+    });
+
+    balance -= avgDailyExpense * 30;
+    projection[month] = { balance, billsThisMonth, expenses: avgDailyExpense * 30, income: totalIncome };
+  }
+
+  return projection;
+}
+
+function calculateSpendingVelocity() {
+  if (transactions.length === 0) return { daily: 0, weekly: 0, monthly: 0, trend: 'stable' };
+
+  const today = new Date();
+  const last7 = transactions.filter(t => {
+    const d = new Date(t.date);
+    return (today - d) / (1000 * 60 * 60 * 24) <= 7;
+  }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  const last30 = transactions.filter(t => {
+    const d = new Date(t.date);
+    return (today - d) / (1000 * 60 * 60 * 24) <= 30;
+  }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  const prev30 = transactions.filter(t => {
+    const d = new Date(t.date);
+    const days = (today - d) / (1000 * 60 * 60 * 24);
+    return days > 30 && days <= 60;
+  }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  return {
+    daily: (last7 / 7).toFixed(2),
+    weekly: (last7).toFixed(2),
+    monthly: (last30).toFixed(2),
+    trend: last30 > prev30 ? 'increasing' : last30 < prev30 ? 'decreasing' : 'stable',
+    trendPercent: prev30 > 0 ? (((last30 - prev30) / prev30) * 100).toFixed(1) : 0
+  };
+}
+
+function generateAlerts() {
+  const alerts = [];
+  const recurring = detectRecurring().filter(r => r.isRecurring);
+  const velocity = calculateSpendingVelocity();
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  if (velocity.trend === 'increasing' && parseFloat(velocity.trendPercent) > 10) {
+    alerts.push({ type: 'warning', title: '📈 Spending Increasing', message: `Your spending is up ${velocity.trendPercent}% vs last month. Monitor budget!` });
+  }
+
+  if (totalExpense > totalIncome * 0.9) {
+    alerts.push({ type: 'alert', title: '⚠️ High Expense Ratio', message: `You're spending ${(totalExpense / totalIncome * 100).toFixed(0)}% of income. Reduce spending!` });
+  }
+
+  const nextBill = recurring.sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate))[0];
+  if (nextBill) {
+    const days = Math.ceil((new Date(nextBill.nextDueDate) - new Date()) / (1000 * 60 * 60 * 24));
+    if (days <= 7 && days > 0) {
+      alerts.push({ type: 'info', title: `💰 ${nextBill.merchant} Due Soon`, message: `${nextBill.merchant} ($${nextBill.avgAmount.toFixed(2)}) due in ${days} days` });
+    }
+  }
+
+  if (recurring.length > 10) {
+    const totalRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
+    alerts.push({ type: 'info', title: '🔄 High Recurring Costs', message: `You have ${recurring.length} recurring bills costing ~$${totalRecurring.toFixed(0)}/year` });
+  }
+
+  if (debts.length > 0) {
+    const totalDebt = debts.reduce((s, d) => s + d.balance, 0);
+    if (totalDebt > totalIncome * 3) {
+      alerts.push({ type: 'alert', title: '💳 High Debt Ratio', message: `Your debt (${(totalDebt / totalIncome).toFixed(1)}x income) is very high. Focus on payoff!` });
+    }
+  }
+
+  return alerts.slice(0, 5);
 }
 
 function extractTransactions(text) {
@@ -208,23 +315,29 @@ app.get('/api/daily-breakdown', (req, res) => {
   res.json(daily);
 });
 
+app.get('/api/recurring-calendar', (req, res) => res.json(generateBillCalendar(3)));
+app.get('/api/cash-flow', (req, res) => res.json(calculateCashFlow(6)));
+app.get('/api/spending-velocity', (req, res) => res.json(calculateSpendingVelocity()));
+app.get('/api/alerts', (req, res) => res.json(generateAlerts()));
+
 app.get('/api/insights', (req, res) => {
   const recurring = detectRecurring();
-  const score = calculateFinancialScore();
-  const trends = getSpendingTrends();
-  const savings = getSavingsOpportunities();
+  const velocity = calculateSpendingVelocity();
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
-  const avgDailySpend = transactions.filter(t => t.type === 'expense').length > 0 ? (totalExpenses / transactions.filter(t => t.type === 'expense').length).toFixed(2) : 0;
+  
+  let score = 50;
+  if (savingsRate > 20) score += 25;
+  if (savingsRate > 10) score += 15;
+  if (velocity.trend === 'decreasing') score += 15;
   
   res.json({
-    financialScore: score,
+    financialScore: Math.min(100, score),
     savingsRate,
     recurringTransactions: recurring,
-    spendingTrends: trends,
-    savingsOpportunities: savings,
-    avgDailySpend,
+    velocity,
+    avgDailySpend: velocity.daily,
     totalTransactions: transactions.length,
     debtTotal: debts.reduce((s, d) => s + d.balance, 0)
   });
@@ -246,89 +359,40 @@ app.post('/api/debts', express.json(), (req, res) => {
 
 app.get('/api/debts', (req, res) => res.json(debts));
 
-function calculateDebtPayoff(debtList, strategy, extraPayment = 0) {
-  const debts = JSON.parse(JSON.stringify(debtList));
-  let totalPaid = 0, totalInterest = 0, months = 0;
-  const timeline = [];
-  
-  if (strategy === 'avalanche') {
-    debts.sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
-  } else {
-    debts.sort((a, b) => a.balance - b.balance);
-  }
-
-  while (debts.some(d => d.balance > 0) && months < 600) {
-    let monthPayment = extraPayment;
-    debts.forEach(d => {
-      if (d.balance > 0) {
-        const minPay = d.minPayment || 50;
-        monthPayment += minPay;
-      }
-    });
-
-    let paid = 0;
-    for (let d of debts) {
-      if (d.balance <= 0) continue;
-      const minPay = d.minPayment || 50;
-      const interest = (d.balance * (d.interestRate || 0)) / 100 / 12;
-      d.balance += interest;
-      totalInterest += interest;
-
-      if (d === debts[0] && monthPayment > 0) {
-        d.balance -= Math.min(monthPayment, d.balance);
-        paid = Math.min(monthPayment, d.balance + interest);
-        totalPaid += paid;
-      } else if (d.balance > 0) {
-        d.balance -= minPay;
-        totalPaid += minPay;
-      }
-    }
-
-    months++;
-    if (months <= 12 || months % 6 === 0 || debts.some(d => d.balance <= 0)) {
-      timeline.push({
-        month: months,
-        totalBalance: debts.reduce((s, d) => s + Math.max(0, d.balance), 0),
-        totalInterest: totalInterest,
-        debtsPaid: debts.filter(d => d.balance <= 0).length
-      });
-    }
-  }
-
-  const totalBalance = debts.reduce((s, d) => s + d.balance, 0);
-  return {
-    months,
-    totalInterest: Math.round(totalInterest),
-    totalBalance: Math.max(0, totalBalance),
-    payoffDate: new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    timeline,
-    debts: debts.map(d => ({ ...d, balance: Math.max(0, d.balance) }))
-  };
-}
-
 app.post('/api/payoff-strategy', express.json(), (req, res) => {
   const { strategy, extraPayment } = req.body;
   const extra = extraPayment || 0;
   
-  const avalanche = calculateDebtPayoff(debts, 'avalanche', extra);
-  const snowball = calculateDebtPayoff(debts, 'snowball', extra);
+  const calculatePayoff = (debtList, strat, extra) => {
+    const debts = JSON.parse(JSON.stringify(debtList));
+    if (strat === 'avalanche') debts.sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
+    else debts.sort((a, b) => a.balance - b.balance);
+    
+    let months = 0, interest = 0;
+    while (debts.some(d => d.balance > 0) && months < 600) {
+      debts.forEach(d => {
+        if (d.balance > 0) {
+          const i = (d.balance * (d.interestRate || 0)) / 100 / 12;
+          d.balance += i;
+          interest += i;
+          d.balance -= Math.min(d.minPayment || 50, d.balance);
+        }
+      });
+      months++;
+    }
+    return { months, interest: Math.round(interest) };
+  };
   
-  const selected = strategy === 'avalanche' ? avalanche : snowball;
-  const other = strategy === 'avalanche' ? snowball : avalanche;
-  
-  const interestSaved = other.totalInterest - selected.totalInterest;
-  const monthsSaved = other.months - selected.months;
+  const aval = calculatePayoff(debts, 'avalanche', extra);
+  const snow = calculatePayoff(debts, 'snowball', extra);
+  const selected = strategy === 'avalanche' ? aval : snow;
+  const other = strategy === 'avalanche' ? snow : aval;
   
   res.json({
     strategy: strategy.toUpperCase(),
-    recommendation: strategy === 'avalanche' 
-      ? `Save $${interestSaved.toLocaleString()} and finish ${monthsSaved} months faster` 
-      : `Save $${interestSaved.toLocaleString()} and finish ${monthsSaved} months faster`,
+    recommendation: `Save $${(other.interest - selected.interest).toLocaleString()} and finish ${other.months - selected.months} months faster`,
     payoff: selected,
-    comparison: {
-      avalanche: { months: avalanche.months, interest: avalanche.totalInterest },
-      snowball: { months: snowball.months, interest: snowball.totalInterest }
-    }
+    comparison: { avalanche: aval, snowball: snow }
   });
 });
 
