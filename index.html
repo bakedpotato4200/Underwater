@@ -191,9 +191,10 @@
           <div id="upcomingBills"></div>
         </div>
 
-        <div class="card">
-          <h2>💰 Recent Transactions</h2>
-          <ul id="transactionsList" style="max-height: 400px; overflow-y: auto;">
+        <div class="card full">
+          <h2>💰 All Transactions (Click "Transactions" Tab for Full List)</h2>
+          <p style="color: #7f8c8d; font-size: 12px; margin-bottom: 10px;">Showing most recent 30 - Go to Transactions tab to see and manage all</p>
+          <ul id="transactionsList" style="max-height: 600px; overflow-y: auto;">
             <li class="loading">No transactions</li>
           </ul>
         </div>
@@ -227,9 +228,10 @@
 
     <div id="transactions" class="tab-content" style="display: none;">
       <div class="card full">
-        <h2>📋 Transaction History</h2>
+        <h2>📋 All Transactions - Manage & Exclude</h2>
+        <p style="color: #7f8c8d; font-size: 12px; margin-bottom: 10px;">💡 Click "Exclude" on any transaction (transfers, internal moves, duplicates) to remove from income/expense calculations</p>
         <input type="text" class="search-box" id="searchBox" placeholder="Search transactions..." onkeyup="filterTransactions()">
-        <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
+        <div id="fullTransactionsList" style="max-height: 700px; overflow-y: auto;">
           <div class="loading">No transactions</div>
         </div>
       </div>
@@ -420,7 +422,7 @@
         fullList.innerHTML = '<div class="loading">No transactions yet</div>';
         return;
       }
-      const html = txns.slice(-10).map(t => `
+      const html = txns.slice(-30).map(t => `
         <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #95a5a6;' : ''}">
           <div style="flex: 1;">
             <div class="transaction-date">${t.date}</div>
