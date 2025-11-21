@@ -1,0 +1,15 @@
+{
+  "name": "budget-app",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/api.js &  python3 -m http.server 5000 --directory .",
+    "dev": "node src/api.js & sleep 1 && python3 -m http.server 5000 --directory ."
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5",
+    "dotenv": "^16.0.0"
+  }
+}
