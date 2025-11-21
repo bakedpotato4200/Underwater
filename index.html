@@ -421,30 +421,50 @@
         return;
       }
       const html = txns.slice(-10).map(t => `
-        <li class="transaction-item">
-          <div>
+        <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #95a5a6;' : ''}">
+          <div style="flex: 1;">
             <div class="transaction-date">${t.date}</div>
             <div class="transaction-desc">${t.description}</div>
             <span style="font-size: 11px; color: #95a5a6;">${t.category}</span>
           </div>
-          <div class="transaction-amount ${t.type}">
-            ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="transaction-amount ${t.type}">
+              ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+            </div>
+            <button class="btn btn-small" style="background: ${t.excluded ? '#e74c3c' : '#ecf0f1'}; color: ${t.excluded ? 'white' : '#2c3e50'};" onclick="toggleExclude(${t.id})">
+              ${t.excluded ? '✓ Excluded' : 'Exclude'}
+            </button>
           </div>
         </li>
       `).join('');
       list.innerHTML = html;
       fullList.innerHTML = txns.map(t => `
-        <li class="transaction-item">
-          <div>
+        <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #95a5a6;' : ''}">
+          <div style="flex: 1;">
             <div class="transaction-date">${t.date}</div>
             <div class="transaction-desc">${t.description}</div>
             <span style="font-size: 11px; color: #95a5a6;">${t.category}</span>
           </div>
-          <div class="transaction-amount ${t.type}">
-            ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="transaction-amount ${t.type}">
+              ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+            </div>
+            <button class="btn btn-small" style="background: ${t.excluded ? '#e74c3c' : '#ecf0f1'}; color: ${t.excluded ? 'white' : '#2c3e50'}; cursor: pointer;" onclick="toggleExclude(${t.id})">
+              ${t.excluded ? '✓ Excluded' : 'Exclude'}
+            </button>
           </div>
         </li>
       `).join('');
+    }
+
+    async function toggleExclude(txnId) {
+      try {
+        const response = await fetch(API_URL + `/api/transactions/${txnId}/toggle-exclude`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const result = await response.json();
+        loadData();
+      } catch (e) {
+        alert('Failed to update transaction: ' + e.message);
+      }
     }
 
     function filterTransactions() {

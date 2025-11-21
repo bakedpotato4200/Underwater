@@ -281,15 +281,25 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
 
 app.get('/api/transactions', (req, res) => res.json(transactions));
 app.post('/api/transactions', express.json(), (req, res) => {
-  const newTransaction = { id: Math.max(...transactions.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0] };
+  const newTransaction = { id: Math.max(...transactions.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0], excluded: false };
   transactions.push(newTransaction);
   res.json(newTransaction);
+});
+
+app.post('/api/transactions/:id/toggle-exclude', express.json(), (req, res) => {
+  const txn = transactions.find(t => t.id == req.params.id);
+  if (txn) {
+    txn.excluded = !txn.excluded;
+    res.json({ success: true, excluded: txn.excluded });
+  } else {
+    res.status(404).json({ error: 'Transaction not found' });
+  }
 });
 
 app.get('/api/categories', (req, res) => {
   const categories = {};
   transactions.forEach(t => {
-    if (t.type === 'expense' && t.category !== 'Income' && t.category !== 'Transfer') {
+    if (t.type === 'expense' && t.category !== 'Income' && !t.excluded) {
       categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
     }
   });
@@ -297,17 +307,16 @@ app.get('/api/categories', (req, res) => {
 });
 
 app.get('/api/balance', (req, res) => {
-  const totalIncome = transactions.filter(t => t.type === 'income' && t.category !== 'Transfer').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense' && t.category !== 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const transfers = transactions.filter(t => t.category === 'Transfer').length;
-  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length, transfers });
+  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const excluded = transactions.filter(t => t.excluded).length;
+  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length, excluded });
 });
 
 app.get('/api/summary', (req, res) => {
-  const totalIncome = transactions.filter(t => t.type === 'income' && t.category !== 'Transfer').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense' && t.category !== 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const transfers = transactions.filter(t => t.category === 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses, transfers });
+  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses });
 });
 
 app.get('/api/daily-breakdown', (req, res) => {
@@ -326,9 +335,8 @@ app.get('/api/alerts', (req, res) => res.json(generateAlerts()));
 app.get('/api/insights', (req, res) => {
   const recurring = detectRecurring();
   const velocity = calculateSpendingVelocity();
-  const totalIncome = transactions.filter(t => t.type === 'income' && t.category !== 'Transfer').reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense' && t.category !== 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const transfers = transactions.filter(t => t.category === 'Transfer').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
   
   let score = 50;
@@ -343,7 +351,7 @@ app.get('/api/insights', (req, res) => {
     velocity,
     avgDailySpend: velocity.daily,
     totalTransactions: transactions.length,
-    transfers,
+    excludedTransactions: transactions.filter(t => t.excluded).length,
     debtTotal: debts.reduce((s, d) => s + d.balance, 0)
   });
 });
