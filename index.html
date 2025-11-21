@@ -350,31 +350,40 @@
   </div>
 
   <script>
-    // Use the current domain for API calls
-    const API_URL = window.location.origin.replace(':5000', ':3001');
+    // Construct the API URL dynamically
+    const API_URL = (() => {
+      const origin = window.location.origin;
+      const protocol = origin.split(':')[0];
+      const hostname = origin.replace(/^https?:\/\//, '').replace(/:\d+$/, '');
+      return protocol + '://' + hostname + ':3001';
+    })();
+    console.log('API URL:', API_URL);
 
     async function loadData() {
       try {
         // Load transactions
-        const txns = await fetch(API_URL + '/api/transactions', { credentials: 'include' }).then(r => r.json());
+        const txns = await fetch(API_URL + '/api/transactions').then(r => {
+          if (!r.ok) throw new Error('Failed to load transactions: ' + r.status);
+          return r.json();
+        });
         displayTransactions(txns);
 
         // Load summary
-        const summary = await fetch(API_URL + '/api/summary', { credentials: 'include' }).then(r => r.json());
+        const summary = await fetch(API_URL + '/api/summary').then(r => r.json());
         document.getElementById('totalIncome').textContent = '$' + summary.totalIncome.toLocaleString();
         document.getElementById('totalExpenses').textContent = '$' + summary.totalExpenses.toLocaleString();
         document.getElementById('netBalance').textContent = '$' + summary.balance.toLocaleString();
 
         // Load categories
-        const categories = await fetch(API_URL + '/api/categories', { credentials: 'include' }).then(r => r.json());
+        const categories = await fetch(API_URL + '/api/categories').then(r => r.json());
         displayCategories(categories);
 
         // Load debts
-        const debts = await fetch(API_URL + '/api/debts', { credentials: 'include' }).then(r => r.json());
+        const debts = await fetch(API_URL + '/api/debts').then(r => r.json());
         displayDebts(debts);
 
         // Load daily breakdown
-        const daily = await fetch(API_URL + '/api/daily-breakdown', { credentials: 'include' }).then(r => r.json());
+        const daily = await fetch(API_URL + '/api/daily-breakdown').then(r => r.json());
         displayDailyChart(daily);
       } catch (e) {
         console.error('Error loading data:', e);
@@ -442,8 +451,7 @@
         const plan = await fetch(API_URL + '/api/debt-plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ strategy }),
-          credentials: 'include'
+          body: JSON.stringify({ strategy })
         }).then(r => r.json());
 
         const planDiv = document.getElementById('debtPlan');
@@ -476,18 +484,19 @@
       const formData = new FormData();
       formData.append('file', file);
       try {
+        console.log('Uploading to:', API_URL + '/api/upload-statement');
         const response = await fetch(API_URL + '/api/upload-statement', { 
           method: 'POST', 
-          body: formData,
-          credentials: 'include'
+          body: formData
         });
+        console.log('Upload response:', response.status);
         if (!response.ok) throw new Error('Upload failed: ' + response.status);
         closeModal('uploadModal');
         document.getElementById('pdfFile').value = '';
         loadData();
       } catch (e) {
         console.error('Upload failed:', e);
-        alert('Upload failed. Please try again.');
+        alert('Upload failed. Please try again: ' + e.message);
       }
     }
 
@@ -507,17 +516,16 @@
         const response = await fetch(API_URL + '/api/transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(txn),
-          credentials: 'include'
+          body: JSON.stringify(txn)
         });
-        if (!response.ok) throw new Error('Failed to add transaction');
+        if (!response.ok) throw new Error('Failed to add transaction: ' + response.status);
         closeModal('transactionModal');
         document.getElementById('txnDesc').value = '';
         document.getElementById('txnAmount').value = '';
         loadData();
       } catch (e) {
         console.error('Add failed:', e);
-        alert('Failed to add transaction');
+        alert('Failed to add transaction: ' + e.message);
       }
     }
 
