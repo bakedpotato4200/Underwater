@@ -50,44 +50,60 @@ function categorizeTransaction(description) {
 // Store extracted PDF text for debugging
 let lastExtractedText = '';
 
-// Ultra-simple transaction parser - just find date + amount patterns
+// Line-by-line transaction parser for Capital One format
 function extractTransactions(text) {
   const transactions = [];
+  const lines = text.split('\n');
   const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
                     Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
   
-  // Find all transaction lines that have date + amount
-  // Match: Oct 1 ... $153.00 or Oct 1 ... + $153.00
-  const txnPattern = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+(.+?)\s+([-+]?\$[\d,]+\.?\d{0,2})/g;
-  
-  let match;
   let id = 1;
   
-  while ((match = txnPattern.exec(text)) !== null) {
-    const month = monthMap[match[1]];
-    const day = match[2].padStart(2, '0');
-    let description = match[3].trim().replace(/\s+/g, ' ');
-    let amountStr = match[4];
+  for (const line of lines) {
+    // Check if line starts with month and day
+    const dateMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+/);
+    if (!dateMatch) continue;
     
-    // Skip headers and non-transactions
-    if (description.match(/^(DESCRIPTION|DATE|CATEGORY|AMOUNT|Opening|Closing|Page|Account|Bills|Spending|Savings|Monthly|Total|APY|YTD|Fees|Interest)/i)) {
-      continue;
-    }
+    // Check if line contains a dollar amount
+    const amountMatches = line.match(/([-+]?\$[\d,]+\.?\d{0,2})/g);
+    if (!amountMatches || amountMatches.length === 0) continue;
     
+    const month = monthMap[dateMatch[1]];
+    const day = dateMatch[2].padStart(2, '0');
+    
+    // Use the LAST amount in the line (rightmost)
+    const amountStr = amountMatches[amountMatches.length - 1];
+    const amountStartIndex = line.lastIndexOf(amountStr);
+    
+    // Get everything after the date and before the last amount as description
+    const dateEndIndex = dateMatch[0].length;
+    
+    let description = line.substring(dateEndIndex, amountStartIndex).trim();
+    description = description.replace(/\s+/g, ' ').trim();
+    
+    // Skip if it's a header or has no real description
+    if (!description || description.length < 2) continue;
+    if (description.match(/^(DESCRIPTION|DATE|CATEGORY|AMOUNT|Opening|Closing|Page|Account|Bills|Spending|Savings|Monthly|Total|APY|YTD|Fees|Interest)/i)) continue;
     if (description.includes('Rejected') || description.includes('BPF_')) continue;
     
     // Parse amount
     let amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
     if (!amount || amount === 0) continue;
     
-    // Determine type
+    // Determine type based on sign
     let type = 'expense';
-    if (amountStr.includes('+') || description.toLowerCase().includes('credit') || description.toLowerCase().includes('deposit')) {
+    if (amountStr.includes('+')) {
       type = 'income';
       amount = Math.abs(amount);
-    } else if (amountStr.includes('-') || description.toLowerCase().includes('debit') || description.toLowerCase().includes('withdrawal')) {
+    } else if (amountStr.includes('-')) {
       type = 'expense';
       amount = Math.abs(amount) * -1;
+    } else if (description.toLowerCase().includes('debit') || description.toLowerCase().includes('withdrawal')) {
+      type = 'expense';
+      amount = Math.abs(amount) * -1;
+    } else if (description.toLowerCase().includes('credit') || description.toLowerCase().includes('deposit')) {
+      type = 'income';
+      amount = Math.abs(amount);
     }
     
     const date = `2025-${month}-${day}`;
@@ -103,6 +119,7 @@ function extractTransactions(text) {
     });
   }
   
+  console.log(`📊 Extracted ${transactions.length} transactions from PDF`);
   return transactions;
 }
 
