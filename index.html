@@ -14,14 +14,19 @@
       display: flex;
     }
     
-    .sidebar { width: 240px; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; }
-    .sidebar-header { padding: 20px; border-bottom: 2px solid #ecf0f1; font-weight: bold; color: #2c3e50; font-size: 16px; }
+    .sidebar { width: 240px; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); position: fixed; height: 100vh; left: 0; top: 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease-in-out; transform: translateX(0); }
+    .sidebar.hidden { transform: translateX(-100%); }
+    .sidebar-header { padding: 20px; border-bottom: 2px solid #ecf0f1; font-weight: bold; color: #2c3e50; font-size: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #7f8c8d; }
     .nav-tabs { display: flex; flex-direction: column; gap: 0; padding: 10px; }
     .nav-tabs button { background: none; border: none; padding: 12px 15px; cursor: pointer; color: #7f8c8d; border-left: 4px solid transparent; font-size: 13px; font-weight: 500; text-align: left; width: 100%; transition: all 0.3s; border-radius: 0; }
     .nav-tabs button:hover { background: #f5f7fa; }
     .nav-tabs button.active { color: #3498db; border-left-color: #3498db; background: #e3f2fd; }
     
-    .main-content { margin-left: 240px; width: calc(100% - 240px); padding: 20px; }
+    .menu-toggle { position: fixed; left: 20px; top: 20px; background: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 99; transition: left 0.3s ease-in-out; }
+    .menu-toggle.sidebar-open { left: 260px; }
+    
+    .main-content { margin-left: 0; width: 100%; padding: 20px; transition: margin-left 0.3s ease-in-out; }
     .container { max-width: 1800px; margin: 0 auto; }
     .header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 20px; }
     .header h1 { color: #2c3e50; font-size: 32px; margin-bottom: 5px; }
@@ -104,8 +109,11 @@
     
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      .sidebar { width: 100%; height: auto; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-      .main-content { margin-left: 0; width: 100%; }
+      .sidebar { width: 100%; height: auto; position: fixed; top: 60px; left: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transform: translateY(-100%); }
+      .sidebar.hidden { transform: translateY(-100%); }
+      .sidebar:not(.hidden) { transform: translateY(0); }
+      .menu-toggle.sidebar-open { left: 20px; }
+      .main-content { margin-left: 0; width: 100%; padding-top: 60px; }
       .nav-tabs { flex-direction: row; flex-wrap: wrap; }
       .nav-tabs button { border-left: none; border-bottom: 3px solid transparent; }
       .nav-tabs button.active { border-left: none; border-bottom-color: #3498db; }
@@ -117,14 +125,19 @@
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <div class="sidebar-header">💰 Budget App</div>
+  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+  
+  <div class="sidebar hidden">
+    <div class="sidebar-header">
+      💰 Budget App
+      <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+    </div>
     <div class="nav-tabs">
-      <button class="active" onclick="switchTab('overview')">📊 Overview</button>
-      <button onclick="switchTab('calendar')">📅 Calendar</button>
-      <button onclick="switchTab('cashflow')">💹 Cash Flow</button>
-      <button onclick="switchTab('insights')">🧠 Insights</button>
-      <button onclick="switchTab('transactions')">📋 Transactions</button>
+      <button class="active" onclick="switchTab('overview'); toggleSidebar();">📊 Overview</button>
+      <button onclick="switchTab('calendar'); toggleSidebar();">📅 Calendar</button>
+      <button onclick="switchTab('cashflow'); toggleSidebar();">💹 Cash Flow</button>
+      <button onclick="switchTab('insights'); toggleSidebar();">🧠 Insights</button>
+      <button onclick="switchTab('transactions'); toggleSidebar();">📋 Transactions</button>
     </div>
   </div>
 
@@ -734,6 +747,13 @@
       } catch (e) {
         alert('Failed: ' + e.message);
       }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const toggle = document.querySelector('.menu-toggle');
+      sidebar.classList.toggle('hidden');
+      toggle.classList.toggle('sidebar-open');
     }
 
     window.addEventListener('load', loadData);
