@@ -390,6 +390,45 @@ app.post('/api/transactions/:id/toggle-exclude', express.json(), (req, res) => {
   }
 });
 
+app.post('/api/transactions/:id/note', express.json(), (req, res) => {
+  const txn = transactions.find(t => t.id == req.params.id);
+  if (txn) {
+    txn.note = req.body.note || '';
+    saveData(transactionsFile, transactions);
+    res.json({ success: true, note: txn.note });
+  } else {
+    res.status(404).json({ error: 'Transaction not found' });
+  }
+});
+
+app.get('/api/spending-trends', (req, res) => {
+  const trends = {};
+  const months = {};
+  
+  transactions.forEach(t => {
+    if (t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
+      const date = new Date(t.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!months[monthKey]) months[monthKey] = {};
+      if (!months[monthKey][t.category]) months[monthKey][t.category] = 0;
+      months[monthKey][t.category] += Math.abs(t.amount);
+    }
+  });
+  
+  const allCategories = new Set();
+  Object.values(months).forEach(m => Object.keys(m).forEach(cat => allCategories.add(cat)));
+  
+  const sorted = Object.keys(months).sort();
+  sorted.forEach(month => {
+    trends[month] = {};
+    allCategories.forEach(cat => {
+      trends[month][cat] = months[month][cat] || 0;
+    });
+  });
+  
+  res.json(trends);
+});
+
 app.get('/api/categories', (req, res) => {
   const categories = {};
   transactions.forEach(t => {

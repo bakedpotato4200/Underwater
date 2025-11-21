@@ -185,6 +185,7 @@
     </div>
     <div class="nav-tabs">
       <button class="active" onclick="switchTab('overview'); toggleSidebar();">Overview</button>
+      <button onclick="switchTab('trends'); toggleSidebar();">Trends</button>
       <button onclick="switchTab('calendar'); toggleSidebar();">Calendar</button>
       <button onclick="switchTab('cashflow'); toggleSidebar();">Cash Flow</button>
       <button onclick="switchTab('insights'); toggleSidebar();">Insights</button>
@@ -264,6 +265,13 @@
               <li class="loading">No transactions</li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      <div id="trends" class="tab-content" style="display: none;">
+        <div class="card full">
+          <h2>Spending Trends</h2>
+          <div id="trendsChart" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 16px;"></div>
         </div>
       </div>
 
@@ -424,12 +432,27 @@
     </div>
   </div>
 
+  <!-- Transaction Note Modal -->
+  <div id="noteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Add Note</div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="noteText" placeholder="Add a note to remember details about this transaction..." style="width: 100%; padding: 8px 12px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px;"></textarea>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="saveNote()">Save</button>
+        <button class="btn btn-secondary" onclick="closeModal('noteModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_URL = window.location.origin;
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -439,7 +462,8 @@
           fetch(API_URL + '/api/recurring-calendar').then(r => r.json()),
           fetch(API_URL + '/api/cash-flow').then(r => r.json()),
           fetch(API_URL + '/api/spending-velocity').then(r => r.json()),
-          fetch(API_URL + '/api/alerts').then(r => r.json())
+          fetch(API_URL + '/api/alerts').then(r => r.json()),
+          fetch(API_URL + '/api/spending-trends').then(r => r.json())
         ]);
 
         displayTransactions(txns);
@@ -459,6 +483,7 @@
         displayCashFlow(cashflow);
         displayRecommendations(insights.recommendations);
         displayAnomalies(insights.anomalies);
+        displaySpendingTrends(trends);
       } catch (e) {
         console.error('Error loading data:', e);
       }
@@ -499,9 +524,8 @@
             <div class="transaction-amount ${t.type}">
               ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
             </div>
-            <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'};" onclick="toggleExclude(${t.id})">
-              ${t.excluded ? 'Excl' : 'Excl'}
-            </button>
+            <button class="btn btn-small" style="background: #0071e3; color: white;" onclick="showNoteModal(${t.id}, '${(t.note || '').replace(/'/g, "\\'")}')">Note</button>
+            <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'};" onclick="toggleExclude(${t.id})">Excl</button>
           </div>
         </li>
       `).join('');
@@ -517,9 +541,8 @@
             <div class="transaction-amount ${t.type}">
               ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
             </div>
-            <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'}; cursor: pointer;" onclick="toggleExclude(${t.id})">
-              ${t.excluded ? 'Excl' : 'Excl'}
-            </button>
+            <button class="btn btn-small" style="background: #0071e3; color: white; cursor: pointer;" onclick="showNoteModal(${t.id}, '${(t.note || '').replace(/'/g, "\\'")}')">Note</button>
+            <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'}; cursor: pointer;" onclick="toggleExclude(${t.id})">Excl</button>
           </div>
         </li>
       `).join('');
@@ -688,6 +711,57 @@
           <div class="bill-amount" style="color: #ff3b30;">$${Math.abs(a.amount).toFixed(2)}</div>
         </div>
       `).join('');
+    }
+
+    let currentNoteId = null;
+
+    function showNoteModal(txnId, currentNote) {
+      currentNoteId = txnId;
+      document.getElementById('noteText').value = currentNote;
+      document.getElementById('noteModal').classList.add('active');
+    }
+
+    async function saveNote() {
+      const note = document.getElementById('noteText').value;
+      try {
+        await fetch(API_URL + `/api/transactions/${currentNoteId}/note`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note })
+        });
+        closeModal('noteModal');
+        loadData();
+      } catch (e) {
+        alert('Failed to save note: ' + e.message);
+      }
+    }
+
+    function displaySpendingTrends(trends) {
+      const container = document.getElementById('trendsChart');
+      if (!trends || Object.keys(trends).length === 0) {
+        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px; grid-column: 1/-1;">No trend data available</div>';
+        return;
+      }
+
+      const months = Object.keys(trends).sort().slice(-6);
+      const categories = new Set();
+      months.forEach(m => Object.keys(trends[m]).forEach(cat => categories.add(cat)));
+
+      let html = '';
+      categories.forEach(cat => {
+        const data = months.map(m => trends[m][cat] || 0);
+        const maxVal = Math.max(...data, 1);
+        const bars = data.map((v, i) => `<div style="height: ${(v / maxVal) * 100}px; background: #0071e3; border-radius: 4px; flex: 1; margin: 0 2px;"></div>`).join('');
+        const labels = months.map(m => m.slice(5)).join(', ');
+        html += `
+          <div style="background: white; border: 1px solid #e5e5e7; padding: 12px; border-radius: 8px;">
+            <div style="font-weight: 600; color: #000; margin-bottom: 8px; font-size: 13px;">${cat}</div>
+            <div style="display: flex; align-items: flex-end; height: 60px; gap: 4px;">${bars}</div>
+            <div style="font-size: 10px; color: #86868b; margin-top: 6px;">Avg: $${(data.reduce((a,b) => a+b,0) / data.length).toFixed(0)}</div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
     }
 
     function switchTab(tab) {
