@@ -59,9 +59,11 @@ function extractTransactions(text) {
   
   let id = 1;
   
+  console.log(`📋 Processing ${lines.length} lines from PDF...`);
+  
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!line || line.length < 20) continue;
+    if (!line || line.trim().length < 10) continue;
     
     // Match: Month Day at the start of line
     const dateMatch = line.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+/);
@@ -70,36 +72,56 @@ function extractTransactions(text) {
     const month = monthMap[dateMatch[1]];
     const day = dateMatch[2].padStart(2, '0');
     
+    // Skip specific header lines
+    if (line.includes('Opening Balance') || line.includes('Closing Balance') || 
+        line.includes('Monthly Interest') || line.includes('DATE') || line.includes('DESCRIPTION')) continue;
+    if (line.includes('Rejected') || line.includes('BPF_')) continue;
+    
     // Get everything after the date
     const afterDate = line.substring(dateMatch[0].length);
     
-    // Skip lines with headers or rejected transactions
-    if (afterDate.match(/^(Opening Balance|Closing Balance|DESCRIPTION|Monthly Interest|AMOUNT|CATEGORY)/i)) continue;
-    if (afterDate.includes('Rejected')) continue;
-    if (afterDate.includes('BPF_')) continue;
-    
-    // Look for amount pattern: +/- $X.XX anywhere in the line
-    const amountMatches = afterDate.match(/([-+]\s*\$[\d,]+\.\d{2})/g);
-    if (!amountMatches || amountMatches.length === 0) continue;
+    // Look for amount pattern: +/- $X.XX or +/- $X,XXX.XX
+    // Match: optional spaces, +/-, optional spaces, $, digits, optional comma, decimal
+    const amountMatches = afterDate.match(/[-+]\s*\$[\d,]+\.[\d]{2}/g);
+    if (!amountMatches || amountMatches.length === 0) {
+      console.log(`  Line ${i}: No amount found in: "${line.substring(0, 80)}..."`);
+      continue;
+    }
     
     // The transaction amount should be the first one (before the balance)
-    const transactionAmountStr = amountMatches[0];
-    const amountPos = afterDate.indexOf(transactionAmountStr);
+    const transactionAmountStr = amountMatches[0].trim();
+    
+    // Find the position - be careful because indexOf might find it in a different spot after regex
+    let amountPos = afterDate.indexOf(transactionAmountStr);
+    if (amountPos === -1) {
+      // Try finding without the exact spacing
+      const amountClean = transactionAmountStr.replace(/\s+/g, '');
+      const afterDateClean = afterDate.replace(/\s+/g, '');
+      const posClean = afterDateClean.indexOf(amountClean);
+      if (posClean === -1) continue;
+      amountPos = posClean;
+    }
     
     // Description is everything before the amount
     let description = afterDate.substring(0, amountPos).trim();
     description = description.replace(/\s+/g, ' ').trim();
     
-    // Clean up description - remove category labels
-    description = description.replace(/\s+(Credit|Debit|Transfer)$/, '').trim();
+    // Remove Category labels from description
+    description = description.replace(/\s+(Credit|Debit|Transfer)\s*$/i, '').trim();
     
-    if (!description || description.length < 2) continue;
+    if (!description || description.length < 2) {
+      console.log(`  Line ${i}: Empty description for amount ${transactionAmountStr}`);
+      continue;
+    }
     
     // Parse the amount
     let amountStr = transactionAmountStr.replace(/[\$,\s]/g, '');
     let amount = parseFloat(amountStr);
     
-    if (!amount || amount === 0) continue;
+    if (!amount || amount === 0) {
+      console.log(`  Line ${i}: Invalid amount: "${transactionAmountStr}"`);
+      continue;
+    }
     
     // Determine type based on sign
     let type = 'expense';
@@ -113,6 +135,8 @@ function extractTransactions(text) {
     
     const date = `2025-${month}-${day}`;
     const category = categorizeTransaction(description);
+    
+    console.log(`  ✓ Line ${i}: ${date} | ${description.substring(0, 40)} | ${amount}`);
     
     transactions.push({
       id: id++,
