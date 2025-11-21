@@ -1,13 +1,11 @@
-import express from 'express';
-import cors from 'cors';
-import multer from 'multer';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import pdfParse from 'pdf-parse';
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(cors({
@@ -36,87 +34,105 @@ let subscriptions = [];
 // Helper function to categorize transactions
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
-  if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco/)) return 'Food & Dining';
-  if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart/)) return 'Groceries';
-  if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t/)) return 'Utilities';
-  if (desc.match(/netflix|hulu|spotify|disney|prime|subscription|gym|apple|xbox/)) return 'Entertainment';
-  if (desc.match(/shell|chevron|exxon|bp|gas station|fuel|parking|metro|transit|lyft/)) return 'Transportation';
-  if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store/)) return 'Shopping';
-  if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical/)) return 'Health & Fitness';
-  if (desc.match(/salary|paycheck|deposit|transfer in|income|bonus/)) return 'Income';
+  if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|groceries/)) return 'Food & Dining';
+  if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter/)) return 'Groceries';
+  if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|harley|car payment|motorcycle/)) return 'Utilities';
+  if (desc.match(/netflix|hulu|spotify|disney|prime|subscription|gym|apple|xbox|crunch|fitness/)) return 'Entertainment';
+  if (desc.match(/shell|chevron|exxon|bp|gas station|fuel|parking|metro|transit|lyft|qt|murphy|carwash|chase|discover|capital one|wells fargo|amex/)) return 'Transportation';
+  if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walmart|walgreens|dollar general|staxx|inola|dollar general/)) return 'Shopping';
+  if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|armstrong|ctlp/)) return 'Health & Fitness';
+  if (desc.match(/salary|paycheck|deposit|transfer|income|bonus|interest/)) return 'Income';
+  if (desc.match(/deposit from|withdrawal to|transfer/)) return 'Transfer';
   return 'Other';
 }
 
-// Store extracted PDF text for debugging
-let lastExtractedText = '';
-
-// Capital One bank statement parser - global regex search across entire text
+// Advanced Capital One PDF parser using simple splitting
 function extractTransactions(text) {
   const transactions = [];
   const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
                     Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
   
+  // Months to search for
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
   let id = 1;
   
-  // Global pattern: Month Day [any text] [+/-]$amount
-  // This searches across whitespace and line breaks
-  const pattern = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+([^$\n]{10,150}?)\s+([-+]?\s*\$[\d,]+\.?\d{0,2})\s+(\$[\d,]+\.?\d{2})?/g;
+  // Try to find all transactions by searching for month-day patterns
+  // Split text by any month followed by space and 1-2 digits
+  const splitRegex = new RegExp(`(?<=${months.join('|')})\\s+\\d{1,2}(?=\\s)`, 'g');
   
-  let match;
-  const seen = new Set();
+  // Find all month/day combinations
+  let monthDayMatches = text.matchAll(/(\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\s+(\d{1,2})\b/g);
   
-  while ((match = pattern.exec(text)) !== null) {
-    const month = monthMap[match[1]];
-    const day = match[2].padStart(2, '0');
-    let description = match[3];
-    const amountStr = match[4].trim();
-    const balanceStr = match[5];
+  for (const match of monthDayMatches) {
+    const monthStr = match[1];
+    const dayStr = match[2];
+    const month = monthMap[monthStr];
+    const day = dayStr.padStart(2, '0');
+    const startIndex = match.index;
     
-    // Skip headers
-    if (description.match(/^(Opening|Closing|DATE|DESCRIPTION|Monthly|AMOUNT|CATEGORY|Fees|Interest|APY|YTD|Bills|Spending|Savings|Total|Account)/i)) continue;
-    if (description.includes('Rejected') || description.includes('BPF_')) continue;
+    // Get text after this match for description and amount
+    let remainingText = text.substring(startIndex + match[0].length, startIndex + 300);
     
-    // Skip large amounts (balance not transaction)
-    const amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
-    if (!amount || amount === 0 || Math.abs(amount) > 100000) continue;
+    // Skip certain headers
+    if (remainingText.match(/^[\s]*(Opening|Closing|DATE|DESCRIPTION|Monthly|AMOUNT|CATEGORY|Fees|Interest|APY|YTD|Bills|Spending|Savings|Total|Account|STATEMENT PERIOD)/i)) continue;
+    if (remainingText.includes('Rejected') || remainingText.includes('BPF_')) continue;
+    if (remainingText.includes('Page ') || remainingText.includes('capitalone.com')) continue;
+    
+    // Look for +/- $X.XX or +/- $ X.XX anywhere in remaining text
+    const amountMatch = remainingText.match(/([-+]\s*\$[\d,]+\.?\d{0,2})/);
+    if (!amountMatch) continue;
+    
+    const amountStr = amountMatch[1].trim();
+    const amountPos = remainingText.indexOf(amountMatch[0]);
+    
+    // Extract description - text between month/day and amount
+    let description = remainingText.substring(0, amountPos).trim();
     
     // Clean description
-    description = description.replace(/\s+(Debit|Credit|Transfer)\s*$/i, '')
-                             .replace(/\s+/g, ' ')
-                             .trim();
+    description = description.replace(/[\s\n\t]+/g, ' ')
+                            .replace(/\s+(Debit|Credit|Transfer|Category)\s*/gi, ' ')
+                            .trim();
     
-    if (!description || description.length < 3) continue;
+    // Skip if no real description
+    if (!description || description.length < 2) continue;
+    if (description.length > 150) description = description.substring(0, 150);
     
-    // Create unique key to avoid duplicates
-    const key = `${month}-${day}-${amount}-${description}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    // Parse amount
+    let amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
+    if (!amount || amount === 0) continue;
     
-    // Determine type
+    // Skip very large amounts (likely balances)
+    if (Math.abs(amount) > 100000) continue;
+    
+    // Set sign
     let type = 'expense';
-    let finalAmount = amount;
     if (amountStr.includes('+')) {
       type = 'income';
-      finalAmount = Math.abs(amount);
+      amount = Math.abs(amount);
     } else if (amountStr.includes('-')) {
       type = 'expense';
-      finalAmount = -Math.abs(amount);
+      amount = -Math.abs(amount);
     }
     
     const date = `2025-${month}-${day}`;
     const category = categorizeTransaction(description);
     
+    // Check for duplicates
+    const isDuplicate = transactions.some(t => t.date === date && t.amount === amount && t.description === description);
+    if (isDuplicate) continue;
+    
     transactions.push({
       id: id++,
       date,
-      amount: finalAmount,
+      amount,
       category,
-      description: description.substring(0, 100),
+      description: description,
       type
     });
   }
   
-  console.log(`✅ Extracted ${transactions.length} transactions from PDF using global pattern`);
+  console.log(`✅ Extracted ${transactions.length} transactions from PDF`);
   return transactions;
 }
 
@@ -131,6 +147,8 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
     const pdfData = await pdfParse(pdfBuffer);
     const text = pdfData.text;
     
+    console.log(`📄 PDF extracted, text length: ${text.length} chars`);
+    
     const parsedTransactions = extractTransactions(text);
     
     if (parsedTransactions.length > 0) {
@@ -139,7 +157,7 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
       transactions = [
         { id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense' },
       ];
-      console.log(`⚠️ Could not parse PDF, loaded sample transaction`);
+      console.log(`⚠️ No transactions found, loaded sample`);
     }
     
     // Clean up uploaded file
@@ -185,69 +203,68 @@ app.get('/api/categories', (req, res) => {
   res.json(categories);
 });
 
-// Get debts and payment plan
-app.get('/api/debts', (req, res) => {
-  const mockDebts = [
-    { id: 1, name: 'Credit Card', balance: 3500, rate: 18, minPayment: 100, dueDate: '2025-12-05' },
-    { id: 2, name: 'Student Loan', balance: 15000, rate: 4, minPayment: 200, dueDate: '2025-12-28' },
-    { id: 3, name: 'Car Loan', balance: 8200, rate: 3.5, minPayment: 350, dueDate: '2025-12-15' },
-  ];
-  res.json(mockDebts);
-});
-
-// AI-powered debt payoff plan
-app.post('/api/debt-plan', express.json(), (req, res) => {
-  const { strategy } = req.body;
-  const debts = [
-    { name: 'Credit Card', balance: 3500, rate: 18, minPayment: 100 },
-    { name: 'Student Loan', balance: 15000, rate: 4, minPayment: 200 },
-    { name: 'Car Loan', balance: 8200, rate: 3.5, minPayment: 350 },
-  ];
-
-  let plan = [];
-  if (strategy === 'avalanche') {
-    // Pay highest interest first
-    plan = debts.sort((a, b) => b.rate - a.rate).map(d => ({
-      ...d,
-      payoffMonths: Math.ceil(d.balance / (d.minPayment + 500)),
-      totalInterest: Math.ceil(d.balance * (d.rate / 100) * (d.payoffMonths / 12))
-    }));
-  } else {
-    // Snowball: pay smallest balance first
-    plan = debts.sort((a, b) => a.balance - b.balance).map(d => ({
-      ...d,
-      payoffMonths: Math.ceil(d.balance / (d.minPayment + 300)),
-      totalInterest: Math.ceil(d.balance * (d.rate / 100) * (d.payoffMonths / 12))
-    }));
-  }
-
-  res.json({ strategy, plan });
-});
-
-// Get income and expenses summary
-app.get('/api/summary', (req, res) => {
-  let income = 0, expenses = 0;
-  transactions.forEach(t => {
-    if (t.type === 'income') income += t.amount;
-    else expenses += Math.abs(t.amount);
-  });
+// Get balance and stats
+app.get('/api/balance', (req, res) => {
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const balance = totalIncome - totalExpense;
   
   res.json({
-    totalIncome: income,
-    totalExpenses: expenses,
-    balance: income - expenses,
-    transactions: transactions.length
+    income: totalIncome,
+    expenses: totalExpense,
+    balance: balance,
+    transactionCount: transactions.length
   });
 });
 
-// Get daily breakdown
-app.get('/api/daily-breakdown', (req, res) => {
-  const daily = {};
-  transactions.forEach(t => {
-    daily[t.date] = (daily[t.date] || 0) + t.amount;
-  });
-  res.json(daily);
+// Add debt
+app.post('/api/debts', express.json(), (req, res) => {
+  const newDebt = {
+    id: Math.max(...debts.map(d => d.id || 0), 0) + 1,
+    ...req.body
+  };
+  debts.push(newDebt);
+  res.json(newDebt);
 });
 
-const PORT = 5000;
+// Get all debts
+app.get('/api/debts', (req, res) => {
+  res.json(debts);
+});
+
+// Calculate payoff strategy
+app.post('/api/payoff-strategy', express.json(), (req, res) => {
+  const { strategy } = req.body;
+  
+  if (strategy === 'avalanche') {
+    // Highest interest first
+    const sorted = [...debts].sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
+    res.json({ strategy: 'Avalanche', debts: sorted, recommendation: 'Pay off highest interest debt first to save money' });
+  } else {
+    // Smallest balance first
+    const sorted = [...debts].sort((a, b) => a.balance - b.balance);
+    res.json({ strategy: 'Snowball', debts: sorted, recommendation: 'Pay off smallest balance first for quick wins' });
+  }
+});
+
+// Add subscription
+app.post('/api/subscriptions', express.json(), (req, res) => {
+  const newSub = {
+    id: Math.max(...subscriptions.map(s => s.id || 0), 0) + 1,
+    ...req.body
+  };
+  subscriptions.push(newSub);
+  res.json(newSub);
+});
+
+// Get all subscriptions
+app.get('/api/subscriptions', (req, res) => {
+  res.json(subscriptions);
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
