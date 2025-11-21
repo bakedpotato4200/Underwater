@@ -50,7 +50,7 @@ function categorizeTransaction(description) {
 // Store extracted PDF text for debugging
 let lastExtractedText = '';
 
-// Capital One bank statement parser - global regex pattern matching
+// Capital One bank statement parser - global regex search across entire text
 function extractTransactions(text) {
   const transactions = [];
   const monthMap = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
@@ -58,74 +58,49 @@ function extractTransactions(text) {
   
   let id = 1;
   
-  // Remove header/footer sections and normalize whitespace
-  let cleanText = text.replace(/Page \d+ of \d+/g, '')
-                       .replace(/capitalone\.com.*?P\.O\. Box.*/g, '')
-                       .replace(/Jacob Emmer.*?STATEMENT/g, '')
-                       .replace(/Account Summary[\s\S]*?Cashflow Summary[\s\S]*?PERIOD/g, '');
+  // Global pattern: Month Day [any text] [+/-]$amount
+  // This searches across whitespace and line breaks
+  const pattern = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+([^$\n]{10,150}?)\s+([-+]?\s*\$[\d,]+\.?\d{0,2})\s+(\$[\d,]+\.?\d{2})?/g;
   
-  // Split into lines but keep structure
-  const lines = cleanText.split('\n');
+  let match;
+  const seen = new Set();
   
-  console.log(`🔍 Parsing ${lines.length} lines from PDF`);
-  
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-    if (!line || line.trim().length < 15) continue;
+  while ((match = pattern.exec(text)) !== null) {
+    const month = monthMap[match[1]];
+    const day = match[2].padStart(2, '0');
+    let description = match[3];
+    const amountStr = match[4].trim();
+    const balanceStr = match[5];
     
-    // Look for: Month Day ... amounts
-    // More flexible: Month followed by space and 1-2 digits
-    const monthPattern = '(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)';
-    const dateMatch = line.match(new RegExp(`^\\s*${monthPattern}\\s+(\\d{1,2})\\s+(.{5,})`));
-    if (!dateMatch) continue;
+    // Skip headers
+    if (description.match(/^(Opening|Closing|DATE|DESCRIPTION|Monthly|AMOUNT|CATEGORY|Fees|Interest|APY|YTD|Bills|Spending|Savings|Total|Account)/i)) continue;
+    if (description.includes('Rejected') || description.includes('BPF_')) continue;
     
-    const month = monthMap[dateMatch[1]];
-    const day = dateMatch[2].padStart(2, '0');
-    let remainder = dateMatch[3];
+    // Skip large amounts (balance not transaction)
+    const amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
+    if (!amount || amount === 0 || Math.abs(amount) > 100000) continue;
     
-    // Skip header rows and special cases
-    if (remainder.match(/^(Opening|Closing|Monthly|DATE|DESCRIPTION|AMOUNT|CATEGORY|Fees|Interest|APY|YTD|Bills|Spending|Savings|Account|Total)/i)) continue;
-    if (remainder.includes('Page ') || remainder.includes('capitalone') || remainder.includes('Rejected')) continue;
-    
-    // Extract amounts - look for all $ amounts in the remainder
-    const dollarPattern = /[-+]?\s*\$[\d,]+\.?\d{0,2}/g;
-    const amounts = remainder.match(dollarPattern);
-    
-    if (!amounts || amounts.length === 0) continue;
-    
-    // The first amount is typically the transaction amount
-    let amountStr = amounts[0].trim();
-    
-    // Skip if balance looks too large (>100k likely a balance, not transaction)
-    let testAmount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
-    if (Math.abs(testAmount) > 100000) continue;
-    
-    // Get description - everything before the amount
-    const amountIndex = remainder.indexOf(amountStr);
-    if (amountIndex < 5) continue; // Need real description
-    
-    let description = remainder.substring(0, amountIndex).trim();
-    
-    // Clean up description
+    // Clean description
     description = description.replace(/\s+(Debit|Credit|Transfer)\s*$/i, '')
-                             .replace(/CATEGORY\s*/i, '')
                              .replace(/\s+/g, ' ')
                              .trim();
     
     if (!description || description.length < 3) continue;
     
-    // Parse final amount
-    let amount = parseFloat(amountStr.replace(/[\$,\s]/g, ''));
-    if (!amount || amount === 0) continue;
+    // Create unique key to avoid duplicates
+    const key = `${month}-${day}-${amount}-${description}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     
-    // Determine sign from +/- prefix
+    // Determine type
     let type = 'expense';
+    let finalAmount = amount;
     if (amountStr.includes('+')) {
       type = 'income';
-      amount = Math.abs(amount);
+      finalAmount = Math.abs(amount);
     } else if (amountStr.includes('-')) {
       type = 'expense';
-      amount = -Math.abs(amount);
+      finalAmount = -Math.abs(amount);
     }
     
     const date = `2025-${month}-${day}`;
@@ -134,14 +109,14 @@ function extractTransactions(text) {
     transactions.push({
       id: id++,
       date,
-      amount,
+      amount: finalAmount,
       category,
       description: description.substring(0, 100),
       type
     });
   }
   
-  console.log(`✅ Extracted ${transactions.length} transactions from PDF`);
+  console.log(`✅ Extracted ${transactions.length} transactions from PDF using global pattern`);
   return transactions;
 }
 
