@@ -20,12 +20,44 @@ app.use(express.static(path.join(__dirname, '..')));
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
+const dataDir = path.join(__dirname, '..', 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
 const upload = multer({ dest: uploadDir });
 
-let transactions = [];
-let debts = [];
-let subscriptions = [];
-let goals = [];
+// Data files
+const transactionsFile = path.join(dataDir, 'transactions.json');
+const debtsFile = path.join(dataDir, 'debts.json');
+const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
+const goalsFile = path.join(dataDir, 'goals.json');
+
+// Load/Save functions
+function loadData(file) {
+  try {
+    if (fs.existsSync(file)) {
+      return JSON.parse(fs.readFileSync(file, 'utf8'));
+    }
+  } catch (e) {
+    console.error(`Error loading ${file}:`, e.message);
+  }
+  return [];
+}
+
+function saveData(file, data) {
+  try {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error(`Error saving ${file}:`, e.message);
+  }
+}
+
+// Initialize data from files
+let transactions = loadData(transactionsFile);
+let debts = loadData(debtsFile);
+let subscriptions = loadData(subscriptionsFile);
+let goals = loadData(goalsFile);
+
+console.log(`Loaded ${transactions.length} transactions, ${debts.length} debts, ${goals.length} goals`);
 
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
@@ -189,13 +221,13 @@ function getSmartRecommendations() {
   const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
   if (sorted.length > 0) {
     const topCategory = sorted[0];
-    recs.push({ title: `💡 Cut ${topCategory[0]}`, desc: `Reduce ${topCategory[0].toLowerCase()} by 10% and save $${(topCategory[1] * 0.1).toFixed(2)}/month` });
+    recs.push({ title: `Cut ${topCategory[0]}`, desc: `Reduce ${topCategory[0].toLowerCase()} by 10% and save $${(topCategory[1] * 0.1).toFixed(2)}/month` });
   }
   
   const recurring = detectRecurring().filter(r => r.isRecurring);
   if (recurring.length > 0) {
     const totalRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
-    recs.push({ title: '🔄 Audit Subscriptions', desc: `You pay $${totalRecurring.toFixed(0)}/year in recurring charges. Cancel unused ones?` });
+    recs.push({ title: 'Audit Subscriptions', desc: `You pay $${totalRecurring.toFixed(0)}/year in recurring charges. Cancel unused ones?` });
   }
   
   const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
@@ -203,12 +235,12 @@ function getSmartRecommendations() {
   const savings = totalIncome - totalExpense;
   
   if (savings > 0) {
-    recs.push({ title: '🎯 Set Savings Goal', desc: `You save $${savings.toFixed(2)}/month. Create a goal to reach $${(savings * 12).toFixed(0)} this year` });
+    recs.push({ title: 'Set Savings Goal', desc: `You save $${savings.toFixed(2)}/month. Create a goal to reach $${(savings * 12).toFixed(0)} this year` });
   }
   
   if (sorted.length > 1 && sorted[1][0] === 'Food & Dining') {
     const foodAmount = sorted[1][1];
-    recs.push({ title: '🍽️ Optimize Food', desc: `Food spending: $${foodAmount.toFixed(2)}. Meal prep to reduce by 15%?` });
+    recs.push({ title: 'Optimize Food', desc: `Food spending: $${foodAmount.toFixed(2)}. Meal prep to reduce by 15%?` });
   }
   
   return recs.slice(0, 4);
@@ -224,34 +256,34 @@ function generateAlerts() {
 
   if (anomalies.length > 0) {
     const anomaly = anomalies[0];
-    alerts.push({ type: 'warning', title: '🚨 Unusual Transaction', message: `${anomaly.description} ($${Math.abs(anomaly.amount).toFixed(2)}) seems unusual for ${anomaly.category}` });
+    alerts.push({ type: 'warning', title: 'Unusual Transaction', message: `${anomaly.description} ($${Math.abs(anomaly.amount).toFixed(2)}) seems unusual for ${anomaly.category}` });
   }
 
   if (velocity.trend === 'increasing' && parseFloat(velocity.trendPercent) > 10) {
-    alerts.push({ type: 'warning', title: '📈 Spending Increasing', message: `Your spending is up ${velocity.trendPercent}% vs last month. Monitor budget!` });
+    alerts.push({ type: 'warning', title: 'Spending Increasing', message: `Your spending is up ${velocity.trendPercent}% vs last month. Monitor budget!` });
   }
 
   if (totalExpense > totalIncome * 0.9) {
-    alerts.push({ type: 'alert', title: '⚠️ High Expense Ratio', message: `You're spending ${(totalExpense / totalIncome * 100).toFixed(0)}% of income. Reduce spending!` });
+    alerts.push({ type: 'alert', title: 'High Expense Ratio', message: `You're spending ${(totalExpense / totalIncome * 100).toFixed(0)}% of income. Reduce spending!` });
   }
 
   const nextBill = recurring.sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate))[0];
   if (nextBill) {
     const days = Math.ceil((new Date(nextBill.nextDueDate) - new Date()) / (1000 * 60 * 60 * 24));
     if (days <= 7 && days > 0) {
-      alerts.push({ type: 'info', title: `💰 ${nextBill.merchant} Due Soon`, message: `${nextBill.merchant} ($${nextBill.avgAmount.toFixed(2)}) due in ${days} days` });
+      alerts.push({ type: 'info', title: `${nextBill.merchant} Due Soon`, message: `${nextBill.merchant} ($${nextBill.avgAmount.toFixed(2)}) due in ${days} days` });
     }
   }
 
   if (recurring.length > 10) {
     const totalRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
-    alerts.push({ type: 'info', title: '🔄 High Recurring Costs', message: `You have ${recurring.length} recurring bills costing ~$${totalRecurring.toFixed(0)}/year` });
+    alerts.push({ type: 'info', title: 'High Recurring Costs', message: `You have ${recurring.length} recurring bills costing ~$${totalRecurring.toFixed(0)}/year` });
   }
 
   if (debts.length > 0) {
     const totalDebt = debts.reduce((s, d) => s + d.balance, 0);
     if (totalDebt > totalIncome * 3) {
-      alerts.push({ type: 'alert', title: '💳 High Debt Ratio', message: `Your debt (${(totalDebt / totalIncome).toFixed(1)}x income) is very high. Focus on payoff!` });
+      alerts.push({ type: 'alert', title: 'High Debt Ratio', message: `Your debt (${(totalDebt / totalIncome).toFixed(1)}x income) is very high. Focus on payoff!` });
     }
   }
 
@@ -314,7 +346,7 @@ function extractTransactions(text) {
     });
   }
   
-  console.log(`✅ Extracted ${transactions.length} transactions`);
+  console.log(`Extracted ${transactions.length} transactions`);
   return transactions;
 }
 
@@ -328,8 +360,9 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
     if (parsedTransactions.length > 0) {
       transactions = parsedTransactions;
     } else {
-      transactions = [{ id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense' }];
+      transactions = [{ id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense', excluded: false }];
     }
+    saveData(transactionsFile, transactions);
     fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
     res.json({ success: true, transactions: transactions.length, message: `Loaded ${transactions.length} transactions` });
   } catch (error) {
@@ -342,6 +375,7 @@ app.get('/api/transactions', (req, res) => res.json(transactions));
 app.post('/api/transactions', express.json(), (req, res) => {
   const newTransaction = { id: Math.max(...transactions.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0], excluded: false };
   transactions.push(newTransaction);
+  saveData(transactionsFile, transactions);
   res.json(newTransaction);
 });
 
@@ -349,6 +383,7 @@ app.post('/api/transactions/:id/toggle-exclude', express.json(), (req, res) => {
   const txn = transactions.find(t => t.id == req.params.id);
   if (txn) {
     txn.excluded = !txn.excluded;
+    saveData(transactionsFile, transactions);
     res.json({ success: true, excluded: txn.excluded });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
@@ -426,6 +461,7 @@ app.get('/api/insights', (req, res) => {
 app.post('/api/goals', express.json(), (req, res) => {
   const newGoal = { id: Math.max(...goals.map(g => g.id || 0), 0) + 1, ...req.body, createdAt: new Date() };
   goals.push(newGoal);
+  saveData(goalsFile, goals);
   res.json(newGoal);
 });
 
@@ -434,6 +470,7 @@ app.get('/api/goals', (req, res) => res.json(goals));
 app.post('/api/debts', express.json(), (req, res) => {
   const newDebt = { id: Math.max(...debts.map(d => d.id || 0), 0) + 1, ...req.body };
   debts.push(newDebt);
+  saveData(debtsFile, debts);
   res.json(newDebt);
 });
 
@@ -479,6 +516,7 @@ app.post('/api/payoff-strategy', express.json(), (req, res) => {
 app.post('/api/subscriptions', express.json(), (req, res) => {
   const newSub = { id: Math.max(...subscriptions.map(s => s.id || 0), 0) + 1, ...req.body };
   subscriptions.push(newSub);
+  saveData(subscriptionsFile, subscriptions);
   res.json(newSub);
 });
 
