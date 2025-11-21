@@ -246,15 +246,90 @@ app.post('/api/debts', express.json(), (req, res) => {
 
 app.get('/api/debts', (req, res) => res.json(debts));
 
-app.post('/api/payoff-strategy', express.json(), (req, res) => {
-  const { strategy } = req.body;
+function calculateDebtPayoff(debtList, strategy, extraPayment = 0) {
+  const debts = JSON.parse(JSON.stringify(debtList));
+  let totalPaid = 0, totalInterest = 0, months = 0;
+  const timeline = [];
+  
   if (strategy === 'avalanche') {
-    const sorted = [...debts].sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
-    res.json({ strategy: 'Avalanche', debts: sorted, recommendation: 'Pay off highest interest debt first' });
+    debts.sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
   } else {
-    const sorted = [...debts].sort((a, b) => a.balance - b.balance);
-    res.json({ strategy: 'Snowball', debts: sorted, recommendation: 'Pay off smallest balance first' });
+    debts.sort((a, b) => a.balance - b.balance);
   }
+
+  while (debts.some(d => d.balance > 0) && months < 600) {
+    let monthPayment = extraPayment;
+    debts.forEach(d => {
+      if (d.balance > 0) {
+        const minPay = d.minPayment || 50;
+        monthPayment += minPay;
+      }
+    });
+
+    let paid = 0;
+    for (let d of debts) {
+      if (d.balance <= 0) continue;
+      const minPay = d.minPayment || 50;
+      const interest = (d.balance * (d.interestRate || 0)) / 100 / 12;
+      d.balance += interest;
+      totalInterest += interest;
+
+      if (d === debts[0] && monthPayment > 0) {
+        d.balance -= Math.min(monthPayment, d.balance);
+        paid = Math.min(monthPayment, d.balance + interest);
+        totalPaid += paid;
+      } else if (d.balance > 0) {
+        d.balance -= minPay;
+        totalPaid += minPay;
+      }
+    }
+
+    months++;
+    if (months <= 12 || months % 6 === 0 || debts.some(d => d.balance <= 0)) {
+      timeline.push({
+        month: months,
+        totalBalance: debts.reduce((s, d) => s + Math.max(0, d.balance), 0),
+        totalInterest: totalInterest,
+        debtsPaid: debts.filter(d => d.balance <= 0).length
+      });
+    }
+  }
+
+  const totalBalance = debts.reduce((s, d) => s + d.balance, 0);
+  return {
+    months,
+    totalInterest: Math.round(totalInterest),
+    totalBalance: Math.max(0, totalBalance),
+    payoffDate: new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    timeline,
+    debts: debts.map(d => ({ ...d, balance: Math.max(0, d.balance) }))
+  };
+}
+
+app.post('/api/payoff-strategy', express.json(), (req, res) => {
+  const { strategy, extraPayment } = req.body;
+  const extra = extraPayment || 0;
+  
+  const avalanche = calculateDebtPayoff(debts, 'avalanche', extra);
+  const snowball = calculateDebtPayoff(debts, 'snowball', extra);
+  
+  const selected = strategy === 'avalanche' ? avalanche : snowball;
+  const other = strategy === 'avalanche' ? snowball : avalanche;
+  
+  const interestSaved = other.totalInterest - selected.totalInterest;
+  const monthsSaved = other.months - selected.months;
+  
+  res.json({
+    strategy: strategy.toUpperCase(),
+    recommendation: strategy === 'avalanche' 
+      ? `Save $${interestSaved.toLocaleString()} and finish ${monthsSaved} months faster` 
+      : `Save $${interestSaved.toLocaleString()} and finish ${monthsSaved} months faster`,
+    payoff: selected,
+    comparison: {
+      avalanche: { months: avalanche.months, interest: avalanche.totalInterest },
+      snowball: { months: snowball.months, interest: snowball.totalInterest }
+    }
+  });
 });
 
 app.post('/api/subscriptions', express.json(), (req, res) => {
