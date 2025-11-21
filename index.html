@@ -337,7 +337,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, recurring, calendar, cashflow, velocity, alerts, insights] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -347,8 +347,7 @@
           fetch(API_URL + '/api/recurring-calendar').then(r => r.json()),
           fetch(API_URL + '/api/cash-flow').then(r => r.json()),
           fetch(API_URL + '/api/spending-velocity').then(r => r.json()),
-          fetch(API_URL + '/api/alerts').then(r => r.json()),
-          fetch(API_URL + '/api/insights').then(r => r.json())
+          fetch(API_URL + '/api/alerts').then(r => r.json())
         ]);
 
         displayTransactions(txns);
@@ -362,6 +361,7 @@
 
         displayCategories(cats);
         displayDebts(debts);
+        const recurring = Array.isArray(insights.recurringTransactions) ? insights.recurringTransactions : [];
         displayRecurring(recurring.filter(r => r.isRecurring));
         displayVelocity(velocity);
         displayUpcomingBills(calendar);
