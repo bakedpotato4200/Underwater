@@ -2,12 +2,26 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-const upload = multer({ dest: 'uploads/' });
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({ dest: uploadDir });
 
 // In-memory data storage
 let transactions = [];
@@ -17,16 +31,32 @@ let subscriptions = [];
 
 // Parse transactions from uploaded PDF (simulated)
 app.post('/api/upload-statement', upload.single('file'), (req, res) => {
-  const mockTransactions = [
-    { id: 1, date: '2025-11-15', amount: -50, category: 'Food & Dining', description: 'Starbucks', type: 'expense' },
-    { id: 2, date: '2025-11-14', amount: -120, category: 'Groceries', description: 'Whole Foods', type: 'expense' },
-    { id: 3, date: '2025-11-13', amount: -25, category: 'Entertainment', description: 'Netflix', type: 'subscription' },
-    { id: 4, date: '2025-11-12', amount: 5000, category: 'Income', description: 'Salary', type: 'income' },
-    { id: 5, date: '2025-11-10', amount: -200, category: 'Utilities', description: 'Electric Bill', type: 'expense' },
-    { id: 6, date: '2025-11-08', amount: -75, category: 'Transportation', description: 'Gas', type: 'expense' },
-  ];
-  transactions = mockTransactions;
-  res.json({ success: true, transactions: transactions.length });
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    // Simulate PDF parsing - in production, use pdf-parse
+    const mockTransactions = [
+      { id: 1, date: '2025-11-15', amount: -50, category: 'Food & Dining', description: 'Starbucks', type: 'expense' },
+      { id: 2, date: '2025-11-14', amount: -120, category: 'Groceries', description: 'Whole Foods', type: 'expense' },
+      { id: 3, date: '2025-11-13', amount: -25, category: 'Entertainment', description: 'Netflix', type: 'subscription' },
+      { id: 4, date: '2025-11-12', amount: 5000, category: 'Income', description: 'Salary', type: 'income' },
+      { id: 5, date: '2025-11-10', amount: -200, category: 'Utilities', description: 'Electric Bill', type: 'expense' },
+      { id: 6, date: '2025-11-08', amount: -75, category: 'Transportation', description: 'Gas', type: 'expense' },
+    ];
+    transactions = mockTransactions;
+    
+    // Clean up uploaded file
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error('Error deleting file:', err);
+    });
+    
+    res.json({ success: true, transactions: transactions.length });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Upload failed' });
+  }
 });
 
 // Get all transactions
