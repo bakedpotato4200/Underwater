@@ -1635,7 +1635,7 @@
         const largeArc = sliceAngle > 180 ? 1 : 0;
         const path = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 
-        slices += `<path d="${path}" fill="${colors[cat] || '#0071e3'}" stroke="white" stroke-width="2" style="cursor: pointer;" title="${cat}: $${val.toFixed(0)} (${(val/total*100).toFixed(1)}%)"></path>`;
+        slices += `<path d="${path}" fill="${colors[cat] || '#0071e3'}" stroke="white" stroke-width="2" title="${cat}: $${val.toFixed(0)} (${(val/total*100).toFixed(1)}%)"></path>`;
         currentAngle = endAngle;
       });
 
