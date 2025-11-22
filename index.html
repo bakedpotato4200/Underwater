@@ -453,9 +453,6 @@
             <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white;">Delete Selected</button>
             <span id="selectedCount" style="font-size: 13px; color: #86868b; align-self: center;"></span>
           </div>
-          <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
-            <button class="btn btn-secondary" onclick="deduplicateTransactions()" style="background: #f0f3ff; color: #0071e3;">Remove Duplicates</button>
-          </div>
           <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
             <div class="loading">No transactions</div>
           </div>
@@ -1016,28 +1013,6 @@
       
       await loadTransactions();
       document.getElementById('selectAllTxns').checked = false;
-    }
-
-    async function deduplicateTransactions() {
-      if (!confirm('Remove duplicate transactions? Only one copy of each duplicate will be kept.')) return;
-      try {
-        const res = await fetch(API_URL + '/api/deduplicate-transactions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({})
-        });
-        const data = await res.json();
-        console.log('Deduplicate response:', data);
-        if (data.removed > 0) {
-          alert(`Removed ${data.removed} duplicate transaction(s)!`);
-        } else {
-          alert('No duplicates found.');
-        }
-        loadData();
-      } catch (e) {
-        console.error('Deduplicate error:', e);
-        alert('Error removing duplicates: ' + e.message);
-      }
     }
 
     async function bulkDeleteTransactions() {
