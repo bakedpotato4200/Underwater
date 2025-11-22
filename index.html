@@ -1581,6 +1581,7 @@
             <button class="btn btn-secondary" onclick="document.getElementById('categoryModal').remove();" style="width: 100%;">Cancel</button>
           </div>
         `;
+        newModal.innerHTML = html;
         document.body.appendChild(newModal);
         setTimeout(() => document.getElementById('customCategory').focus(), 100);
       }
