@@ -874,15 +874,18 @@
       const sortBy = document.getElementById('sortBy').value;
       currentSortBy = sortBy;
       const now = new Date();
-      const items = Array.from(document.querySelectorAll('#fullTransactionsList .transaction-item'));
+      const allItems = Array.from(document.querySelectorAll('#fullTransactionsList .transaction-item'));
       
-      // Apply filters
-      items.forEach(item => {
-        const dateStr = item.getAttribute('data-date');
-        const type = item.getAttribute('data-type');
-        if (!dateStr || !type) return;
-        
-        const itemDate = new Date(dateStr);
+      // Get all transaction data from items still in DOM
+      let filteredTransactions = allItems.map(item => ({
+        html: item.outerHTML,
+        dateStr: item.getAttribute('data-date'),
+        type: item.getAttribute('data-type'),
+        amount: parseFloat(item.getAttribute('data-amount') || 0),
+        category: item.getAttribute('data-category'),
+        text: item.textContent.toLowerCase()
+      })).filter(t => {
+        const itemDate = new Date(t.dateStr);
         let showDate = false;
         
         if (currentDateFilter === 'all') showDate = true;
@@ -891,61 +894,49 @@
         else if (currentDateFilter === '3months') showDate = (now - itemDate) / (1000*60*60*24) <= 90;
         else if (currentDateFilter === 'year') showDate = itemDate.getFullYear() === now.getFullYear();
         
-        const showType = currentTypeFilter === 'all' || type === currentTypeFilter;
-        const showSearch = item.textContent.toLowerCase().includes(search);
+        const showType = currentTypeFilter === 'all' || t.type === currentTypeFilter;
+        const showSearch = search === '' || t.text.includes(search);
         
-        item.style.display = (showDate && showType && showSearch) ? 'flex' : 'none';
+        return showDate && showType && showSearch;
       });
       
-      // Apply sorting
-      const visibleItems = items.filter(item => item.style.display === 'flex');
-      visibleItems.sort((a, b) => {
-        const aAmount = parseFloat(a.getAttribute('data-amount') || 0);
-        const bAmount = parseFloat(b.getAttribute('data-amount') || 0);
-        const aDate = new Date(a.getAttribute('data-date'));
-        const bDate = new Date(b.getAttribute('data-date'));
-        const aCategory = a.getAttribute('data-category') || '';
-        const bCategory = b.getAttribute('data-category') || '';
+      // Sort
+      filteredTransactions.sort((a, b) => {
+        const aDate = new Date(a.dateStr);
+        const bDate = new Date(b.dateStr);
         
         if (sortBy === 'date-desc') return bDate - aDate;
         if (sortBy === 'date-asc') return aDate - bDate;
-        if (sortBy === 'amount-desc') return Math.abs(bAmount) - Math.abs(aAmount);
-        if (sortBy === 'amount-asc') return Math.abs(aAmount) - Math.abs(bAmount);
-        if (sortBy === 'category') return aCategory.localeCompare(bCategory);
+        if (sortBy === 'amount-desc') return Math.abs(b.amount) - Math.abs(a.amount);
+        if (sortBy === 'amount-asc') return Math.abs(a.amount) - Math.abs(b.amount);
+        if (sortBy === 'category') return a.category.localeCompare(b.category);
         return 0;
       });
       
-      const container = document.getElementById('fullTransactionsList');
+      // Group by month and rebuild HTML
       const monthSections = {};
-      
-      visibleItems.forEach(item => {
-        const dateStr = item.getAttribute('data-date');
-        const [year, month] = dateStr.split('-');
+      filteredTransactions.forEach(t => {
+        const [year, month] = t.dateStr.split('-');
         const monthKey = `${year}-${month}`;
         if (!monthSections[monthKey]) monthSections[monthKey] = [];
-        monthSections[monthKey].push(item);
+        monthSections[monthKey].push(t.html);
       });
       
-      container.innerHTML = '';
+      let html = '';
       const sortedMonths = Object.keys(monthSections).sort((a, b) => new Date(b) - new Date(a));
       
       sortedMonths.forEach(monthKey => {
         const [year, month] = monthKey.split('-');
         const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-        const monthDiv = document.createElement('div');
-        monthDiv.style.marginBottom = '16px';
-        
-        const headerDiv = document.createElement('div');
-        headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;';
-        headerDiv.innerHTML = `<div>${monthName}</div>`;
-        monthDiv.appendChild(headerDiv);
-        
-        const itemsContainer = document.createElement('div');
-        monthSections[monthKey].forEach(item => itemsContainer.appendChild(item));
-        monthDiv.appendChild(itemsContainer);
-        
-        container.appendChild(monthDiv);
+        html += `<div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
+            <div>${monthName}</div>
+          </div>
+          ${monthSections[monthKey].join('')}
+        </div>`;
       });
+      
+      document.getElementById('fullTransactionsList').innerHTML = html;
     }
     
     function getCategoryColor(category) {
