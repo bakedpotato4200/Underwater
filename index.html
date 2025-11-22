@@ -185,7 +185,7 @@
     .cat-badge { display: inline-block; padding: 5px 12px; border-radius: 22px; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
     .cat-income { background: #d4edda; color: #155724; }
     .cat-utilities { background: #cfe2ff; color: #084298; }
-    .cat-food { background: #fff3cd; color: #664d03; }
+    .cat-food { background: var(--bg-secondary); color: #664d03; }
     .cat-groceries { background: #d1e7dd; color: #0f5132; }
     .cat-transportation { background: #f8d7da; color: #842029; }
     .cat-entertainment { background: #e2e3e5; color: #383d41; }
@@ -567,7 +567,7 @@
           </div>
           
           <!-- Bulk Actions -->
-          <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107; align-items: center; flex-wrap: wrap;">
+          <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid #ffc107; align-items: center; flex-wrap: wrap;">
             <span id="selectedCount" style="font-size: 13px; font-weight: 600; color: var(--text-primary);"></span>
             <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="background: #e8f4f8; color: #0071e3; font-size: 12px; padding: 6px 12px;">Mark as Ignore</button>
             <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white; font-size: 12px; padding: 6px 12px;">Delete</button>
@@ -1655,7 +1655,7 @@
           html += '<div style="margin-bottom: 12px;"><div style="font-weight: 700; color: #ff3b30; margin-bottom: 8px; font-size: 12px; text-transform: uppercase;">Expenses</div>';
           expenses.forEach(exp => {
             html += `
-              <div style="background: #fef2f2; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff3b30;">
+              <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff3b30;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div style="font-weight: 600; color: var(--text-primary);">${exp.merchant}</div>
                   <div style="font-weight: 700; color: #ff3b30; font-size: 14px;">-$${exp.amount.toFixed(2)}</div>
@@ -1673,7 +1673,7 @@
         let dayEndBalance = dayStartBalance + totalIncome - totalExpenses;
         
         if (isPastDate && currentBankBalance > 0) {
-          html = `<div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #ff9800; color: #856404;">
+          html = `<div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #ff9800; color: #856404;">
             <strong>📅 Historical Date</strong><br>
             <span style="font-size: 12px;">This is a past transaction. The balance shown below is your current balance with today's bills/income applied.</span>
           </div>` + html;
@@ -1683,18 +1683,18 @@
         html += `
           <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid #0071e3;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: var(--text-secondary);">Starting Balance:</span>
-              <span style="font-weight: 600;">$${dayStartBalance.toFixed(2)}</span>
+              <span style="color: var(--text-primary); font-weight: 600;">Starting Balance:</span>
+              <span style="font-weight: 600; color: var(--text-primary);">$${dayStartBalance.toFixed(2)}</span>
             </div>
             ${totalIncome > 0 ? `
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #34c759;">+ Income:</span>
+              <span style="color: #34c759; font-weight: 600;">+ Income:</span>
               <span style="font-weight: 600; color: #34c759;">+$${totalIncome.toFixed(2)}</span>
             </div>
             ` : ''}
             ${totalExpenses > 0 ? `
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #ff3b30;">- Expenses:</span>
+              <span style="color: #ff3b30; font-weight: 600;">- Expenses:</span>
               <span style="font-weight: 600; color: #ff3b30;">-$${totalExpenses.toFixed(2)}</span>
             </div>
             ` : ''}
