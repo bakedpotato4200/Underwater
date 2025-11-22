@@ -1709,18 +1709,9 @@
           });
         }
         
-        // Reload all data and force UI refresh
-        console.log('Exclusion toggled, reloading data...');
-        await loadData();
-        
-        // Force re-render of transaction lists
-        const txnsList = document.getElementById('transactionsList');
-        if (txnsList) txnsList.innerHTML = txnsList.innerHTML;
-        
-        const fullList = document.getElementById('fullTransactionsList');
-        if (fullList) applyFilters();
-        
+        // Show success message then reload the page to display updated data
         showToast(result.excluded ? 'Transaction excluded' : 'Transaction included', 'success');
+        setTimeout(() => location.reload(), 500);
       } catch (e) {
         console.error('Exclusion error:', e);
         showToast('Failed to exclude: ' + e.message, 'error');
