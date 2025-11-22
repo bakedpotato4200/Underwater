@@ -1691,11 +1691,14 @@
         const txn = allTransactions.find(t => t.id == id);
         const currentlyExcluded = txn ? txn.excluded : false;
         
-        await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, {
+        const response = await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ learnRule: true })
         });
+        
+        if (!response.ok) throw new Error('Failed to toggle exclusion');
+        const result = await response.json();
         
         // Learn exclusion pattern when excluding a transaction
         if (txn && txn.description && !currentlyExcluded) {
@@ -1706,10 +1709,20 @@
           });
         }
         
-        // Immediately update the UI to show exclusion visual feedback
+        // Reload all data and force UI refresh
+        console.log('Exclusion toggled, reloading data...');
         await loadData();
-        showToast(currentlyExcluded ? 'Transaction included' : 'Transaction excluded', 'success');
+        
+        // Force re-render of transaction lists
+        const txnsList = document.getElementById('transactionsList');
+        if (txnsList) txnsList.innerHTML = txnsList.innerHTML;
+        
+        const fullList = document.getElementById('fullTransactionsList');
+        if (fullList) applyFilters();
+        
+        showToast(result.excluded ? 'Transaction excluded' : 'Transaction included', 'success');
       } catch (e) {
+        console.error('Exclusion error:', e);
         showToast('Failed to exclude: ' + e.message, 'error');
       }
     }
