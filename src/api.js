@@ -945,6 +945,12 @@ app.post('/api/bank-balance', express.json(), (req, res) => {
   res.json(bankBalance);
 });
 
+app.delete('/api/bank-balance', (req, res) => {
+  bankBalance = {};
+  saveData(bankBalanceFile, bankBalance);
+  res.json({ success: true });
+});
+
 // Learning endpoints
 app.get('/api/learned-patterns', (req, res) => {
   res.json(learnedPatterns);

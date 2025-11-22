@@ -274,6 +274,8 @@
             <label style="font-size: 12px; font-weight: 600; color: #666;">Bank Balance:</label>
             <input type="number" id="bankBalanceInput" placeholder="0.00" step="0.01" style="width: 120px; padding: 8px 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; font-weight: 600;">
             <button class="btn btn-secondary" onclick="saveBankBalance()" style="padding: 8px 12px; font-size: 12px;">Set</button>
+            <span id="bankBalanceDisplay" style="font-size: 12px; font-weight: 600; color: #0071e3; min-width: 80px; text-align: center;">—</span>
+            <button class="btn btn-secondary" onclick="clearBankBalance()" style="padding: 8px 12px; font-size: 12px; background: #f0f0f0; color: #666;">Clear</button>
           </div>
         </div>
       </div>
@@ -2685,7 +2687,7 @@
 
     async function saveBankBalance() {
       const balance = parseFloat(document.getElementById('bankBalanceInput').value);
-      if (isNaN(balance) || balance < 0) {
+      if (isNaN(balance)) {
         showToast('Please enter a valid balance', 'warning');
         return;
       }
@@ -2699,6 +2701,33 @@
         loadData();
       } catch (e) {
         showToast('Error saving balance: ' + e.message, 'error');
+      }
+    }
+
+    async function clearBankBalance() {
+      if (!confirm('Clear the saved bank balance? This will use calculated balance instead.')) return;
+      try {
+        await fetch(API_URL + '/api/bank-balance', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        showToast('Bank balance cleared!', 'success');
+        document.getElementById('bankBalanceInput').value = '';
+        document.getElementById('bankBalanceDisplay').textContent = '—';
+        loadData();
+      } catch (e) {
+        showToast('Error clearing balance: ' + e.message, 'error');
+      }
+    }
+
+    function updateBankBalanceDisplay(balance) {
+      const display = document.getElementById('bankBalanceDisplay');
+      if (balance && balance.balance) {
+        display.textContent = `$${parseFloat(balance.balance).toFixed(2)}`;
+        document.getElementById('bankBalanceInput').value = parseFloat(balance.balance).toFixed(2);
+      } else {
+        display.textContent = '—';
+        document.getElementById('bankBalanceInput').value = '';
       }
     }
 
