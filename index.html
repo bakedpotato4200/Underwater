@@ -388,9 +388,9 @@
               <span style="font-size: 13px; color: #000;">Select All</span>
             </label>
           </div>
-          <div style="display: flex; gap: 8px; margin-bottom: 12px;" id="bulkActionsContainer" style="display: none;">
-            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="display: none;">Ignore Selected</button>
-            <button class="btn" style="background: #ff3b30; color: white;" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="display: none;">Delete Selected</button>
+          <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()">Ignore Selected</button>
+            <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white;">Delete Selected</button>
             <span id="selectedCount" style="font-size: 13px; color: #86868b; align-self: center;"></span>
           </div>
           <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
@@ -709,18 +709,12 @@
       const checkboxes = document.querySelectorAll('.txn-checkbox:checked');
       const bulkActionsContainer = document.getElementById('bulkActionsContainer');
       const selectedCount = document.getElementById('selectedCount');
-      const bulkIgnoreBtn = document.getElementById('bulkIgnoreBtn');
-      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
       
       if (checkboxes.length > 0) {
         bulkActionsContainer.style.display = 'flex';
-        bulkIgnoreBtn.style.display = 'block';
-        bulkDeleteBtn.style.display = 'block';
         selectedCount.textContent = `${checkboxes.length} selected`;
       } else {
         bulkActionsContainer.style.display = 'none';
-        bulkIgnoreBtn.style.display = 'none';
-        bulkDeleteBtn.style.display = 'none';
         selectedCount.textContent = '';
         document.getElementById('selectAllTxns').checked = false;
       }
