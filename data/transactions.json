@@ -6,7 +6,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 2,
