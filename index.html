@@ -641,21 +641,23 @@
   <!-- Day Bills Modal -->
   <div id="dayBillsModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header" id="dayBillsHeader">Bills for Today</div>
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <span id="dayBillsHeader">Bills for Today</span>
+        <button onclick="closeModal('dayBillsModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #86868b; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">✕</button>
+      </div>
       <div id="dayBillsContent" style="margin-bottom: 20px;"></div>
-      <button class="btn btn-secondary" onclick="closeModal('dayBillsModal')" style="width: 100%;">Close</button>
     </div>
   </div>
 
   <!-- Category Transactions Modal -->
   <div id="categoryTransactionsModal" class="modal">
     <div class="modal-content" style="max-width: 700px; max-height: 85vh;">
-      <div class="modal-header" id="categoryModalTitle">Category Transactions</div>
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <span id="categoryModalTitle">Category Transactions</span>
+        <button onclick="closeModal('categoryTransactionsModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #86868b; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">✕</button>
+      </div>
       <div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;">
         <div class="loading">Loading transactions...</div>
-      </div>
-      <div class="action-buttons">
-        <button class="btn btn-secondary" onclick="closeModal('categoryTransactionsModal')" style="flex: 1;">Close</button>
       </div>
     </div>
   </div>
