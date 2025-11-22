@@ -20,7 +20,7 @@
       --text-primary: #000;
       --text-secondary: #666;
       --text-tertiary: #999;
-      --border-color: #e5e5e7;
+      --border-color: var(--text-secondary);
       --card-shadow: rgba(0,0,0,0.06);
       --hover-shadow: rgba(0,0,0,0.12);
     }
@@ -76,7 +76,7 @@
       background: linear-gradient(135deg, var(--bg-tertiary) 0%, transparent 100%);
       transition: background 0.3s, border 0.3s;
     }
-    .sidebar-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; transition: all 0.2s; }
+    .sidebar-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; }
     .sidebar-close:hover { color: #0071e3; transform: rotate(90deg); }
     .nav-tabs { display: flex; flex-direction: column; gap: 4px; padding: 12px; }
     .nav-tabs button { 
@@ -132,7 +132,7 @@
     .alert-banner.success { border-left-color: #34c759; background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); }
     .alert-banner.info { border-left-color: #0071e3; background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); }
     .alert-banner strong { color: var(--text-primary); font-size: 13px; font-weight: 700; }
-    .alert-banner p { color: #666; font-size: 12px; margin: 0; }
+    .alert-banner p { color: var(--text-secondary); font-size: 12px; margin: 0; }
     
     /* Stats */
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-top: 24px; }
@@ -224,20 +224,20 @@
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; margin-bottom: 10px; color: var(--text-primary); font-weight: 700; font-size: 13px; letter-spacing: -0.2px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1.5px solid #d5d5d7; border-radius: 10px; font-size: 13px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: inherit; }
-    .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: #ccc; }
+    .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: var(--text-secondary); }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
     .action-buttons { display: flex; gap: 10px; margin-top: 28px; }
     .action-buttons button { flex: 1; }
     
     /* Utility */
-    .loading { color: #999; text-align: center; padding: 28px 20px; font-size: 13px; animation: pulse 2.5s ease-in-out infinite; }
+    .loading { color: var(--text-secondary); text-align: center; padding: 28px 20px; font-size: 13px; animation: pulse 2.5s ease-in-out infinite; }
     .search-box { width: 100%; padding: 11px 15px; border: 1.5px solid #d5d5d7; border-radius: 10px; margin-bottom: 14px; font-size: 13px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: inherit; }
-    .search-box:hover { border-color: #ccc; }
+    .search-box:hover { border-color: var(--text-secondary); }
     .search-box:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
     .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #0071e3; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .insight-box:hover { border-color: #0071e3; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
     .insight-box strong { color: var(--text-primary); font-size: 13px; font-weight: 700; }
-    .insight-box span { color: #666; font-size: 12px; display: block; margin-top: 6px; }
+    .insight-box span { color: var(--text-secondary); font-size: 12px; display: block; margin-top: 6px; }
     
     @media (max-width: 768px) {
       .sidebar { width: 240px; }
@@ -431,15 +431,15 @@
               <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">📊 Monthly Cash Flow</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div style="background: #f0f7ff; padding: 12px; border-radius: 8px; border-left: 3px solid #34c759;">
-                  <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Income</div>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Income</div>
                   <div style="font-size: 18px; font-weight: 700; color: #34c759;" id="insightIncome">$0</div>
                 </div>
                 <div style="background: #fff5f5; padding: 12px; border-radius: 8px; border-left: 3px solid #ff3b30;">
-                  <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Expenses</div>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Expenses</div>
                   <div style="font-size: 18px; font-weight: 700; color: #ff3b30;" id="insightExpenses">$0</div>
                 </div>
                 <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border-left: 3px solid #34c759; grid-column: 1/-1;">
-                  <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Leftover</div>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Leftover</div>
                   <div style="font-size: 20px; font-weight: 700; color: #34c759;" id="insightLeftover">$0</div>
                 </div>
               </div>
@@ -449,15 +449,15 @@
               <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">🎯 Spending Velocity</h3>
               <div style="display: grid; gap: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
-                  <span style="font-size: 12px; color: #666;">Daily Average</span>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Daily Average</span>
                   <span style="font-weight: 700; font-size: 14px; color: #0071e3;" id="velocityDaily">$0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
-                  <span style="font-size: 12px; color: #666;">7-Day Total</span>
+                  <span style="font-size: 12px; color: var(--text-secondary);">7-Day Total</span>
                   <span style="font-weight: 700; font-size: 14px; color: #0071e3;" id="velocityWeekly">$0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
-                  <span style="font-size: 12px; color: #666;">30-Day Total</span>
+                  <span style="font-size: 12px; color: var(--text-secondary);">30-Day Total</span>
                   <span style="font-weight: 700; font-size: 14px; color: #0071e3;" id="velocityMonthly">$0</span>
                 </div>
               </div>
@@ -603,7 +603,7 @@
         <label>PDF File</label>
         <input type="file" id="pdfFile" accept=".pdf">
       </div>
-      <p style="color: #86868b; font-size: 12px; margin-bottom: 12px;">Supports Capital One 360 statements</p>
+      <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">Supports Capital One 360 statements</p>
       <div class="action-buttons">
         <button class="btn btn-primary" onclick="uploadStatement(event)">Upload</button>
         <button class="btn btn-secondary" onclick="closeModal('uploadModal')">Cancel</button>
@@ -723,7 +723,7 @@
     <div class="modal-content">
       <div class="modal-header">Make This a Recurring Bill</div>
       <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0071e3;">
-        <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Transaction:</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Transaction:</div>
         <div id="recurringTxnPreview" style="font-weight: 600; color: #0071e3; font-size: 14px;">—</div>
       </div>
       <div class="form-group">
@@ -780,7 +780,7 @@
       
       <!-- Your Recurring Transactions -->
       <div style="margin-top: 16px;">
-        <div style="font-size: 12px; font-weight: 700; color: #666; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Your Recurring Transactions</div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Your Recurring Transactions</div>
         <div id="recurringBillsList" style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid #e5e5e7; min-height: 100px;">
           <div class="loading">No recurring transactions added yet</div>
         </div>
@@ -789,11 +789,11 @@
       <!-- Summary -->
       <div id="recurringBillsStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e5e7;">
         <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; text-align: center;">
-          <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Monthly Total</div>
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Monthly Total</div>
           <div id="monthlyTotal" style="font-size: 18px; font-weight: 700; color: #0071e3;">$0</div>
         </div>
         <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; text-align: center;">
-          <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Next 30 Days</div>
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Next 30 Days</div>
           <div id="nextDaysTotal" style="font-size: 18px; font-weight: 700; color: #0071e3;">$0</div>
         </div>
       </div>
@@ -822,7 +822,7 @@
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
         <span id="dayBillsHeader">Bills for Today</span>
-        <button onclick="closeModal('dayBillsModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #86868b; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">✕</button>
+        <button onclick="closeModal('dayBillsModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">✕</button>
       </div>
       <div id="dayBillsContent" style="margin-bottom: 20px;"></div>
     </div>
@@ -833,7 +833,7 @@
     <div class="modal-content" style="max-width: 700px; max-height: 85vh;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
         <span id="categoryModalTitle">Category Transactions</span>
-        <button onclick="closeModal('categoryTransactionsModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #86868b; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">✕</button>
+        <button onclick="closeModal('categoryTransactionsModal')" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary); padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">✕</button>
       </div>
       <div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;">
         <div class="loading">Loading transactions...</div>
@@ -1022,7 +1022,7 @@
           <div style="flex: 1;">
             <div class="transaction-date">${t.date}</div>
             <div class="transaction-desc">${t.description}</div>
-            <span style="font-size: 11px; color: #86868b;">${t.category}</span>
+            <span style="font-size: 11px; color: var(--text-secondary);">${t.category}</span>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
             <div class="transaction-amount ${t.type}">
@@ -1037,14 +1037,14 @@
       if (excluded.length > 0) {
         fullHtml += `
           <li style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #e5e5e7; list-style: none;">
-            <button onclick="document.getElementById('excludedTransactionsRecent').style.display = document.getElementById('excludedTransactionsRecent').style.display === 'none' ? 'block' : 'none'; this.textContent = document.getElementById('excludedTransactionsRecent').style.display === 'none' ? '▶ Excluded (' + ${excluded.length} + ')' : '▼ Excluded (' + ${excluded.length} + ')'" style="background: none; border: none; color: #86868b; font-weight: 600; cursor: pointer; padding: 0; font-size: 13px;">▶ Excluded (${excluded.length})</button>
+            <button onclick="document.getElementById('excludedTransactionsRecent').style.display = document.getElementById('excludedTransactionsRecent').style.display === 'none' ? 'block' : 'none'; this.textContent = document.getElementById('excludedTransactionsRecent').style.display === 'none' ? '▶ Excluded (' + ${excluded.length} + ')' : '▼ Excluded (' + ${excluded.length} + ')'" style="background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; padding: 0; font-size: 13px;">▶ Excluded (${excluded.length})</button>
             <div id="excludedTransactionsRecent" style="display: none; margin-top: 12px;">
               ${excluded.slice(0, 20).map(t => `
-                <div class="transaction-item" style="opacity: 0.6; text-decoration: line-through; color: #86868b;">
+                <div class="transaction-item" style="opacity: 0.6; text-decoration: line-through; color: var(--text-secondary);">
                   <div style="flex: 1;">
                     <div class="transaction-date">${t.date}</div>
                     <div class="transaction-desc">${t.description}</div>
-                    <span style="font-size: 11px; color: #86868b;">${t.category}</span>
+                    <span style="font-size: 11px; color: var(--text-secondary);">${t.category}</span>
                   </div>
                   <div style="display: flex; gap: 8px; align-items: center;">
                     <div class="transaction-amount ${t.type}">
@@ -1246,10 +1246,10 @@
         if (excludedMonth.length > 0) {
           fullHtml += `
             <div style="margin-top: 12px; padding: 8px; border-top: 1px dashed #d5d5d7;">
-              <button onclick="const el = this.nextElementSibling; el.style.display = el.style.display === 'none' ? 'block' : 'none'; this.textContent = el.style.display === 'none' ? '▶ Excluded (' + ${excludedMonth.length} + ')' : '▼ Excluded (' + ${excludedMonth.length} + ')'" style="background: none; border: none; color: #86868b; font-weight: 600; cursor: pointer; padding: 0; font-size: 12px;">▶ Excluded (${excludedMonth.length})</button>
+              <button onclick="const el = this.nextElementSibling; el.style.display = el.style.display === 'none' ? 'block' : 'none'; this.textContent = el.style.display === 'none' ? '▶ Excluded (' + ${excludedMonth.length} + ')' : '▼ Excluded (' + ${excludedMonth.length} + ')'" style="background: none; border: none; color: var(--text-secondary); font-weight: 600; cursor: pointer; padding: 0; font-size: 12px;">▶ Excluded (${excludedMonth.length})</button>
               <div style="display: none; margin-top: 8px;">
                 ${excludedMonth.map(t => `
-                  <li class="transaction-item" style="opacity: 0.5; text-decoration: line-through; color: #86868b; margin-bottom: 6px;">
+                  <li class="transaction-item" style="opacity: 0.5; text-decoration: line-through; color: var(--text-secondary); margin-bottom: 6px;">
                     <div style="flex: 1;">
                       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                         <div class="transaction-desc">${t.description}</div>
@@ -1496,7 +1496,7 @@
       let resultsHtml = `
         <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #0071e3;">
           <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">With Current Payment ($${minPayment.toFixed(2)}/mo)</div>
-          <div style="font-size: 13px; color: #666;">
+          <div style="font-size: 13px; color: var(--text-secondary);">
             <div>⏱️ ${current.months > 0 ? `${current.years} years (${current.months} months)` : 'Could not calculate'}</div>
             <div>💰 Total Interest: $${current.totalInterest}</div>
           </div>
@@ -1593,7 +1593,7 @@
       
       bills.sort((a, b) => new Date(a.date) - new Date(b.date));
       list.innerHTML = bills.slice(0, 10).length === 0 
-        ? '<div style="text-align: center; padding: 20px; color: #86868b; font-size: 13px;">No upcoming bills added<br><span style="font-size: 12px;">Right-click a transaction to make it recurring</span></div>'
+        ? '<div style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 13px;">No upcoming bills added<br><span style="font-size: 12px;">Right-click a transaction to make it recurring</span></div>'
         : bills.slice(0, 10).map(b => `
         <div class="bill-item">
           <div>
@@ -1632,7 +1632,7 @@
       
       let html = '';
       if (items.length === 0) {
-        html = '<div style="text-align: center; padding: 20px; color: #86868b;">No transactions on this day</div>';
+        html = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">No transactions on this day</div>';
       } else {
         // Show income
         if (income.length > 0) {
@@ -1683,7 +1683,7 @@
         html += `
           <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid #0071e3;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #666;">Starting Balance:</span>
+              <span style="color: var(--text-secondary);">Starting Balance:</span>
               <span style="font-weight: 600;">$${dayStartBalance.toFixed(2)}</span>
             </div>
             ${totalIncome > 0 ? `
@@ -1811,23 +1811,23 @@
       const projectionHtml = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid #e5e5e7;">
           <div style="text-align: center;">
-            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">7 Days</div>
+            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">7 Days</div>
             <div style="font-size: 18px; font-weight: 800; color: #34c759;">$${getBalanceAfter(7).toFixed(0)}</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">14 Days</div>
+            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">14 Days</div>
             <div style="font-size: 18px; font-weight: 800; color: #34c759;">$${getBalanceAfter(14).toFixed(0)}</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">30 Days</div>
+            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">30 Days</div>
             <div style="font-size: 18px; font-weight: 800; color: #34c759;">$${getBalanceAfter(30).toFixed(0)}</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">60 Days</div>
+            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">60 Days</div>
             <div style="font-size: 18px; font-weight: 800; color: ${getBalanceAfter(60) > 0 ? '#34c759' : '#ff3b30'};">$${getBalanceAfter(60).toFixed(0)}</div>
           </div>
           <div style="text-align: center;">
-            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">90 Days</div>
+            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px;">90 Days</div>
             <div style="font-size: 18px; font-weight: 800; color: ${getBalanceAfter(90) > 0 ? '#34c759' : '#ff3b30'};">$${getBalanceAfter(90).toFixed(0)}</div>
           </div>
         </div>
@@ -1846,7 +1846,7 @@
         return `<div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
           <div style="height: ${height}px; background: #0071e3; border-radius: 4px; width: 100%; margin-bottom: 8px;"></div>
           <div style="font-size: 12px; font-weight: 600; color: var(--text-primary);">$${(cf.balance / 1000).toFixed(1)}k</div>
-          <div style="font-size: 11px; color: #86868b;">${month}</div>
+          <div style="font-size: 11px; color: var(--text-secondary);">${month}</div>
         </div>`;
       }).join('');
     }
@@ -1886,31 +1886,31 @@
       if (billsCalc && billsCalc.requiredBalance) {
         bufferEl.innerHTML = `
           <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 8px; border-left: 4px solid #0071e3;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 6px; font-weight: 600;">Next 30 Days Bills</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Next 30 Days Bills</div>
             <div style="font-size: 20px; font-weight: 700; color: #0071e3;">$${billsCalc.totalBillsAmount?.toFixed(0) || 0}</div>
           </div>
           <div style="background: #fff4e6; padding: 16px; border-radius: 8px; border-left: 4px solid #ff9500;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 6px; font-weight: 600;">Safety Buffer (20%)</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Safety Buffer (20%)</div>
             <div style="font-size: 20px; font-weight: 700; color: #ff9500;">$${billsCalc.recommendedBuffer?.toFixed(0) || 0}</div>
           </div>
           <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; border-left: 4px solid #34c759; grid-column: 1/-1;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 6px; font-weight: 600;">Required Balance</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Required Balance</div>
             <div style="font-size: 24px; font-weight: 700; color: #34c759;">$${billsCalc.requiredBalance?.toFixed(0) || 0}</div>
           </div>
         `;
       } else {
-        bufferEl.innerHTML = '<div style="padding: 12px; color: #86868b; text-align: center;">No bills added yet</div>';
+        bufferEl.innerHTML = '<div style="padding: 12px; color: var(--text-secondary); text-align: center;">No bills added yet</div>';
       }
       
       // Smart Recommendations
       const recsEl = document.getElementById('smartRecsContainer');
       if (!insights.recommendations || insights.recommendations.length === 0) {
-        recsEl.innerHTML = '<div style="padding: 12px; color: #86868b; text-align: center;">Add debts or bills to get recommendations</div>';
+        recsEl.innerHTML = '<div style="padding: 12px; color: var(--text-secondary); text-align: center;">Add debts or bills to get recommendations</div>';
       } else {
         recsEl.innerHTML = insights.recommendations.map((r, i) => `
           <div style="padding: 14px; background: ${i % 2 === 0 ? '#f9fafb' : 'white'}; border-radius: 8px; border-left: 3px solid #0071e3;">
             <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 13px;">${r.title}</div>
-            <div style="font-size: 12px; color: #666; line-height: 1.5;">${r.desc}</div>
+            <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">${r.desc}</div>
           </div>
         `).join('');
       }
@@ -1924,17 +1924,17 @@
       
       let healthHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
       healthHtml += `<div style="background: ${categorizedPercent >= 95 ? '#f0fdf4' : categorizedPercent >= 80 ? '#fffbf0' : '#fff5f5'}; padding: 12px; border-radius: 8px; border-left: 3px solid ${categorizedPercent >= 95 ? '#34c759' : categorizedPercent >= 80 ? '#ff9500' : '#ff3b30'};">
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Categorized</div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Categorized</div>
         <div style="font-size: 18px; font-weight: 700; color: ${categorizedPercent >= 95 ? '#34c759' : categorizedPercent >= 80 ? '#ff9500' : '#ff3b30'};">${categorizedPercent}%</div>
       </div>`;
       healthHtml += `<div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border-left: 3px solid #0071e3;">
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Transactions</div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Transactions</div>
         <div style="font-size: 18px; font-weight: 700; color: #0071e3;">${total}</div>
       </div>`;
       healthHtml += '</div>';
       
       if (uncategorized > 0) {
-        healthHtml += `<div style="padding: 12px; background: #fffbf0; border-radius: 8px; border-left: 3px solid #ff9500; font-size: 12px; color: #666;">
+        healthHtml += `<div style="padding: 12px; background: #fffbf0; border-radius: 8px; border-left: 3px solid #ff9500; font-size: 12px; color: var(--text-secondary);">
           <strong>${uncategorized} transactions need categorization</strong> - visit Transactions tab to organize
         </div>`;
       }
@@ -2001,7 +2001,7 @@
       const trends = trendsData;
       const container = document.getElementById('trendsChart');
       if (!trends || Object.keys(trends).length === 0) {
-        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No trend data available</div>';
+        container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No trend data available</div>';
         return;
       }
 
@@ -2036,7 +2036,7 @@
       const categories = Array.from(new Set(Object.values(trends).flatMap(m => Object.keys(m || {}))));
       
       if (categories.length === 0) {
-        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No spending data available</div>';
+        container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No spending data available</div>';
         return;
       }
 
@@ -2125,7 +2125,7 @@
               <span style="font-size: 10px; font-weight: 600; color: var(--text-primary);">${cat}</span>
             </div>
             <div style="font-size: 12px; font-weight: 700; color: #0071e3; margin-bottom: 2px;">$${val.toFixed(0)}</div>
-            <div style="font-size: 9px; color: #86868b;">${percent}%</div>
+            <div style="font-size: 9px; color: var(--text-secondary);">${percent}%</div>
           </div>`;
         }).join('')}
       </div>`;
@@ -2136,7 +2136,7 @@
             ${consolidatedSelector}
           </div>
           <div style="background: var(--bg-primary); border: 1px solid #e5e5e7; border-radius: 12px; padding: 32px; text-align: center;">
-            <div style="font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${periodLabel} Breakdown</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${periodLabel} Breakdown</div>
             <div style="font-size: 32px; font-weight: 700; color: #0071e3; margin-bottom: 24px;">$${total.toFixed(0)}</div>
             <div style="display: flex; justify-content: center; margin-bottom: 24px;">
               <svg width="240" height="240" viewBox="0 0 200 200" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));">
@@ -2237,7 +2237,7 @@
           </div>`;
         
         months[monthKey].forEach(t => {
-          html += `<div style="padding: 12px; border-bottom: 1px solid #e5e5e7; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: var(--bg-primary); border-radius: 6px; opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}">
+          html += `<div style="padding: 12px; border-bottom: 1px solid #e5e5e7; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: var(--bg-primary); border-radius: 6px; opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: var(--text-secondary);' : ''}">
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                 <div style="font-weight: 600; color: inherit;">${t.description}</div>
@@ -2245,7 +2245,7 @@
                   ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
                 </div>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #999;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary);">
                 <span class="cat-badge ${getCategoryColor(t.category)}" style="font-size: 11px; padding: 4px 8px;">${t.category}</span>
                 <span>${t.date}</span>
               </div>
@@ -2533,7 +2533,7 @@
       
         let html = `<div style="background: var(--bg-primary); border-radius: 20px; padding: 24px; max-width: 380px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3); margin: auto; my-space: auto;">
           <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--text-primary); letter-spacing: -0.5px;">Select Category</div>
-          <div style="font-size: 12px; color: #999; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${txn.description}</div>`;
+          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${txn.description}</div>`;
         
         // Always show suggestion - more compact
         if (suggestedCat) {
@@ -2710,7 +2710,7 @@
           bulkModal.innerHTML = `
             <div style="background: var(--bg-primary); border-radius: 20px; padding: 32px; max-width: 480px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
               <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: var(--text-primary); letter-spacing: -0.5px;">Smart Category Update</div>
-              <div style="font-size: 13px; color: #999; margin-bottom: 20px;">Found ${matchingTxns.length} similar transaction${matchingTxns.length !== 1 ? 's' : ''}</div>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">Found ${matchingTxns.length} similar transaction${matchingTxns.length !== 1 ? 's' : ''}</div>
               
               <div style="margin-bottom: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -2723,7 +2723,7 @@
                       <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3; margin-top: 2px; flex-shrink: 0;" onchange="updateBulkCounter()">
                       <div style="flex: 1; min-width: 0;">
                         <div style="font-size: 12px; color: var(--text-primary); font-weight: 500; word-wrap: break-word; white-space: normal; line-height: 1.4;">${t.date} - ${t.description}</div>
-                        <div style="font-size: 11px; color: #999; margin-top: 4px;">Was: ${t.category}</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Was: ${t.category}</div>
                       </div>
                       <span style="font-weight: 600; color: #0071e3; font-size: 12px; flex-shrink: 0; margin-top: 2px;">$${Math.abs(t.amount).toFixed(2)}</span>
                     </label>
@@ -2796,7 +2796,7 @@
     function displayExclusionRules(rules) {
       const container = document.getElementById('exclusionRulesContainer');
       if (!Array.isArray(rules) || rules.length === 0) {
-        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No exclusion rules yet. Exclude transactions to create rules that auto-exclude similar ones.</div>';
+        container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No exclusion rules yet. Exclude transactions to create rules that auto-exclude similar ones.</div>';
         return;
       }
 
@@ -2804,7 +2804,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-primary); border: 1px solid #e5e5e7; border-radius: 6px; margin-bottom: 8px;">
           <div>
             <div style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${rule.pattern}</div>
-            <div style="font-size: 11px; color: #86868b; margin-top: 2px;">Auto-excludes by ${rule.type}</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Auto-excludes by ${rule.type}</div>
           </div>
           <button class="btn btn-small" style="background: #ff3b30; color: white; cursor: pointer;" onclick="removeExclusionRule(${idx})">Remove</button>
         </div>
@@ -2821,7 +2821,7 @@
     function displayBillBuffer(data) {
       const container = document.getElementById('billBufferContainer');
       if (!data || !data.nextBills || data.nextBills.length === 0) {
-        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No upcoming bills detected</div>';
+        container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No upcoming bills detected</div>';
         return;
       }
 
@@ -2853,12 +2853,12 @@
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px;">
           <div style="background: var(--bg-tertiary); border: 1px solid #0071e3; padding: 16px; border-radius: 8px;">
-            <div style="color: #86868b; font-size: 12px;">Total Bills</div>
+            <div style="color: var(--text-secondary); font-size: 12px;">Total Bills</div>
             <div style="font-size: 24px; font-weight: 700; color: #0071e3;">$${data.totalBillsAmount.toFixed(2)}</div>
           </div>
 
           <div style="background: var(--bg-tertiary); border: 1px solid #0071e3; padding: 16px; border-radius: 8px;">
-            <div style="color: #86868b; font-size: 12px;">Safety Buffer (20%)</div>
+            <div style="color: var(--text-secondary); font-size: 12px;">Safety Buffer (20%)</div>
             <div style="font-size: 24px; font-weight: 700; color: #0071e3;">$${data.recommendedBuffer.toFixed(2)}</div>
           </div>
 
@@ -3137,7 +3137,7 @@
     function displayBillsCalculator(calc) {
       const container = document.getElementById('billsCalculator');
       if (!calc || calc.paycheckAmount === null || calc.paycheckAmount === undefined || calc.paycheckAmount === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Add a paycheck in Manage Bills to see calculations</div>';
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Add a paycheck in Manage Bills to see calculations</div>';
         return;
       }
 
@@ -3151,31 +3151,31 @@
         const html = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 4px solid #34c759;">
-              <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Per Paycheck</div>
+              <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Per Paycheck</div>
               <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">$${paycheckAmt.toFixed(2)}</div>
-              <div style="font-size: 10px; color: #999; margin-top: 4px;">Every ${calc.paycheckFrequency} days</div>
+              <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">Every ${calc.paycheckFrequency} days</div>
             </div>
             <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 4px solid #ff9500;">
-              <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Monthly Bills</div>
+              <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Monthly Bills</div>
               <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">$${monthlyBills.toFixed(2)}</div>
-              <div style="font-size: 10px; color: #999; margin-top: 4px;">${paychecksPerMonth.toFixed(1)} paychecks/month</div>
+              <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">${paychecksPerMonth.toFixed(1)} paychecks/month</div>
             </div>
           </div>
 
           <div style="background: var(--bg-primary); padding: 14px; border-radius: 8px; border: 2px solid #0071e3; margin-bottom: 12px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
               <div>
-                <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">To Bills Account</div>
+                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">To Bills Account</div>
                 <div style="font-size: 20px; font-weight: 700; color: #ff3b30;">$${billsPerPaycheck.toFixed(2)}</div>
-                <div style="font-size: 10px; color: #999; margin-top: 4px;">per paycheck</div>
+                <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">per paycheck</div>
               </div>
               <div>
-                <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Spending Account</div>
+                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Spending Account</div>
                 <div style="font-size: 20px; font-weight: 700; color: #34c759;">$${spendingPerPaycheck.toFixed(2)}</div>
-                <div style="font-size: 10px; color: #999; margin-top: 4px;">leftover per paycheck</div>
+                <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">leftover per paycheck</div>
               </div>
             </div>
-            <div style="font-size: 12px; color: #666; background: #f0f7ff; padding: 10px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 12px; color: var(--text-secondary); background: #f0f7ff; padding: 10px; border-radius: 6px; text-align: center;">
               ✓ Transfer <strong>$${billsPerPaycheck.toFixed(2)}</strong> to bills account, keep <strong>$${spendingPerPaycheck.toFixed(2)}</strong> for spending
             </div>
           </div>
@@ -3183,7 +3183,7 @@
         container.innerHTML = html;
       } catch (e) {
         console.error('Error displaying bills calculator:', e);
-        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Error loading calculator</div>';
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Error loading calculator</div>';
       }
     }
 
@@ -3228,7 +3228,7 @@
             <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0071e3; display: flex; justify-content: space-between; align-items: center;">
               <div style="flex: 1;">
                 <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${b.name}</div>
-                <div style="font-size: 12px; color: #86868b;">${freqName} starting ${b.startDate}</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">${freqName} starting ${b.startDate}</div>
               </div>
               <div style="display: flex; gap: 12px; align-items: center;">
                 <div style="font-weight: 700; font-size: 16px; color: #0071e3; min-width: 60px; text-align: right;">$${b.amount.toFixed(2)}</div>
