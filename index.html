@@ -246,7 +246,6 @@
       <div class="header">
         <h1>Budget Tracker</h1>
         <p>AI-Powered Financial Intelligence</p>
-        <div id="alertsContainer" style="margin-top: 12px;"></div>
         <div class="stats">
           <div class="stat-card">
             <div class="stat-value" id="totalIncome">$0</div>
@@ -709,7 +708,6 @@
         ]);
 
         displayTransactions(txns);
-        displayAlerts(alerts);
         document.getElementById('totalIncome').textContent = '$' + summary.totalIncome.toLocaleString('en-US', {maximumFractionDigits: 0});
         document.getElementById('totalExpenses').textContent = '$' + summary.totalExpenses.toLocaleString('en-US', {maximumFractionDigits: 0});
         document.getElementById('netBalance').textContent = '$' + summary.balance.toLocaleString('en-US', {maximumFractionDigits: 0});
