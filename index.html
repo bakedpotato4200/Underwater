@@ -352,10 +352,36 @@
       </div>
 
       <div id="transactions" class="tab-content" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px;">
+          <div class="stat-card">
+            <div class="stat-value" id="txnTotalCount">0</div>
+            <div class="stat-label">Total Txns</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="txnTotalIncome">$0</div>
+            <div class="stat-label">Income</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="txnTotalExpenses">$0</div>
+            <div class="stat-label">Expenses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="txnNetBalance">$0</div>
+            <div class="stat-label">Net</div>
+          </div>
+        </div>
+
+        <div class="card full">
+          <h2>Spending by Category</h2>
+          <div id="categoryBreakdown" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; max-height: 250px; overflow-y: auto;">
+            <div class="loading">Loading category breakdown...</div>
+          </div>
+        </div>
+
         <div class="card full">
           <h2>All Transactions</h2>
-          <input type="text" class="search-box" id="searchBox" placeholder="Search transactions..." onkeyup="filterTransactions()">
-          <div id="fullTransactionsList" style="max-height: 700px; overflow-y: auto;">
+          <input type="text" class="search-box" id="searchBox" placeholder="Search by description, date, or amount..." onkeyup="filterTransactions()">
+          <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
             <div class="loading">No transactions</div>
           </div>
         </div>
@@ -548,6 +574,45 @@
     function displayTransactions(txns) {
       const list = document.getElementById('transactionsList');
       const fullList = document.getElementById('fullTransactionsList');
+      
+      // Update transaction page stats if container exists
+      const txnCount = document.getElementById('txnTotalCount');
+      if (txnCount) {
+        const activeTransactions = txns.filter(t => !t.excluded);
+        const totalIncome = activeTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const totalExpenses = Math.abs(activeTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0));
+        const netBalance = totalIncome - totalExpenses;
+        
+        document.getElementById('txnTotalCount').textContent = activeTransactions.length;
+        document.getElementById('txnTotalIncome').textContent = '$' + totalIncome.toLocaleString('en-US', {maximumFractionDigits: 0});
+        document.getElementById('txnTotalExpenses').textContent = '$' + totalExpenses.toLocaleString('en-US', {maximumFractionDigits: 0});
+        document.getElementById('txnNetBalance').textContent = (netBalance >= 0 ? '+' : '') + '$' + netBalance.toLocaleString('en-US', {maximumFractionDigits: 0});
+      }
+      
+      // Update category breakdown
+      const categoryContainer = document.getElementById('categoryBreakdown');
+      if (categoryContainer) {
+        const categories = {};
+        txns.filter(t => t.type === 'expense' && !t.excluded).forEach(t => {
+          categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
+        });
+        const sorted_cats = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+        const max_cat = Math.max(...sorted_cats.map(([_, v]) => v), 1);
+        
+        categoryContainer.innerHTML = sorted_cats.map(([cat, amount]) => {
+          const percent = (amount / max_cat) * 100;
+          return `
+            <div style="padding: 12px; background: #f9f9fb; border-radius: 10px; border: 1px solid #e5e5e7;">
+              <div style="font-weight: 600; font-size: 13px; color: #000; margin-bottom: 8px;">${cat}</div>
+              <div style="background: #e5e5e7; height: 20px; border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
+                <div style="background: linear-gradient(90deg, #0071e3 0%, #0077ed 100%); height: 100%; width: ${percent}%; transition: width 0.3s ease;"></div>
+              </div>
+              <div style="font-size: 12px; color: #0071e3; font-weight: 600;">$${amount.toFixed(0)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+      
       if (!txns.length) {
         list.innerHTML = '<li class="loading">No transactions</li>';
         fullList.innerHTML = '<div class="loading">No transactions</div>';
