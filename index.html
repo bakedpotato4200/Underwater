@@ -642,27 +642,26 @@
     
     window.showDay = function(day) {
       const data = calendarData[day];
-      if (!data) { alert('No data for day ' + day + '. calendarData keys: ' + Object.keys(calendarData).join(',')); return; }
+      if (!data) { alert('No data for day ' + day); return; }
       
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
       
-      let html = '';
-      html += `<p style="margin: 0 0 12px 0; font-weight: 700; color: black;">Starting Balance: $${data.startBalance.toFixed(2)}</p>`;
-      html += `<p style="margin: 0 0 8px 0; color: #34c759; font-weight: 600;">Income: $${data.income.toFixed(2)}</p>`;
-      html += `<p style="margin: 0 0 8px 0; color: #ff3b30; font-weight: 600;">Expenses: $${data.expense.toFixed(2)}</p>`;
-      html += `<p style="margin: 0 0 12px 0; font-weight: 700; color: black;">Ending Balance: $${data.endBalance.toFixed(2)}</p>`;
+      let text = `Starting Balance: $${data.startBalance.toFixed(2)}\n\n`;
+      text += `Income: $${data.income.toFixed(2)}\n`;
+      text += `Expenses: $${data.expense.toFixed(2)}\n`;
+      text += `Ending Balance: $${data.endBalance.toFixed(2)}\n`;
       
       if (data.bills && data.bills.length > 0) {
-        html += `<p style="margin: 8px 0 4px 0; font-weight: 700; color: black; border-top: 1px solid #999; padding-top: 8px;">Transactions:</p>`;
+        text += `\n--- Transactions ---\n`;
         data.bills.forEach(b => {
-          const color = b.type === 'income' ? '#34c759' : '#ff3b30';
-          html += `<p style="margin: 2px 0; color: ${color}; font-weight: 600;">${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</p>`;
+          text += `${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}\n`;
         });
       }
       
-      document.getElementById('dayBillsContent').innerHTML = html;
-      document.getElementById('dayBillsHeader').textContent = `${dateStr}`;
+      const contentDiv = document.getElementById('dayBillsContent');
+      contentDiv.textContent = text;
+      document.getElementById('dayBillsHeader').textContent = dateStr;
       openModal('dayBillsModal');
     };
     
