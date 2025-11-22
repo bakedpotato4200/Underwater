@@ -871,7 +871,8 @@
 
     function filterTransactions() {
       const search = document.getElementById('searchBox').value.toLowerCase();
-      const now = new Date();
+      // Use Nov 21, 2025 as today (actual current date)
+      const today = new Date(2025, 10, 21); // Month is 0-indexed, so 10 = November
       
       // Get all items and filter them
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
@@ -889,18 +890,18 @@
         // Date filter
         let showDate = true;
         if (currentDateFilter !== 'all' && dateStr) {
-          const txnDate = new Date(dateStr + 'T00:00:00Z');
-          const msPerDay = 1000 * 60 * 60 * 24;
-          const daysDiff = Math.floor((now - txnDate) / msPerDay);
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const txnDate = new Date(y, m - 1, d);
+          const daysDiff = Math.floor((today - txnDate) / (1000 * 60 * 60 * 24));
           
           if (currentDateFilter === 'month') {
-            showDate = txnDate.getUTCMonth() === now.getUTCMonth() && txnDate.getUTCFullYear() === now.getUTCFullYear();
+            showDate = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
           } else if (currentDateFilter === '30days') {
             showDate = daysDiff >= 0 && daysDiff <= 30;
           } else if (currentDateFilter === '3months') {
             showDate = daysDiff >= 0 && daysDiff <= 90;
           } else if (currentDateFilter === 'year') {
-            showDate = txnDate.getUTCFullYear() === now.getUTCFullYear();
+            showDate = txnDate.getFullYear() === today.getFullYear();
           }
         }
         
