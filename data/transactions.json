@@ -1191,7 +1191,7 @@
     "id": 133,
     "date": "2025-10-29",
     "amount": 65,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Savings XXXXXXX0688",
     "type": "income",
     "excluded": false

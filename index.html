@@ -1923,17 +1923,15 @@
         
         // Function to extract merchant name from transaction description
         function extractMerchant(desc) {
-          // Look for merchant name after common prefixes like "Card Purchase - ", "Digital Card Purchase - ", etc
-          const match = desc.match(/(?:Purchase|Card|Digital)[^-]*-\s*(.+?)(?:\s+\d{1,5}\s+|$)/i);
-          if (match && match[1]) {
-            const merchant = match[1].trim();
-            // Extract the main merchant name (first 1-3 words, excluding numbers)
-            const words = merchant.split(/[\s\d]+/).filter(w => w.length > 2);
-            return words.slice(0, 2).join(' ').toLowerCase();
-          }
-          // Fallback: get first meaningful words
-          const words = desc.toLowerCase().split(/[\s\-\d]+/).filter(w => w.length > 2);
-          return words.slice(0, 2).join(' ');
+          const commonWords = ['card', 'purchase', 'digital', 'withdrawal', 'deposit', 'from', 'to', 'spending', 'savings', 'xxxxxxx', 'autopay', 'payment'];
+          
+          // Extract all words, filter common ones, keep meaningful ones
+          const allWords = desc.toLowerCase()
+            .split(/[\s\-\d]+/)
+            .filter(w => w.length > 2 && !commonWords.includes(w));
+          
+          // Return first 2 meaningful words as merchant identifier
+          return allWords.slice(0, 2).join(' ');
         }
         
         // Find transactions with exact merchant match
