@@ -443,7 +443,7 @@
 
       <div id="trendsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📊 Category Spending Trends</h2><div id="trendsChart" style="margin-top: 20px;"><div class="loading">Loading...</div></div></div></div>
       
-      <div id="calendarContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📆 Recurring Transactions Calendar</h2><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><button class="btn btn-small" onclick="previousMonth()">← Previous</button><div id="calendarMonth" style="font-weight: 700; font-size: 16px; min-width: 200px; text-align: center;">November 2025</div><button class="btn btn-small" onclick="nextMonth()">Next →</button></div><button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="openAddRecurringModal()">+ Add Recurring Transaction</button><div id="calendarView" style="margin-top: 20px; overflow-x: auto;"><div class="loading">Loading calendar...</div></div></div></div>
+      <div id="calendarContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📆 Recurring Transactions Calendar</h2><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><button class="btn btn-small" onclick="previousMonth()">← Previous</button><div id="calendarMonth" style="font-weight: 700; font-size: 16px; min-width: 200px; text-align: center;">November 2025</div><button class="btn btn-small" onclick="nextMonth()">Next →</button></div><div style="display: flex; gap: 8px; margin-bottom: 16px;"><button class="btn btn-primary" style="flex: 1;" onclick="openAddRecurringModal()">+ Add Recurring</button><button class="btn btn-secondary" style="flex: 1;" onclick="toggleRecurringList()">📋 View All</button></div><div id="recurringListView" style="display: none; margin-bottom: 20px; padding: 16px; background: var(--bg-tertiary); border-radius: 10px;"><h3 style="margin: 0 0 16px 0; color: var(--text-primary);">All Recurring Transactions</h3><div id="recurringTransactionsList" style="display: grid; gap: 10px;"><div class="loading">Loading...</div></div></div><div id="calendarView" style="margin-top: 20px; overflow-x: auto;"><div class="loading">Loading calendar...</div></div></div></div>
       
       <div id="insightsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>💡 Financial Insights</h2><div id="insightsList" style="margin-top: 20px;"><div style="color: var(--text-secondary); text-align: center; padding: 20px;">Financial insights will appear here</div></div></div></div>
       
@@ -628,6 +628,29 @@
     let calendarCurrentMonth = new Date().getMonth();
     let initialBalance = 5000;
     
+    function toggleRecurringList() {
+      const listView = document.getElementById('recurringListView');
+      listView.style.display = listView.style.display === 'none' ? 'block' : 'none';
+      if (listView.style.display === 'block') displayAllRecurring();
+    }
+    
+    function displayAllRecurring() {
+      const html = calendarBills.map(b => {
+        const color = b.type === 'income' ? '#34c759' : '#ff3b30';
+        const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : `Every ${b.frequency} days`;
+        return `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid ${color}; display: flex; justify-content: space-between; align-items: center;">
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: var(--text-primary);">${b.name}</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">${freqText} • Started ${new Date(b.startDate).toLocaleDateString()}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 700; font-size: 16px; color: ${color};">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div>
+          </div>
+        </div>`;
+      }).join('');
+      document.getElementById('recurringTransactionsList').innerHTML = html || '<div style="color: var(--text-secondary);">No recurring transactions</div>';
+    }
+    
     async function loadCalendar(year = calendarCurrentYear, month = calendarCurrentMonth) {
       try {
         calendarCurrentYear = year;
@@ -637,6 +660,8 @@
         calendarBills = await billsRes.json();
         const balanceRes = await fetch(API_URL + '/api/balance');
         const balanceData = await balanceRes.json();
+        
+        document.getElementById('recurringListView').style.display = 'none';
         
         // Use only non-excluded income for starting balance
         const nonExcludedIncome = balanceData.income || 0;
