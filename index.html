@@ -369,9 +369,12 @@
             <h1>💼 Dashboard</h1>
             <p>Financial Overview & Money Management</p>
           </div>
-          <button onclick="toggleDarkMode()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0;">
-            <span id="themeIcon">🌙</span>
-          </button>
+          <div style="display: flex; gap: 8px; flex-shrink: 0;">
+            <input type="month" id="dashboardMonth" style="padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 14px;" onchange="loadDashboard()">
+            <button onclick="toggleDarkMode()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+              <span id="themeIcon">🌙</span>
+            </button>
+          </div>
         </div>
         <div class="stats">
           <div class="stat-card">
@@ -512,15 +515,35 @@
     
     let currentTransactionId = null;
     
+    function getMonthDateRange(monthStr) {
+      const [year, month] = monthStr.split('-').map(Number);
+      const start = new Date(year, month - 1, 1);
+      const end = new Date(year, month, 0, 23, 59, 59);
+      return { start, end };
+    }
+    
     async function loadDashboard() {
       try {
+        const monthInput = document.getElementById('dashboardMonth');
+        if (!monthInput.value) {
+          const now = new Date();
+          monthInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+        
+        const { start, end } = getMonthDateRange(monthInput.value);
+        
         const txRes = await fetch(API_URL + '/api/transactions');
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
         const transactions = await txRes.json();
         const bills = await billsRes.json();
         
-        const income = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-        const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+        const monthTxs = transactions.filter(t => {
+          const txDate = new Date(t.date);
+          return txDate >= start && txDate <= end;
+        });
+        
+        const income = monthTxs.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+        const expenses = monthTxs.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + t.amount, 0);
         const balance = income - expenses;
         
         document.getElementById('totalIncome').textContent = formatCurrency(income);
@@ -540,8 +563,8 @@
         document.getElementById('spendingAmount').textContent = formatCurrency(paycheckAmount - monthlyBillsAmount / paychecksPerMonth);
         
         loadUpcomingBills(bills);
-        loadSpendingTrends(transactions);
-        loadRecentTransactions(transactions);
+        loadSpendingTrends(monthTxs);
+        loadRecentTransactions(monthTxs);
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { console.error('Dashboard load error:', e); }
     }
@@ -559,6 +582,7 @@
       });
       const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
       const totalSpend = sorted.reduce((s, [, a]) => s + a, 0);
+      if (totalSpend === 0) { document.getElementById('spendingTrends').innerHTML = '<div class="loading">No spending data for this month</div>'; return; }
       const trendsHtml = sorted.map(([cat, amt]) => {
         const pct = (amt / totalSpend * 100).toFixed(1);
         return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">${formatCurrency(amt)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
