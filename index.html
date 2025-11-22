@@ -411,49 +411,57 @@
         <div class="card full">
           <h2>All Transactions</h2>
           
-          <!-- Type Filters -->
-          <div style="margin-bottom: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="filter-btn active" onclick="filterByType('all'); updateTypeFilter(this)">All Types</button>
-            <button class="filter-btn" onclick="filterByType('income'); updateTypeFilter(this)">💰 Income</button>
-            <button class="filter-btn" onclick="filterByType('expense'); updateTypeFilter(this)">💸 Expenses</button>
-            <button class="filter-btn" onclick="filterByType('transfer'); updateTypeFilter(this)">↔️ Transfers</button>
+          <!-- Toolbar -->
+          <div style="background: #f9fafb; padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #e5e5e7;">
+            <!-- Search Bar -->
+            <div style="margin-bottom: 14px;">
+              <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search transactions..." onkeyup="filterTransactions()" style="width: 100%; padding: 10px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 13px; background: white;">
+            </div>
+            
+            <!-- Filter Row 1: Type -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+              <span style="font-size: 12px; font-weight: 600; color: #666; display: flex; align-items: center;">Type:</span>
+              <button class="filter-btn active" onclick="filterByType('all'); updateTypeFilter(this)">All</button>
+              <button class="filter-btn" onclick="filterByType('income'); updateTypeFilter(this)">💰 Income</button>
+              <button class="filter-btn" onclick="filterByType('expense'); updateTypeFilter(this)">💸 Expenses</button>
+              <button class="filter-btn" onclick="filterByType('transfer'); updateTypeFilter(this)">↔️ Transfers</button>
+            </div>
+            
+            <!-- Filter Row 2: Date -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+              <span style="font-size: 12px; font-weight: 600; color: #666; display: flex; align-items: center;">Period:</span>
+              <button class="filter-btn active" onclick="filterByDate('all'); updateActiveFilter(this)">All Time</button>
+              <button class="filter-btn" onclick="filterByDate('month'); updateActiveFilter(this)">This Month</button>
+              <button class="filter-btn" onclick="filterByDate('30days'); updateActiveFilter(this)">Last 30 Days</button>
+              <button class="filter-btn" onclick="filterByDate('3months'); updateActiveFilter(this)">Last 3 Months</button>
+              <button class="filter-btn" onclick="filterByDate('year'); updateActiveFilter(this)">This Year</button>
+            </div>
+            
+            <!-- Filter Row 3: Sort & Select -->
+            <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+              <select id="sortBy" onchange="filterTransactions()" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer;">
+                <option value="date-desc">Sort: Newest First</option>
+                <option value="date-asc">Sort: Oldest First</option>
+                <option value="amount-desc">Sort: Highest Amount</option>
+                <option value="amount-asc">Sort: Lowest Amount</option>
+                <option value="category">Sort: Category A-Z</option>
+              </select>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                <input type="checkbox" id="selectAllTxns" onchange="toggleSelectAllTransactions()" style="cursor: pointer; width: 16px; height: 16px;">
+                <span style="font-size: 12px; font-weight: 600; color: #000;">Select All</span>
+              </label>
+            </div>
           </div>
           
-          <!-- Date Filters -->
-          <div class="date-filters">
-            <button class="filter-btn active" onclick="filterByDate('all'); updateActiveFilter(this)">All Time</button>
-            <button class="filter-btn" onclick="filterByDate('month'); updateActiveFilter(this)">This Month</button>
-            <button class="filter-btn" onclick="filterByDate('30days'); updateActiveFilter(this)">Last 30 Days</button>
-            <button class="filter-btn" onclick="filterByDate('3months'); updateActiveFilter(this)">Last 3 Months</button>
-            <button class="filter-btn" onclick="filterByDate('year'); updateActiveFilter(this)">This Year</button>
+          <!-- Bulk Actions -->
+          <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107; align-items: center; flex-wrap: wrap;">
+            <span id="selectedCount" style="font-size: 13px; font-weight: 600; color: #000;"></span>
+            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="background: #e8f4f8; color: #0071e3; font-size: 12px; padding: 6px 12px;">Mark as Ignore</button>
+            <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white; font-size: 12px; padding: 6px 12px;">Delete</button>
           </div>
           
-          <!-- Sort Options -->
-          <div style="margin-bottom: 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <label style="display: flex; align-items: center; gap: 6px; color: #666; font-size: 12px; font-weight: 600;">Sort By:</label>
-            <select id="sortBy" onchange="filterTransactions()" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer; transition: all 0.2s;">
-              <option value="date-desc">Newest First</option>
-              <option value="date-asc">Oldest First</option>
-              <option value="amount-desc">Highest Amount</option>
-              <option value="amount-asc">Lowest Amount</option>
-              <option value="category">Category A-Z</option>
-            </select>
-          </div>
-          
-          <!-- Search & Select -->
-          <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
-            <input type="text" class="search-box" id="searchBox" placeholder="Search by merchant, category, or amount..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px;">
-            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
-              <input type="checkbox" id="selectAllTxns" onchange="toggleSelectAllTransactions()" style="cursor: pointer; width: 18px; height: 18px;">
-              <span style="font-size: 13px; color: #000;">Select All</span>
-            </label>
-          </div>
-          <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
-            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()">Ignore Selected</button>
-            <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white;">Delete Selected</button>
-            <span id="selectedCount" style="font-size: 13px; color: #86868b; align-self: center;"></span>
-          </div>
-          <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
+          <!-- Transactions List -->
+          <div id="fullTransactionsList" style="max-height: 650px; overflow-y: auto;">
             <div class="loading">No transactions</div>
           </div>
         </div>
