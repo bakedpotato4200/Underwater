@@ -261,11 +261,12 @@
             </div>
           </div>
 
-          <div class="card">
-            <h2>Recurring Bills</h2>
-            <div id="recurringList" style="max-height: 400px; overflow-y: auto;">
+          <div class="card" style="cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" onclick="switchTab('transactions')" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
+            <h2 style="color: #0071e3;">Recurring Bills</h2>
+            <div id="recurringList" style="max-height: 400px; overflow-y: auto; pointer-events: none;">
               <div class="loading">Detecting recurring...</div>
             </div>
+            <div style="margin-top: 12px; font-size: 13px; color: #0071e3; font-weight: 600;">View all transactions →</div>
           </div>
 
           <div class="card full">
