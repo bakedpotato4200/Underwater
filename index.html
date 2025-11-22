@@ -410,6 +410,16 @@
 
         <div class="card full">
           <h2>All Transactions</h2>
+          
+          <!-- Type Filters -->
+          <div style="margin-bottom: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="filter-btn active" onclick="filterByType('all'); updateTypeFilter(this)">All Types</button>
+            <button class="filter-btn" onclick="filterByType('income'); updateTypeFilter(this)">💰 Income</button>
+            <button class="filter-btn" onclick="filterByType('expense'); updateTypeFilter(this)">💸 Expenses</button>
+            <button class="filter-btn" onclick="filterByType('transfer'); updateTypeFilter(this)">↔️ Transfers</button>
+          </div>
+          
+          <!-- Date Filters -->
           <div class="date-filters">
             <button class="filter-btn active" onclick="filterByDate('all'); updateActiveFilter(this)">All Time</button>
             <button class="filter-btn" onclick="filterByDate('month'); updateActiveFilter(this)">This Month</button>
@@ -417,8 +427,22 @@
             <button class="filter-btn" onclick="filterByDate('3months'); updateActiveFilter(this)">Last 3 Months</button>
             <button class="filter-btn" onclick="filterByDate('year'); updateActiveFilter(this)">This Year</button>
           </div>
+          
+          <!-- Sort Options -->
+          <div style="margin-bottom: 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 6px; color: #666; font-size: 12px; font-weight: 600;">Sort By:</label>
+            <select id="sortBy" onchange="filterTransactions()" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Highest Amount</option>
+              <option value="amount-asc">Lowest Amount</option>
+              <option value="category">Category A-Z</option>
+            </select>
+          </div>
+          
+          <!-- Search & Select -->
           <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
-            <input type="text" class="search-box" id="searchBox" placeholder="Search transactions..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px;">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by merchant, category, or amount..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px;">
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
               <input type="checkbox" id="selectAllTxns" onchange="toggleSelectAllTransactions()" style="cursor: pointer; width: 18px; height: 18px;">
               <span style="font-size: 13px; color: #000;">Select All</span>
@@ -795,7 +819,7 @@
         // Sort transactions within month by date descending (newest first)
         const monthTransactions = [...months[monthKey]].sort((a, b) => new Date(b.date) - new Date(a.date));
         monthTransactions.forEach(t => {
-          fullHtml += `<li class="transaction-item" data-date="${t.date}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
+          fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
             <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
@@ -822,38 +846,105 @@
     }
 
     let currentDateFilter = 'all';
+    let currentTypeFilter = 'all';
+    let currentSortBy = 'date-desc';
+
+    function filterByType(type) {
+      currentTypeFilter = type;
+      filterTransactions();
+    }
+
     function filterByDate(period) {
       currentDateFilter = period;
-      const now = new Date();
-      const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
-      items.forEach(item => {
-        const dateStr = item.getAttribute('data-date');
-        if (!dateStr) return;
-        const itemDate = new Date(dateStr);
-        let show = false;
-        
-        if (period === 'all') show = true;
-        else if (period === 'month') show = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
-        else if (period === '30days') show = (now - itemDate) / (1000*60*60*24) <= 30;
-        else if (period === '3months') show = (now - itemDate) / (1000*60*60*24) <= 90;
-        else if (period === 'year') show = itemDate.getFullYear() === now.getFullYear();
-        
-        item.style.display = show ? 'flex' : 'none';
-      });
       filterTransactions();
     }
     
     function updateActiveFilter(btn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function updateTypeFilter(btn) {
+      btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     }
 
     function filterTransactions() {
       const search = document.getElementById('searchBox').value.toLowerCase();
-      const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
+      const sortBy = document.getElementById('sortBy').value;
+      currentSortBy = sortBy;
+      const now = new Date();
+      const items = Array.from(document.querySelectorAll('#fullTransactionsList .transaction-item'));
+      
+      // Apply filters
       items.forEach(item => {
-        if (item.style.display === 'none' && currentDateFilter !== 'all') return;
-        item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
+        const dateStr = item.getAttribute('data-date');
+        const type = item.getAttribute('data-type');
+        if (!dateStr || !type) return;
+        
+        const itemDate = new Date(dateStr);
+        let showDate = false;
+        
+        if (currentDateFilter === 'all') showDate = true;
+        else if (currentDateFilter === 'month') showDate = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+        else if (currentDateFilter === '30days') showDate = (now - itemDate) / (1000*60*60*24) <= 30;
+        else if (currentDateFilter === '3months') showDate = (now - itemDate) / (1000*60*60*24) <= 90;
+        else if (currentDateFilter === 'year') showDate = itemDate.getFullYear() === now.getFullYear();
+        
+        const showType = currentTypeFilter === 'all' || type === currentTypeFilter;
+        const showSearch = item.textContent.toLowerCase().includes(search);
+        
+        item.style.display = (showDate && showType && showSearch) ? 'flex' : 'none';
+      });
+      
+      // Apply sorting
+      const visibleItems = items.filter(item => item.style.display === 'flex');
+      visibleItems.sort((a, b) => {
+        const aAmount = parseFloat(a.getAttribute('data-amount') || 0);
+        const bAmount = parseFloat(b.getAttribute('data-amount') || 0);
+        const aDate = new Date(a.getAttribute('data-date'));
+        const bDate = new Date(b.getAttribute('data-date'));
+        const aCategory = a.getAttribute('data-category') || '';
+        const bCategory = b.getAttribute('data-category') || '';
+        
+        if (sortBy === 'date-desc') return bDate - aDate;
+        if (sortBy === 'date-asc') return aDate - bDate;
+        if (sortBy === 'amount-desc') return Math.abs(bAmount) - Math.abs(aAmount);
+        if (sortBy === 'amount-asc') return Math.abs(aAmount) - Math.abs(bAmount);
+        if (sortBy === 'category') return aCategory.localeCompare(bCategory);
+        return 0;
+      });
+      
+      const container = document.getElementById('fullTransactionsList');
+      const monthSections = {};
+      
+      visibleItems.forEach(item => {
+        const dateStr = item.getAttribute('data-date');
+        const [year, month] = dateStr.split('-');
+        const monthKey = `${year}-${month}`;
+        if (!monthSections[monthKey]) monthSections[monthKey] = [];
+        monthSections[monthKey].push(item);
+      });
+      
+      container.innerHTML = '';
+      const sortedMonths = Object.keys(monthSections).sort((a, b) => new Date(b) - new Date(a));
+      
+      sortedMonths.forEach(monthKey => {
+        const [year, month] = monthKey.split('-');
+        const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+        const monthDiv = document.createElement('div');
+        monthDiv.style.marginBottom = '16px';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;';
+        headerDiv.innerHTML = `<div>${monthName}</div>`;
+        monthDiv.appendChild(headerDiv);
+        
+        const itemsContainer = document.createElement('div');
+        monthSections[monthKey].forEach(item => itemsContainer.appendChild(item));
+        monthDiv.appendChild(itemsContainer);
+        
+        container.appendChild(monthDiv);
       });
     }
     
