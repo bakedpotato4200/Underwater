@@ -437,7 +437,13 @@
 
   <div id="noteModal" class="modal"><div class="modal-content"><div class="modal-header">📝 Add Note</div><div class="form-group"><label>Note</label><textarea id="noteText" placeholder="Add a note..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px;"></textarea></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveNote()">Save</button><button class="btn btn-secondary" onclick="closeModal('noteModal')">Cancel</button></div></div></div>
 
-  <div id="dayBillsModal" class="modal" style="display: none;"><div class="modal-content" style="max-width: 600px;"><div class="modal-header" id="dayBillsHeader">Transactions for this Day</div><div id="dayBillsContent" style="margin-bottom: 20px; min-height: 100px; background: white; padding: 20px; border-radius: 8px; color: black; font-size: 14px; line-height: 1.6; display: block !important; visibility: visible !important; overflow: visible !important;">Loading...</div><div class="action-buttons"><button class="btn btn-primary" style="flex: 1;" onclick="closeModal('dayBillsModal')">Close</button></div></div></div>
+  <div id="dayDetailsPanel" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 20px; border-top: 2px solid #00d9ff; box-shadow: 0 -8px 24px rgba(0,0,0,0.15); z-index: 2000; max-height: 400px; overflow-y: auto; display: none; transition: transform 0.3s ease;">
+    <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+      <h3 id="dayDetailsTitle" style="margin: 0; color: black; font-size: 18px; font-weight: 700;"></h3>
+      <button onclick="closeDayPanel()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">✕</button>
+    </div>
+    <div id="dayDetailsContent" style="color: black; font-size: 14px; line-height: 1.8;"></div>
+  </div>
 
   <div id="addRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Add Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="recurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="recurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="recurringFrequency"><option value="7">Weekly</option><option value="14" selected>Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="recurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveRecurringTransaction()">Add</button><button class="btn btn-secondary" onclick="closeModal('addRecurringModal')">Cancel</button></div></div></div>
 
@@ -642,31 +648,38 @@
     
     window.showDay = function(day) {
       const data = calendarData[day];
-      if (!data) { alert('No data for day ' + day); return; }
+      if (!data) return;
       
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
       
-      let html = `<div style="color: #000; font-family: system-ui, -apple-system, sans-serif;">`;
-      html += `<p style="margin: 0 0 8px 0; font-weight: 700;">Starting Balance: $${data.startBalance.toFixed(2)}</p>`;
-      html += `<p style="margin: 0 0 4px 0; color: #34c759;">+ Income: $${data.income.toFixed(2)}</p>`;
-      html += `<p style="margin: 0 0 4px 0; color: #ff3b30;">- Expenses: $${data.expense.toFixed(2)}</p>`;
-      html += `<p style="margin: 8px 0 0 0; font-weight: 700;">Ending Balance: $${data.endBalance.toFixed(2)}</p>`;
+      let content = `<div style="font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">Starting Balance: <span style="color: #0066cc;">$${data.startBalance.toFixed(2)}</span></div>`;
+      content += `<div style="margin-bottom: 4px; color: #34c759; font-weight: 600;">+ Income: $${data.income.toFixed(2)}</div>`;
+      content += `<div style="margin-bottom: 12px; color: #ff3b30; font-weight: 600;">- Expenses: $${data.expense.toFixed(2)}</div>`;
+      content += `<div style="font-weight: 700; padding-top: 8px; padding-bottom: 8px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; margin-bottom: 12px;">Ending Balance: <span style="color: ${data.endBalance >= 0 ? '#34c759' : '#ff3b30'};">$${data.endBalance.toFixed(2)}</span></div>`;
       
       if (data.bills && data.bills.length > 0) {
-        html += `<p style="margin: 12px 0 4px 0; font-weight: 700; border-top: 1px solid #999; padding-top: 8px;">Transactions:</p>`;
+        content += `<div style="font-weight: 700; margin-bottom: 8px; margin-top: 12px;">Transactions Today:</div>`;
         data.bills.forEach(b => {
           const color = b.type === 'income' ? '#34c759' : '#ff3b30';
-          html += `<p style="margin: 2px 0; color: ${color};">${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</p>`;
+          content += `<div style="margin-bottom: 6px; padding-left: 12px; border-left: 3px solid ${color}; color: ${color};">${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</div>`;
         });
+      } else {
+        content += `<div style="color: #999; font-style: italic;">No transactions today</div>`;
       }
-      html += `</div>`;
       
-      const contentDiv = document.getElementById('dayBillsContent');
-      contentDiv.innerHTML = html;
-      document.getElementById('dayBillsHeader').textContent = dateStr;
-      openModal('dayBillsModal');
+      document.getElementById('dayDetailsTitle').textContent = dateStr;
+      document.getElementById('dayDetailsContent').innerHTML = content;
+      const panel = document.getElementById('dayDetailsPanel');
+      panel.style.display = 'block';
+      panel.style.transform = 'translateY(0)';
     };
+    
+    function closeDayPanel() {
+      const panel = document.getElementById('dayDetailsPanel');
+      panel.style.transform = 'translateY(100%)';
+      setTimeout(() => { panel.style.display = 'none'; }, 300);
+    }
     
     async function loadAutomation() {
       try {
