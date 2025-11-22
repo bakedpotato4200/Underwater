@@ -618,6 +618,32 @@
     </div>
   </div>
 
+  <!-- Make Recurring Modal -->
+  <div id="makeRecurringModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Make This a Recurring Bill</div>
+      <div style="background: #f0f3ff; padding: 14px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0071e3;">
+        <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Transaction:</div>
+        <div id="recurringTxnPreview" style="font-weight: 600; color: #0071e3; font-size: 14px;">—</div>
+      </div>
+      <div class="form-group">
+        <label>How often does this bill repeat?</label>
+        <select id="recurringFrequency" style="width: 100%; padding: 12px 15px; border: 1.5px solid #d5d5d7; border-radius: 10px; font-size: 13px;">
+          <option value="7">Weekly (every 7 days)</option>
+          <option value="14" selected>Bi-weekly (every 14 days)</option>
+          <option value="30">Monthly (every 30 days)</option>
+          <option value="60">Every 60 days</option>
+          <option value="90">Quarterly (every 90 days)</option>
+          <option value="365">Yearly (every 365 days)</option>
+        </select>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="saveMakeRecurring()">Save as Recurring</button>
+        <button class="btn btn-secondary" onclick="closeModal('makeRecurringModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Recurring Bills Modal -->
   <div id="recurringBillModal" class="modal">
     <div class="modal-content" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
@@ -1371,16 +1397,40 @@
     function displayUpcomingBills(calendar) {
       const list = document.getElementById('upcomingBills');
       const bills = [];
-      Object.entries(calendar).forEach(([date, calendarBills]) => {
-        calendarBills.forEach(bill => {
-          const merchant = (bill.merchant || '').toLowerCase();
-          if (bill.type !== 'withdrawal' && bill.type !== 'transfer' && !merchant.match(/^ke$/i)) {
-            bills.push({ ...bill, date });
+      
+      // Show ONLY manually added recurring bills, not auto-detected
+      if (Array.isArray(recurringBills) && recurringBills.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        recurringBills.forEach(bill => {
+          // Skip income bills
+          if (bill.type === 'income') return;
+          
+          // Generate upcoming dates for this recurring bill
+          const startDate = new Date(bill.startDate);
+          let currentDate = new Date(startDate);
+          const billFrequency = bill.frequency || 30;
+          
+          // Generate next 3 occurrences
+          for (let i = 0; i < 3; i++) {
+            if (currentDate >= today) {
+              bills.push({
+                merchant: bill.name,
+                amount: bill.amount,
+                date: currentDate.toISOString().split('T')[0],
+                isManual: true
+              });
+            }
+            currentDate = new Date(currentDate.getTime() + billFrequency * 24 * 60 * 60 * 1000);
           }
         });
-      });
+      }
+      
       bills.sort((a, b) => new Date(a.date) - new Date(b.date));
-      list.innerHTML = bills.slice(0, 10).map(b => `
+      list.innerHTML = bills.slice(0, 10).length === 0 
+        ? '<div style="text-align: center; padding: 20px; color: #86868b; font-size: 13px;">No upcoming bills added<br><span style="font-size: 12px;">Right-click a transaction to make it recurring</span></div>'
+        : bills.slice(0, 10).map(b => `
         <div class="bill-item">
           <div>
             <div class="bill-name">${b.merchant}</div>
@@ -2068,6 +2118,45 @@
       }
     }
 
+    let currentMakeRecurringId = null;
+
+    function showMakeRecurringModal(id) {
+      currentMakeRecurringId = id;
+      const txn = transactions.find(t => t.id === id);
+      if (!txn) return;
+      document.getElementById('recurringTxnPreview').textContent = `${txn.description} - $${Math.abs(txn.amount).toFixed(2)}`;
+      document.getElementById('recurringFrequency').value = '30';
+      openModal('makeRecurringModal');
+    }
+
+    async function saveMakeRecurring() {
+      if (!currentMakeRecurringId) return;
+      const txn = transactions.find(t => t.id === currentMakeRecurringId);
+      if (!txn) return;
+      
+      const frequency = parseInt(document.getElementById('recurringFrequency').value);
+      
+      try {
+        const response = await fetch(API_URL + '/api/transaction-to-recurring', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            merchant: txn.description,
+            amount: Math.abs(txn.amount),
+            frequency: frequency
+          })
+        });
+        
+        if (!response.ok) throw new Error('Failed to create recurring bill');
+        
+        closeModal('makeRecurringModal');
+        showToast('Bill added to recurring! Check "Manage Bills" to edit.', 'success');
+        loadData();
+      } catch (e) {
+        showToast('Failed to create recurring bill: ' + e.message, 'error');
+      }
+    }
+
     function showTransactionMenu(event, id, currentNote, isExcluded) {
       event.stopPropagation();
       const existing = document.getElementById('transactionMenu');
@@ -2090,7 +2179,11 @@
       menu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
       menu.style.left = (rect.left + window.scrollX - 120) + 'px';
       
+      // Get transaction for "Make Recurring"
+      const txn = transactions.find(t => t.id === id);
+      
       menu.innerHTML = `
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #0071e3; font-weight: 600; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showMakeRecurringModal(${id}); document.getElementById('transactionMenu').remove();">🔄 Make Recurring Bill</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id});">Change Category</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
