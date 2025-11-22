@@ -1396,14 +1396,18 @@
       }
     }
 
-    function displaySpendingTrends(trends) {
+    let trendsPeriod = 4;
+    let trendsData = {};
+
+    function displaySpendingTrendsPie(monthCount) {
+      const trends = trendsData;
       const container = document.getElementById('trendsChart');
       if (!trends || Object.keys(trends).length === 0) {
         container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No trend data available</div>';
         return;
       }
 
-      const months = Object.keys(trends).sort().slice(-4);
+      const months = Object.keys(trends).sort().slice(-monthCount);
       const categories = Array.from(new Set(Object.values(trends).flatMap(m => Object.keys(m || {}))));
       
       if (categories.length === 0) {
@@ -1417,7 +1421,7 @@
         'Shopping': '#ff2d55', 'Health & Fitness': '#00c7be', 'Transfer': '#a2845d', 'Other': '#86868b', 'Rent': '#0071e3'
       };
 
-      // Combine all 4 months into one total
+      // Combine months into one total
       const totals = {};
       months.forEach(month => {
         Object.entries(trends[month] || {}).forEach(([cat, val]) => {
@@ -1463,18 +1467,41 @@
         </div>`;
       }).join('');
 
+      const periods = [
+        { label: 'This Month', months: 1 },
+        { label: 'Last 2 Months', months: 2 },
+        { label: 'Last 3 Months', months: 3 },
+        { label: 'Last 4 Months', months: 4 },
+        { label: 'Last 6 Months', months: 6 },
+        { label: 'Last Year', months: 12 }
+      ];
+
+      const buttons = periods.map(p => `
+        <button onclick="trendsPeriod=${p.months}; displaySpendingTrendsPie(${p.months});" style="padding: 8px 12px; border: 1px solid ${trendsPeriod === p.months ? '#0071e3' : '#d5d5d7'}; background: ${trendsPeriod === p.months ? '#0071e3' : 'white'}; color: ${trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">${p.label}</button>
+      `).join('');
+
+      const periodLabel = periods.find(p => p.months === monthCount)?.label || 'Last 4 Months';
+
       container.innerHTML = `
+        <div style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+          ${buttons}
+        </div>
         <div style="display: flex; gap: 32px; align-items: center; justify-content: center;">
           <svg width="200" height="200" viewBox="0 0 200 200" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
             ${slices}
           </svg>
           <div style="flex: 1; max-width: 300px;">
-            <div style="font-size: 14px; font-weight: 600; color: #000; margin-bottom: 12px;">Last 4 Months Breakdown</div>
+            <div style="font-size: 14px; font-weight: 600; color: #000; margin-bottom: 12px;">${periodLabel} Breakdown</div>
             <div style="font-size: 24px; font-weight: 700; color: #0071e3; margin-bottom: 16px;">$${total.toFixed(0)}</div>
             ${legend}
           </div>
         </div>
       `;
+    }
+
+    function displaySpendingTrends(trends) {
+      trendsData = trends;
+      displaySpendingTrendsPie(trendsPeriod);
     }
 
     let currentBufferDays = 30;
