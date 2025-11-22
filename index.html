@@ -1023,17 +1023,20 @@
       try {
         const res = await fetch(API_URL + '/api/deduplicate-transactions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
         });
         const data = await res.json();
+        console.log('Deduplicate response:', data);
         if (data.removed > 0) {
-          showToast(`Removed ${data.removed} duplicate transaction(s). ${data.remaining} remaining.`, 'success');
+          alert(`Removed ${data.removed} duplicate transaction(s)!`);
         } else {
-          showToast('No duplicates found', 'info');
+          alert('No duplicates found.');
         }
         loadData();
       } catch (e) {
-        showToast('Error: ' + e.message, 'error');
+        console.error('Deduplicate error:', e);
+        alert('Error removing duplicates: ' + e.message);
       }
     }
 
