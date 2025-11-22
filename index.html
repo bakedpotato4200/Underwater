@@ -1923,15 +1923,23 @@
         
         // Function to extract merchant name from transaction description
         function extractMerchant(desc) {
-          const commonWords = ['card', 'purchase', 'digital', 'withdrawal', 'deposit', 'from', 'to', 'spending', 'savings', 'xxxxxxx', 'autopay', 'payment'];
+          // Look for text between "Purchase -" or "Purchase-" and the location/zip code
+          // Pattern: Purchase - MERCHANT_NAME NUMBER CITY STATE
+          const match = desc.match(/[Pp]urchase\s*-\s*([A-Za-z\s]+?)(?:\s+\d+\s+[A-Z]|$)/);
+          if (match && match[1]) {
+            // Return the merchant name, trimmed and lowercase
+            return match[1].trim().toLowerCase();
+          }
           
-          // Extract all words, filter common ones, keep meaningful ones
-          const allWords = desc.toLowerCase()
-            .split(/[\s\-\d]+/)
-            .filter(w => w.length > 2 && !commonWords.includes(w));
+          // Fallback for other formats (like "Withdrawal from...", "Deposit from...")
+          const altMatch = desc.match(/(?:from|to)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i);
+          if (altMatch && altMatch[1]) {
+            return altMatch[1].trim().toLowerCase();
+          }
           
-          // Return first 2 meaningful words as merchant identifier
-          return allWords.slice(0, 2).join(' ');
+          // Last resort: return first meaningful word
+          const words = desc.toLowerCase().split(/[\s\-\d]+/).filter(w => w.length > 2);
+          return words[0] || 'unknown';
         }
         
         // Find transactions with exact merchant match
