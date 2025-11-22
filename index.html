@@ -371,13 +371,6 @@
               <div class="loading">Loading recommendations...</div>
             </div>
           </div>
-
-          <div class="card full">
-            <h2>Anomalies</h2>
-            <div id="anomaliesContainer">
-              <div class="loading">Scanning for unusual transactions...</div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -734,7 +727,6 @@
         displayExclusionRules(rules);
         loadBillBuffer(30);
         displayRecommendations(insights.recommendations);
-        displayAnomalies(insights.anomalies);
       } catch (e) {
         console.error('Error loading data:', e);
         showToast('Failed to load data. Please refresh.', 'error');
