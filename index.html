@@ -1650,16 +1650,16 @@
         </select>
       `;
 
-      const legendGrid = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;">
+      const legendGrid = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 16px;">
         ${data.map(([cat, val]) => {
           const percent = (val / total * 100).toFixed(1);
-          return `<div class="trends-category-card" data-category="${cat}" style="padding: 10px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.2s;">
-            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-              <div style="width: 10px; height: 10px; background: ${colors[cat] || '#0071e3'}; border-radius: 2px;"></div>
-              <span style="font-size: 11px; font-weight: 600; color: #000;">${cat}</span>
+          return `<div class="trends-category-card" data-category="${cat}" style="padding: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.2s;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+              <div style="width: 8px; height: 8px; background: ${colors[cat] || '#0071e3'}; border-radius: 2px;"></div>
+              <span style="font-size: 10px; font-weight: 600; color: #000;">${cat}</span>
             </div>
-            <div style="font-size: 13px; font-weight: 700; color: #0071e3; margin-bottom: 2px;">$${val.toFixed(0)}</div>
-            <div style="font-size: 10px; color: #86868b;">${percent}% of total</div>
+            <div style="font-size: 12px; font-weight: 700; color: #0071e3; margin-bottom: 2px;">$${val.toFixed(0)}</div>
+            <div style="font-size: 9px; color: #86868b;">${percent}%</div>
           </div>`;
         }).join('')}
       </div>`;
