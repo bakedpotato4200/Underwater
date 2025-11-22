@@ -647,42 +647,39 @@
     }
     
     window.showDay = function(day) {
-      try {
-        const data = calendarData[day];
-        if (!data) { alert('No data'); return; }
-        
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
-        
-        let content = `<div style="font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">Starting Balance: <span style="color: #0066cc;">$${data.startBalance.toFixed(2)}</span></div>`;
-        content += `<div style="margin-bottom: 4px; color: #34c759; font-weight: 600;">+ Income: $${data.income.toFixed(2)}</div>`;
-        content += `<div style="margin-bottom: 12px; color: #ff3b30; font-weight: 600;">- Expenses: $${data.expense.toFixed(2)}</div>`;
-        content += `<div style="font-weight: 700; padding-top: 8px; padding-bottom: 8px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; margin-bottom: 12px;">Ending Balance: <span style="color: ${data.endBalance >= 0 ? '#34c759' : '#ff3b30'};">$${data.endBalance.toFixed(2)}</span></div>`;
-        
-        if (data.bills && data.bills.length > 0) {
-          content += `<div style="font-weight: 700; margin-bottom: 8px; margin-top: 12px;">Transactions Today:</div>`;
-          data.bills.forEach(b => {
-            const color = b.type === 'income' ? '#34c759' : '#ff3b30';
-            content += `<div style="margin-bottom: 6px; padding-left: 12px; border-left: 3px solid ${color}; color: ${color};">${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</div>`;
-          });
-        } else {
-          content += `<div style="color: #999; font-style: italic;">No transactions today</div>`;
-        }
-        
-        const titleEl = document.getElementById('dayDetailsTitle');
-        const contentEl = document.getElementById('dayDetailsContent');
-        const panel = document.getElementById('dayDetailsPanel');
-        
-        if (titleEl) titleEl.textContent = dateStr;
-        if (contentEl) contentEl.innerHTML = content;
-        if (panel) {
-          panel.style.display = 'block';
-          panel.style.transform = 'translateY(0)';
-          panel.style.bottom = '0px';
-        }
-      } catch (e) {
-        alert('Error: ' + e.message);
+      alert('1. Clicked day ' + day);
+      const data = calendarData[day];
+      alert('2. Data exists: ' + !!data);
+      if (!data) return;
+      
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
+      alert('3. Date: ' + dateStr);
+      
+      let content = 'Test Content: Day ' + day;
+      if (data.bills && data.bills.length > 0) {
+        content += '\nTransactions: ' + data.bills.length;
+        data.bills.forEach(b => {
+          content += '\n- ' + b.name + ': $' + b.amount;
+        });
       }
+      
+      alert('4. Content ready');
+      const panel = document.getElementById('dayDetailsPanel');
+      alert('5. Panel found: ' + !!panel);
+      if (!panel) { alert('Panel not found!'); return; }
+      
+      const titleEl = document.getElementById('dayDetailsTitle');
+      const contentEl = document.getElementById('dayDetailsContent');
+      alert('6. Elements found - title: ' + !!titleEl + ', content: ' + !!contentEl);
+      
+      titleEl.textContent = dateStr;
+      contentEl.innerHTML = content;
+      panel.style.display = 'block';
+      alert('7. Display set to block, about to show');
+      panel.style.bottom = '0px';
+      panel.style.zIndex = '9999';
+      alert('8. Panel should be visible now!');
     };
     
     function closeDayPanel() {
