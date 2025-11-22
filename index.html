@@ -1021,8 +1021,13 @@
 
     function toggleSelectAllTransactions() {
       const isChecked = document.getElementById('selectAllTxns').checked;
-      const checkboxes = document.querySelectorAll('.txn-checkbox');
-      checkboxes.forEach(cb => cb.checked = isChecked);
+      const checkboxes = document.querySelectorAll('#fullTransactionsList .txn-checkbox');
+      checkboxes.forEach(cb => {
+        const item = cb.closest('.transaction-item');
+        if (item && item.style.display !== 'none') {
+          cb.checked = isChecked;
+        }
+      });
       updateBulkActionButtons();
     }
 
