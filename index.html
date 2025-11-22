@@ -616,7 +616,7 @@
           const hasBills = calendarData[i].bills.length > 0;
           const endBal = calendarData[i].endBalance;
           const balColor = endBal >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-          calendarHtml += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" onclick="showDayDetails(${i})" style="cursor: pointer; position: relative;"><div class="calendar-day-date" style="font-weight: 700;">${i}</div><div style="font-size: 10px; color: ${balColor}; font-weight: 600; margin-top: 4px;">$${endBal.toFixed(0)}</div>${hasBills ? '<div style="font-size: 8px; color: var(--accent-gold); margin-top: 2px;">●●●</div>' : ''}</div>`;
+          calendarHtml += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" data-day="${i}" style="cursor: pointer; position: relative;"><div class="calendar-day-date" style="font-weight: 700;">${i}</div><div style="font-size: 10px; color: ${balColor}; font-weight: 600; margin-top: 4px;">$${endBal.toFixed(0)}</div>${hasBills ? '<div style="font-size: 8px; color: var(--accent-gold); margin-top: 2px;">●●●</div>' : ''}</div>`;
         }
         
         for (let i = 1; i <= nextDays; i++) {
@@ -625,6 +625,15 @@
         
         calendarHtml += '</div>';
         document.getElementById('calendarView').innerHTML = calendarHtml;
+        
+        // Add click handlers to calendar days
+        setTimeout(() => {
+          document.querySelectorAll('.calendar-day[data-day]').forEach(el => {
+            el.addEventListener('click', function() {
+              showDayDetails(parseInt(this.getAttribute('data-day')));
+            });
+          });
+        }, 100);
       } catch (e) { console.error('Calendar error:', e); document.getElementById('calendarView').innerHTML = '<div style="color: red; padding: 20px;">Error loading calendar: ' + e.message + '</div>'; }
     }
     
