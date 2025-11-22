@@ -3,7 +3,7 @@
     "id": 1,
     "date": "2025-10-01",
     "amount": 153,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -12,7 +12,7 @@
     "id": 2,
     "date": "2025-10-03",
     "amount": -153,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -21,7 +21,7 @@
     "id": 3,
     "date": "2025-10-06",
     "amount": 83.98,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -30,7 +30,7 @@
     "id": 4,
     "date": "2025-10-06",
     "amount": -84,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -57,7 +57,7 @@
     "id": 7,
     "date": "2025-10-10",
     "amount": 50,
-    "category": "Income",
+    "category": "Transfer",
     "description": "ke cap one - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -66,7 +66,7 @@
     "id": 8,
     "date": "2025-10-10",
     "amount": 50,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "Wells Fargo - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -78,13 +78,13 @@
     "category": "Utilities",
     "description": "discover card - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 10,
     "date": "2025-10-10",
     "amount": -35,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CHASE CRD AUTOPAY",
     "type": "expense",
     "excluded": false
@@ -111,7 +111,7 @@
     "id": 13,
     "date": "2025-10-17",
     "amount": -204.21,
-    "category": "Other",
+    "category": "Car payment",
     "description": "Withdrawal from Acceptance CAC",
     "type": "expense",
     "excluded": false
@@ -120,7 +120,7 @@
     "id": 14,
     "date": "2025-10-17",
     "amount": -94,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CAPITAL ONE MOBILE PMT",
     "type": "expense",
     "excluded": false
@@ -147,7 +147,7 @@
     "id": 17,
     "date": "2025-10-28",
     "amount": -25,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CAPITAL ONE CRCARDPMT",
     "type": "expense",
     "excluded": false
@@ -264,7 +264,7 @@
     "id": 30,
     "date": "2025-10-02",
     "amount": -7.62,
-    "category": "Utilities",
+    "category": "Gas for car",
     "description": "Digital Card Purchase - MURPHY7561ATWAL BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -336,7 +336,7 @@
     "id": 38,
     "date": "2025-10-04",
     "amount": -6,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -372,7 +372,7 @@
     "id": 42,
     "date": "2025-10-05",
     "amount": -46.89,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -624,7 +624,7 @@
     "id": 70,
     "date": "2025-10-11",
     "amount": -31.62,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -660,7 +660,7 @@
     "id": 74,
     "date": "2025-10-12",
     "amount": -98.92,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -741,7 +741,7 @@
     "id": 83,
     "date": "2025-10-16",
     "amount": -62.34,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -804,7 +804,7 @@
     "id": 90,
     "date": "2025-10-17",
     "amount": -50,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CAPITAL ONE CRCARDPMT",
     "type": "expense",
     "excluded": false
@@ -813,7 +813,7 @@
     "id": 91,
     "date": "2025-10-17",
     "amount": -44.99,
-    "category": "Utilities",
+    "category": "Shopping",
     "description": "Card Purchase - MICROSOFT MICRO MICROSOFT*STO, WA US",
     "type": "expense",
     "excluded": false
@@ -831,7 +831,7 @@
     "id": 93,
     "date": "2025-10-18",
     "amount": -21,
-    "category": "Utilities",
+    "category": "Gas for car",
     "description": "Digital Card Purchase - MURPHY7561ATWAL BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -840,7 +840,7 @@
     "id": 94,
     "date": "2025-10-18",
     "amount": -35,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -894,7 +894,7 @@
     "id": 100,
     "date": "2025-10-20",
     "amount": -8.1,
-    "category": "Utilities",
+    "category": "Shopping",
     "description": "Card Purchase - HOBBYLOBBY BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -921,7 +921,7 @@
     "id": 103,
     "date": "2025-10-20",
     "amount": -35.44,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -1362,7 +1362,7 @@
     "id": 152,
     "date": "2025-10-04",
     "amount": 6,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1416,7 +1416,7 @@
     "id": 158,
     "date": "2025-10-18",
     "amount": 35,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1425,7 +1425,7 @@
     "id": 159,
     "date": "2025-10-20",
     "amount": -35,
-    "category": "Utilities",
+    "category": "Credi card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -1578,7 +1578,7 @@
     "id": 176,
     "date": "2025-09-04",
     "amount": -35.99,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CAPITAL ONE MOBILE PMT",
     "type": "expense",
     "excluded": false
@@ -1605,7 +1605,7 @@
     "id": 179,
     "date": "2025-09-13",
     "amount": 85,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1614,7 +1614,7 @@
     "id": 180,
     "date": "2025-09-13",
     "amount": 205,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1623,7 +1623,7 @@
     "id": 181,
     "date": "2025-09-13",
     "amount": 100,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1632,7 +1632,7 @@
     "id": 182,
     "date": "2025-09-13",
     "amount": 50,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1641,7 +1641,7 @@
     "id": 183,
     "date": "2025-09-13",
     "amount": 70,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1650,7 +1650,7 @@
     "id": 184,
     "date": "2025-09-13",
     "amount": -70,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1659,7 +1659,7 @@
     "id": 185,
     "date": "2025-09-15",
     "amount": -204.21,
-    "category": "Other",
+    "category": "Car payment",
     "description": "Withdrawal from Acceptance CAC",
     "type": "expense",
     "excluded": false
@@ -1713,7 +1713,7 @@
     "id": 191,
     "date": "2025-09-26",
     "amount": 156.35,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1767,7 +1767,7 @@
     "id": 197,
     "date": "2025-09-04",
     "amount": -156,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1920,7 +1920,7 @@
     "id": 214,
     "date": "2025-09-15",
     "amount": -901,
-    "category": "Utilities",
+    "category": "Credi card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -2073,7 +2073,7 @@
     "id": 231,
     "date": "2025-09-28",
     "amount": -20.01,
-    "category": "Utilities",
+    "category": "Gas for car",
     "description": "Digital Card Purchase - MURPHY7561ATWAL BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -2127,7 +2127,7 @@
     "id": 237,
     "date": "2025-09-02",
     "amount": -74,
-    "category": "Utilities",
+    "category": "Credi card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -2145,7 +2145,7 @@
     "id": 239,
     "date": "2025-09-04",
     "amount": 156,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2172,7 +2172,7 @@
     "id": 242,
     "date": "2025-09-15",
     "amount": -70,
-    "category": "Utilities",
+    "category": "Credi card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -2217,7 +2217,7 @@
     "id": 247,
     "date": "2025-07-01",
     "amount": 70,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2226,7 +2226,7 @@
     "id": 248,
     "date": "2025-07-01",
     "amount": 56.52,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2244,7 +2244,7 @@
     "id": 250,
     "date": "2025-07-05",
     "amount": 212.83,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2262,7 +2262,7 @@
     "id": 252,
     "date": "2025-07-05",
     "amount": 84,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2271,7 +2271,7 @@
     "id": 253,
     "date": "2025-07-05",
     "amount": 100,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2289,7 +2289,7 @@
     "id": 255,
     "date": "2025-07-05",
     "amount": 601.15,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2298,7 +2298,7 @@
     "id": 256,
     "date": "2025-07-05",
     "amount": 156.3,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2325,7 +2325,7 @@
     "id": 259,
     "date": "2025-07-10",
     "amount": -14.95,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CHASE CRD AUTOPAY",
     "type": "expense",
     "excluded": false
@@ -2343,7 +2343,7 @@
     "id": 261,
     "date": "2025-07-10",
     "amount": 25,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2352,7 +2352,7 @@
     "id": 262,
     "date": "2025-07-11",
     "amount": 182,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2388,7 +2388,7 @@
     "id": 266,
     "date": "2025-07-15",
     "amount": -204.21,
-    "category": "Other",
+    "category": "Car payment",
     "description": "Withdrawal from Acceptance CAC",
     "type": "expense",
     "excluded": false
@@ -2406,7 +2406,7 @@
     "id": 268,
     "date": "2025-07-17",
     "amount": 45,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2415,7 +2415,7 @@
     "id": 269,
     "date": "2025-07-18",
     "amount": 85.99,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2442,7 +2442,7 @@
     "id": 272,
     "date": "2025-07-23",
     "amount": 55,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -2451,7 +2451,7 @@
     "id": 273,
     "date": "2025-07-23",
     "amount": 35,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -3162,7 +3162,7 @@
     "id": 352,
     "date": "2025-07-24",
     "amount": -35,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -3351,7 +3351,7 @@
     "id": 373,
     "date": "2025-07-24",
     "amount": 35,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -3360,7 +3360,7 @@
     "id": 374,
     "date": "2025-07-25",
     "amount": -35,
-    "category": "Utilities",
+    "category": "Credi card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -3405,7 +3405,7 @@
     "id": 379,
     "date": "2025-06-14",
     "amount": 632,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -3423,7 +3423,7 @@
     "id": 381,
     "date": "2025-06-17",
     "amount": -204.21,
-    "category": "Other",
+    "category": "Car payment",
     "description": "Withdrawal from Acceptance CAC",
     "type": "expense",
     "excluded": false
@@ -3441,7 +3441,7 @@
     "id": 383,
     "date": "2025-06-17",
     "amount": -34,
-    "category": "Utilities",
+    "category": "Credit card payment",
     "description": "Withdrawal from CAPITAL ONE CRCARDPMT",
     "type": "expense",
     "excluded": false
@@ -3477,7 +3477,7 @@
     "id": 387,
     "date": "2025-06-30",
     "amount": 100,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -3792,7 +3792,7 @@
     "id": 422,
     "date": "2025-06-17",
     "amount": -32.76,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -3972,7 +3972,7 @@
     "id": 442,
     "date": "2025-06-23",
     "amount": -1177,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -4035,7 +4035,7 @@
     "id": 449,
     "date": "2025-06-23",
     "amount": 1177,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -4044,7 +4044,7 @@
     "id": 450,
     "date": "2025-06-24",
     "amount": -1177,
-    "category": "Utilities",
+    "category": "Credi card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
