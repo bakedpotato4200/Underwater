@@ -131,7 +131,7 @@
     .alert-banner.alert { border-left-color: #ff3b30; background: linear-gradient(90deg, #fff5f3 0%, #ffffff 100%); }
     .alert-banner.success { border-left-color: #34c759; background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); }
     .alert-banner.info { border-left-color: #0071e3; background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); }
-    .alert-banner strong { color: #000; font-size: 13px; font-weight: 700; }
+    .alert-banner strong { color: var(--text-primary); font-size: 13px; font-weight: 700; }
     .alert-banner p { color: #666; font-size: 12px; margin: 0; }
     
     /* Stats */
@@ -146,7 +146,7 @@
     .btn-primary { background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%); color: white; }
     .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,113,227,0.35); }
     .btn-primary:active { transform: translateY(-1px); }
-    .btn-secondary { background: linear-gradient(135deg, #f5f5f7 0%, #e5e5e7 100%); color: #000; font-weight: 600; }
+    .btn-secondary { background: linear-gradient(135deg, #f5f5f7 0%, #e5e5e7 100%); color: var(--text-primary); font-weight: 600; }
     .btn-secondary:hover { background: linear-gradient(135deg, #e5e5e7 0%, #d5d5d7 100%); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     .btn-small { padding: 7px 13px; font-size: 12px; }
     
@@ -220,9 +220,9 @@
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(6px); animation: fadeIn 0.25s ease-out; }
     .modal.active { display: flex; }
     .modal-content { background: var(--bg-primary); border-radius: 20px; padding: 40px; max-width: 500px; width: 92%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.3); animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .modal-header { font-size: 22px; font-weight: 800; margin-bottom: 24px; color: #000; letter-spacing: -0.5px; }
+    .modal-header { font-size: 22px; font-weight: 800; margin-bottom: 24px; color: var(--text-primary); letter-spacing: -0.5px; }
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; margin-bottom: 10px; color: #000; font-weight: 700; font-size: 13px; letter-spacing: -0.2px; }
+    .form-group label { display: block; margin-bottom: 10px; color: var(--text-primary); font-weight: 700; font-size: 13px; letter-spacing: -0.2px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1.5px solid #d5d5d7; border-radius: 10px; font-size: 13px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: inherit; }
     .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: #ccc; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
@@ -236,7 +236,7 @@
     .search-box:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
     .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #0071e3; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .insight-box:hover { border-color: #0071e3; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
-    .insight-box strong { color: #000; font-size: 13px; font-weight: 700; }
+    .insight-box strong { color: var(--text-primary); font-size: 13px; font-weight: 700; }
     .insight-box span { color: #666; font-size: 12px; display: block; margin-top: 6px; }
     
     @media (max-width: 768px) {
@@ -561,14 +561,14 @@
               </select>
               <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
                 <input type="checkbox" id="selectAllTxns" onchange="toggleSelectAllTransactions()" style="cursor: pointer; width: 16px; height: 16px;">
-                <span style="font-size: 12px; font-weight: 600; color: #000;">Select All</span>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-primary);">Select All</span>
               </label>
             </div>
           </div>
           
           <!-- Bulk Actions -->
           <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; padding: 12px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107; align-items: center; flex-wrap: wrap;">
-            <span id="selectedCount" style="font-size: 13px; font-weight: 600; color: #000;"></span>
+            <span id="selectedCount" style="font-size: 13px; font-weight: 600; color: var(--text-primary);"></span>
             <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="background: #e8f4f8; color: #0071e3; font-size: 12px; padding: 6px 12px;">Mark as Ignore</button>
             <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white; font-size: 12px; padding: 6px 12px;">Delete</button>
           </div>
@@ -751,7 +751,7 @@
       
       <!-- Quick Add Form - Top Priority -->
       <div style="background: var(--bg-primary); padding: 16px; border: 2px solid #0071e3; border-radius: 10px; margin-bottom: 16px;">
-        <div style="font-size: 13px; font-weight: 700; color: #000; margin-bottom: 12px;">Quick Add</div>
+        <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Quick Add</div>
         <div class="form-group">
           <label>What are you paying for? (e.g., Rent, Netflix)</label>
           <input type="text" id="billName" placeholder="e.g., Rent" style="width: 100%; padding: 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px;">
@@ -996,7 +996,7 @@
           const percent = (amount / max_cat) * 100;
           return `
             <div style="padding: 12px; background: #f9f9fb; border-radius: 10px; border: 1px solid #e5e5e7;">
-              <div style="font-weight: 600; font-size: 13px; color: #000; margin-bottom: 8px;">${cat}</div>
+              <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">${cat}</div>
               <div style="background: #e5e5e7; height: 20px; border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
                 <div style="background: linear-gradient(90deg, #0071e3 0%, #0077ed 100%); height: 100%; width: ${percent}%; transition: width 0.3s ease;"></div>
               </div>
@@ -1028,7 +1028,7 @@
             <div class="transaction-amount ${t.type}">
               ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
             </div>
-            <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
+            <button class="btn btn-small" style="background: #e5e5e7; color: var(--text-primary); font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
           </div>
         </li>
       `).join('');
@@ -1050,7 +1050,7 @@
                     <div class="transaction-amount ${t.type}">
                       ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
                     </div>
-                    <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
+                    <button class="btn btn-small" style="background: #e5e5e7; color: var(--text-primary); font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
                   </div>
                 </div>
               `).join('')}
@@ -1216,7 +1216,7 @@
         const monthTotal = activeMonth.reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
         
         fullHtml += `<div style="margin-bottom: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
             <div>${monthName}</div>
             <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
           </div>`;
@@ -1238,7 +1238,7 @@
               </div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; margin-left: 12px;">
-              <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
+              <button class="btn btn-small" style="background: #e5e5e7; color: var(--text-primary); font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
             </div>
           </li>`;
         });
@@ -1263,7 +1263,7 @@
                       </div>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; margin-left: 12px;">
-                      <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
+                      <button class="btn btn-small" style="background: #e5e5e7; color: var(--text-primary); font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
                     </div>
                   </li>
                 `).join('')}
@@ -1495,7 +1495,7 @@
       
       let resultsHtml = `
         <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #0071e3;">
-          <div style="font-weight: 600; color: #000; margin-bottom: 4px;">With Current Payment ($${minPayment.toFixed(2)}/mo)</div>
+          <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">With Current Payment ($${minPayment.toFixed(2)}/mo)</div>
           <div style="font-size: 13px; color: #666;">
             <div>⏱️ ${current.months > 0 ? `${current.years} years (${current.months} months)` : 'Could not calculate'}</div>
             <div>💰 Total Interest: $${current.totalInterest}</div>
@@ -1641,7 +1641,7 @@
             html += `
               <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #34c759;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div style="font-weight: 600; color: #000;">${inc.merchant}</div>
+                  <div style="font-weight: 600; color: var(--text-primary);">${inc.merchant}</div>
                   <div style="font-weight: 700; color: #34c759; font-size: 14px;">+$${Math.abs(inc.amount).toFixed(2)}</div>
                 </div>
               </div>
@@ -1657,7 +1657,7 @@
             html += `
               <div style="background: #fef2f2; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff3b30;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <div style="font-weight: 600; color: #000;">${exp.merchant}</div>
+                  <div style="font-weight: 600; color: var(--text-primary);">${exp.merchant}</div>
                   <div style="font-weight: 700; color: #ff3b30; font-size: 14px;">-$${exp.amount.toFixed(2)}</div>
                 </div>
               </div>
@@ -1699,7 +1699,7 @@
             </div>
             ` : ''}
             <div style="border-top: 1px solid #0071e3; padding-top: 8px; display: flex; justify-content: space-between;">
-              <span style="font-weight: 700; color: #000;">Ending Balance:</span>
+              <span style="font-weight: 700; color: var(--text-primary);">Ending Balance:</span>
               <span style="font-weight: 700; font-size: 16px; color: ${dayEndBalance >= 0 ? '#34c759' : '#ff3b30'};">$${dayEndBalance.toFixed(2)}</span>
             </div>
           </div>
@@ -1845,7 +1845,7 @@
         const height = (cf.balance / maxBalance) * 160;
         return `<div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
           <div style="height: ${height}px; background: #0071e3; border-radius: 4px; width: 100%; margin-bottom: 8px;"></div>
-          <div style="font-size: 12px; font-weight: 600; color: #000;">$${(cf.balance / 1000).toFixed(1)}k</div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-primary);">$${(cf.balance / 1000).toFixed(1)}k</div>
           <div style="font-size: 11px; color: #86868b;">${month}</div>
         </div>`;
       }).join('');
@@ -1909,7 +1909,7 @@
       } else {
         recsEl.innerHTML = insights.recommendations.map((r, i) => `
           <div style="padding: 14px; background: ${i % 2 === 0 ? '#f9fafb' : 'white'}; border-radius: 8px; border-left: 3px solid #0071e3;">
-            <div style="font-weight: 600; color: #000; margin-bottom: 4px; font-size: 13px;">${r.title}</div>
+            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 13px;">${r.title}</div>
             <div style="font-size: 12px; color: #666; line-height: 1.5;">${r.desc}</div>
           </div>
         `).join('');
@@ -2105,12 +2105,12 @@
 
       const consolidatedSelector = `
         <select id="trendsViewSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: #0071e3; color: white; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
-          <option value="year-to-date" ${!singleMonth && trendsPeriod === 12 ? 'selected' : ''} style="color: #000; background: var(--bg-primary);">Year to Date</option>
-          <option value="this-month" ${!singleMonth && trendsPeriod === 1 ? 'selected' : ''} style="color: #000; background: var(--bg-primary);">This Month</option>
+          <option value="year-to-date" ${!singleMonth && trendsPeriod === 12 ? 'selected' : ''} style="color: var(--text-primary); background: var(--bg-primary);">Year to Date</option>
+          <option value="this-month" ${!singleMonth && trendsPeriod === 1 ? 'selected' : ''} style="color: var(--text-primary); background: var(--bg-primary);">This Month</option>
           ${allMonths.reverse().map(m => {
             const [year, month] = m.split('-');
             const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
-            return `<option value="${m}" ${singleMonth === m ? 'selected' : ''} style="color: #000; background: var(--bg-primary);">${monthName}</option>`;
+            return `<option value="${m}" ${singleMonth === m ? 'selected' : ''} style="color: var(--text-primary); background: var(--bg-primary);">${monthName}</option>`;
           }).join('')}
         </select>
       `;
@@ -2122,7 +2122,7 @@
           return `<div class="trends-category-card" data-category="${cat}" style="padding: 8px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.2s;">
             <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
               <div style="width: 8px; height: 8px; background: ${categoryColor}; border-radius: 2px;"></div>
-              <span style="font-size: 10px; font-weight: 600; color: #000;">${cat}</span>
+              <span style="font-size: 10px; font-weight: 600; color: var(--text-primary);">${cat}</span>
             </div>
             <div style="font-size: 12px; font-weight: 700; color: #0071e3; margin-bottom: 2px;">$${val.toFixed(0)}</div>
             <div style="font-size: 9px; color: #86868b;">${percent}%</div>
@@ -2169,7 +2169,7 @@
           showCategoryTransactionsModal(category, trendsPeriod, singleMonth);
         });
         card.addEventListener('mouseenter', function() {
-          this.style.background = '#f0f3ff';
+          this.style.background = 'var(--bg-tertiary)';
           this.style.borderColor = '#0071e3';
         });
         card.addEventListener('mouseleave', function() {
@@ -2231,7 +2231,7 @@
         const monthTotal = months[monthKey].reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
         
         html += `<div style="margin-bottom: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
             <div>${monthName}</div>
             <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
           </div>`;
@@ -2425,9 +2425,9 @@
       
       menu.innerHTML = `
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #0071e3; font-weight: 600; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showMakeRecurringModal(${id}); document.getElementById('transactionMenu').remove();">🔄 Make Recurring Bill</button>
-        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
-        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id});">Change Category</button>
-        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id});">Change Category</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #ff3b30; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="deleteTransaction(${id}); document.getElementById('transactionMenu').remove();">Delete</button>
       `;
       
@@ -2532,7 +2532,7 @@
         newModal.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10005; align-items: center; justify-content: center; backdrop-filter: blur(6px); overflow: auto;';
       
         let html = `<div style="background: var(--bg-primary); border-radius: 20px; padding: 24px; max-width: 380px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3); margin: auto; my-space: auto;">
-          <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px; color: #000; letter-spacing: -0.5px;">Select Category</div>
+          <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--text-primary); letter-spacing: -0.5px;">Select Category</div>
           <div style="font-size: 12px; color: #999; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${txn.description}</div>`;
         
         // Always show suggestion - more compact
@@ -2551,7 +2551,7 @@
         }
         
         // Dropdown select
-        html += `<select id="categorySelect" style="width: 100%; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; border: 1.5px solid #e5e5e7; border-radius: 8px; background: var(--bg-primary); color: #000; font-weight: 500; cursor: pointer;">
+        html += `<select id="categorySelect" style="width: 100%; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; border: 1.5px solid #e5e5e7; border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); font-weight: 500; cursor: pointer;">
           <option value="">Choose a category...</option>`;
         
         categories.forEach(cat => {
@@ -2569,11 +2569,11 @@
         html += `</select>
         
         <div style="margin-bottom: 12px; padding: 10px 12px; border: 1.5px solid #e5e5e7; border-radius: 8px; background: var(--bg-secondary);">
-          <input type="text" id="customCategory" placeholder="Or type custom..." style="width: 100%; border: none; background: transparent; font-size: 13px; outline: none; font-weight: 500; color: #000;" />
+          <input type="text" id="customCategory" placeholder="Or type custom..." style="width: 100%; border: none; background: transparent; font-size: 13px; outline: none; font-weight: 500; color: var(--text-primary);" />
         </div>
         
         <button class="btn btn-primary" id="saveCatBtn" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 600; border-radius: 8px; opacity: 0.5; cursor: not-allowed; margin-bottom: 8px;">Save Category</button>
-        <button style="width: 100%; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 8px; background: var(--bg-secondary); border: none; color: #000; cursor: pointer; transition: all 0.2s;" id="cancelCatBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
+        <button style="width: 100%; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 8px; background: var(--bg-secondary); border: none; color: var(--text-primary); cursor: pointer; transition: all 0.2s;" id="cancelCatBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
         </div>`;
         
         newModal.innerHTML = html;
@@ -2709,12 +2709,12 @@
           
           bulkModal.innerHTML = `
             <div style="background: var(--bg-primary); border-radius: 20px; padding: 32px; max-width: 480px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
-              <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #000; letter-spacing: -0.5px;">Smart Category Update</div>
+              <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: var(--text-primary); letter-spacing: -0.5px;">Smart Category Update</div>
               <div style="font-size: 13px; color: #999; margin-bottom: 20px;">Found ${matchingTxns.length} similar transaction${matchingTxns.length !== 1 ? 's' : ''}</div>
               
               <div style="margin-bottom: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <div style="font-size: 13px; font-weight: 600; color: #000;">Select transactions to update:</div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Select transactions to update:</div>
                   <div style="font-size: 12px; color: #0071e3; cursor: pointer; font-weight: 600; transition: opacity 0.2s;" id="selectAllToggle" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="document.querySelectorAll('.txn-checkbox').forEach(cb => cb.checked = !cb.checked); updateBulkCounter();">Select All</div>
                 </div>
                 <div style="max-height: 280px; overflow-y: auto; background: var(--bg-primary); border-radius: 8px; padding: 8px;">
@@ -2722,7 +2722,7 @@
                     <label style="display: flex; align-items: flex-start; gap: 10px; padding: 8px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='transparent'">
                       <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3; margin-top: 2px; flex-shrink: 0;" onchange="updateBulkCounter()">
                       <div style="flex: 1; min-width: 0;">
-                        <div style="font-size: 12px; color: #000; font-weight: 500; word-wrap: break-word; white-space: normal; line-height: 1.4;">${t.date} - ${t.description}</div>
+                        <div style="font-size: 12px; color: var(--text-primary); font-weight: 500; word-wrap: break-word; white-space: normal; line-height: 1.4;">${t.date} - ${t.description}</div>
                         <div style="font-size: 11px; color: #999; margin-top: 4px;">Was: ${t.category}</div>
                       </div>
                       <span style="font-weight: 600; color: #0071e3; font-size: 12px; flex-shrink: 0; margin-top: 2px;">$${Math.abs(t.amount).toFixed(2)}</span>
@@ -2736,7 +2736,7 @@
               </div>
               
               <button class="btn btn-primary" id="bulkConfirmBtn" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; margin-bottom: 8px;">Save Changes</button>
-              <button style="width: 100%; padding: 12px; font-size: 13px; font-weight: 600; border-radius: 12px; background: var(--bg-secondary); border: none; color: #000; cursor: pointer; transition: all 0.2s;" id="bulkCancelBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
+              <button style="width: 100%; padding: 12px; font-size: 13px; font-weight: 600; border-radius: 12px; background: var(--bg-secondary); border: none; color: var(--text-primary); cursor: pointer; transition: all 0.2s;" id="bulkCancelBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
             </div>
           `;
           
@@ -2803,7 +2803,7 @@
       const rulesHtml = rules.map((rule, idx) => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-primary); border: 1px solid #e5e5e7; border-radius: 6px; margin-bottom: 8px;">
           <div>
-            <div style="font-weight: 600; color: #000; font-size: 13px;">${rule.pattern}</div>
+            <div style="font-weight: 600; color: var(--text-primary); font-size: 13px;">${rule.pattern}</div>
             <div style="font-size: 11px; color: #86868b; margin-top: 2px;">Auto-excludes by ${rule.type}</div>
           </div>
           <button class="btn btn-small" style="background: #ff3b30; color: white; cursor: pointer;" onclick="removeExclusionRule(${idx})">Remove</button>
@@ -2847,7 +2847,7 @@
         </div>
 
         <div style="margin-bottom: 20px;">
-          <h3 style="font-size: 14px; color: #000; margin-bottom: 12px; font-weight: 600;">Bills in next ${data.days} days (${data.billCount} bills)</h3>
+          <h3 style="font-size: 14px; color: var(--text-primary); margin-bottom: 12px; font-weight: 600;">Bills in next ${data.days} days (${data.billCount} bills)</h3>
           ${billsList}
         </div>
 
@@ -3152,12 +3152,12 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 4px solid #34c759;">
               <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Per Paycheck</div>
-              <div style="font-size: 16px; font-weight: 700; color: #000;">$${paycheckAmt.toFixed(2)}</div>
+              <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">$${paycheckAmt.toFixed(2)}</div>
               <div style="font-size: 10px; color: #999; margin-top: 4px;">Every ${calc.paycheckFrequency} days</div>
             </div>
             <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; border-left: 4px solid #ff9500;">
               <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Monthly Bills</div>
-              <div style="font-size: 16px; font-weight: 700; color: #000;">$${monthlyBills.toFixed(2)}</div>
+              <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">$${monthlyBills.toFixed(2)}</div>
               <div style="font-size: 10px; color: #999; margin-top: 4px;">${paychecksPerMonth.toFixed(1)} paychecks/month</div>
             </div>
           </div>
@@ -3227,7 +3227,7 @@
           return `
             <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0071e3; display: flex; justify-content: space-between; align-items: center;">
               <div style="flex: 1;">
-                <div style="font-weight: 700; color: #000; margin-bottom: 4px;">${b.name}</div>
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${b.name}</div>
                 <div style="font-size: 12px; color: #86868b;">${freqName} starting ${b.startDate}</div>
               </div>
               <div style="display: flex; gap: 12px; align-items: center;">
