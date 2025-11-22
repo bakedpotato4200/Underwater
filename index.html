@@ -542,9 +542,7 @@
             <div class="transaction-amount ${t.type}">
               ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
             </div>
-            <button class="btn btn-small" style="background: #0071e3; color: white;" onclick="showNoteModal(${t.id}, '${(t.note || '').replace(/'/g, "\\'")}')">Note</button>
-            <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'};" onclick="toggleExclude(${t.id})">Excl</button>
-            <button class="btn btn-small" style="background: #ff3b30; color: white;" onclick="deleteTransaction(${t.id})">Delete</button>
+            <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
           </div>
         </li>
       `).join('');
@@ -583,9 +581,7 @@
               <div class="transaction-amount ${t.type}">
                 ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
               </div>
-              <button class="btn btn-small" style="background: #0071e3; color: white; cursor: pointer;" onclick="showNoteModal(${t.id}, '${(t.note || '').replace(/'/g, "\\'")}')">Note</button>
-              <button class="btn btn-small" style="background: ${t.excluded ? '#ff3b30' : '#e5e5e7'}; color: ${t.excluded ? 'white' : '#000'}; cursor: pointer;" onclick="toggleExclude(${t.id})">Excl</button>
-              <button class="btn btn-small" style="background: #ff3b30; color: white; cursor: pointer;" onclick="deleteTransaction(${t.id})">Delete</button>
+              <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
             </div>
           </li>`;
         });
@@ -861,6 +857,43 @@
           alert('Failed to delete transaction: ' + e.message);
         }
       }
+    }
+
+    function showTransactionMenu(event, id, currentNote, isExcluded) {
+      event.stopPropagation();
+      const existing = document.getElementById('transactionMenu');
+      if (existing) existing.remove();
+      
+      const menu = document.createElement('div');
+      menu.id = 'transactionMenu';
+      menu.style.cssText = `
+        position: fixed;
+        background: white;
+        border: 1px solid #d5d5d7;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        min-width: 150px;
+        padding: 4px 0;
+      `;
+      
+      const rect = event.target.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 8) + 'px';
+      menu.style.left = (rect.left - 120) + 'px';
+      
+      menu.innerHTML = `
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #ff3b30; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="deleteTransaction(${id}); document.getElementById('transactionMenu').remove();">Delete</button>
+      `;
+      
+      document.body.appendChild(menu);
+      
+      document.addEventListener('click', function closeMenu() {
+        const m = document.getElementById('transactionMenu');
+        if (m) m.remove();
+        document.removeEventListener('click', closeMenu);
+      });
     }
 
     function displayExclusionRules(rules) {
