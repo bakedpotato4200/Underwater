@@ -647,6 +647,7 @@
     }
     
     window.showDay = function(day) {
+      alert('Clicked day: ' + day + ', Data exists: ' + (calendarData[day] ? 'YES' : 'NO'));
       const data = calendarData[day];
       if (!data) return;
       
