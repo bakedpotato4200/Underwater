@@ -156,7 +156,7 @@
     "id": 18,
     "date": "2025-10-31",
     "amount": -36,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1515,7 +1515,7 @@
     "id": 169,
     "date": "2025-10-31",
     "amount": 303.86,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
