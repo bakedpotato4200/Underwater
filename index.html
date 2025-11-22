@@ -151,6 +151,26 @@
     .transaction-amount.income { color: #34c759; }
     .transaction-amount.expense { color: #ff3b30; }
     
+    /* Category Colors */
+    .cat-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+    .cat-income { background: #d4edda; color: #155724; }
+    .cat-utilities { background: #cfe2ff; color: #084298; }
+    .cat-food { background: #fff3cd; color: #664d03; }
+    .cat-groceries { background: #d1e7dd; color: #0f5132; }
+    .cat-transportation { background: #f8d7da; color: #842029; }
+    .cat-entertainment { background: #e2e3e5; color: #383d41; }
+    .cat-shopping { background: #cff4fc; color: #055160; }
+    .cat-health { background: #f5e6ff; color: #5a189a; }
+    .cat-transfer { background: #e7d4f5; color: #5a189a; }
+    .cat-other { background: #e8e8e8; color: #4a4a4a; }
+    .cat-rent { background: #ffeaa7; color: #d63031; }
+    
+    /* Date Filters */
+    .date-filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid #e5e5e7; background: white; color: #000; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s; }
+    .filter-btn:hover { border-color: #0071e3; color: #0071e3; }
+    .filter-btn.active { background: #0071e3; color: white; border-color: #0071e3; }
+    
     /* Velocity Chart */
     .velocity-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 140px; gap: 8px; margin: 20px 0; }
     .velocity-bar { background: linear-gradient(180deg, #0071e3 0%, #0077ed 100%); border-radius: 6px 6px 0 0; flex: 1; min-height: 20px; display: flex; align-items: flex-end; justify-content: center; color: white; font-size: 10px; font-weight: 600; animation: growBar 0.6s ease-out; transition: all 0.2s; box-shadow: 0 4px 8px rgba(0,113,227,0.2); }
@@ -381,8 +401,15 @@
 
         <div class="card full">
           <h2>All Transactions</h2>
+          <div class="date-filters">
+            <button class="filter-btn active" onclick="filterByDate('all'); updateActiveFilter(this)">All Time</button>
+            <button class="filter-btn" onclick="filterByDate('month'); updateActiveFilter(this)">This Month</button>
+            <button class="filter-btn" onclick="filterByDate('30days'); updateActiveFilter(this)">Last 30 Days</button>
+            <button class="filter-btn" onclick="filterByDate('3months'); updateActiveFilter(this)">Last 3 Months</button>
+            <button class="filter-btn" onclick="filterByDate('year'); updateActiveFilter(this)">This Year</button>
+          </div>
           <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
-            <input type="text" class="search-box" id="searchBox" placeholder="Search by description, date, or amount..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px;">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search transactions..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px;">
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
               <input type="checkbox" id="selectAllTxns" onchange="toggleSelectAllTransactions()" style="cursor: pointer; width: 18px; height: 18px;">
               <span style="font-size: 13px; color: #000;">Select All</span>
@@ -675,17 +702,21 @@
         // Sort transactions within month by date descending (newest first)
         const monthTransactions = [...months[monthKey]].sort((a, b) => new Date(b.date) - new Date(a.date));
         monthTransactions.forEach(t => {
-          fullHtml += `<li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
+          fullHtml += `<li class="transaction-item" data-date="${t.date}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
             <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
             <div style="flex: 1;">
-              <div class="transaction-date">${t.date}</div>
-              <div class="transaction-desc">${t.description}</div>
-              <span style="font-size: 11px; color: #86868b;">${t.category}</span>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <div class="transaction-amount ${t.type}">
-                ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <div class="transaction-desc">${t.description}</div>
+                <div class="transaction-amount ${t.type}" style="margin-left: 8px;">
+                  ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+                </div>
               </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div><span class="cat-badge ${getCategoryColor(t.category)}">${t.category}</span></div>
+                <div class="transaction-date">${t.date}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-left: 12px;">
               <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
             </div>
           </li>`;
@@ -697,12 +728,50 @@
       fullList.innerHTML = fullHtml;
     }
 
+    let currentDateFilter = 'all';
+    function filterByDate(period) {
+      currentDateFilter = period;
+      const now = new Date();
+      const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
+      items.forEach(item => {
+        const dateStr = item.getAttribute('data-date');
+        if (!dateStr) return;
+        const itemDate = new Date(dateStr);
+        let show = false;
+        
+        if (period === 'all') show = true;
+        else if (period === 'month') show = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+        else if (period === '30days') show = (now - itemDate) / (1000*60*60*24) <= 30;
+        else if (period === '3months') show = (now - itemDate) / (1000*60*60*24) <= 90;
+        else if (period === 'year') show = itemDate.getFullYear() === now.getFullYear();
+        
+        item.style.display = show ? 'flex' : 'none';
+      });
+      filterTransactions();
+    }
+    
+    function updateActiveFilter(btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
     function filterTransactions() {
       const search = document.getElementById('searchBox').value.toLowerCase();
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
       items.forEach(item => {
+        if (item.style.display === 'none' && currentDateFilter !== 'all') return;
         item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
       });
+    }
+    
+    function getCategoryColor(category) {
+      const colors = {
+        'Income': 'cat-income', 'Utilities': 'cat-utilities', 'Food & Dining': 'cat-food',
+        'Groceries': 'cat-groceries', 'Transportation': 'cat-transportation', 'Entertainment': 'cat-entertainment',
+        'Shopping': 'cat-shopping', 'Health & Fitness': 'cat-health', 'Transfer': 'cat-transfer',
+        'Rent': 'cat-rent'
+      };
+      return colors[category] || 'cat-other';
     }
 
     function updateBulkActionButtons() {
