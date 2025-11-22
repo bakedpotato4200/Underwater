@@ -941,7 +941,7 @@ app.get('/api/bills-calculator', (req, res) => {
     let paycheckAmount = 0;
     let paycheckFrequency = 30;
     
-    // Get all recurring bills
+    // Get all recurring bills (only manually added ones, not detected historical)
     if (Array.isArray(freshBills) && freshBills.length > 0) {
       freshBills.forEach(bill => {
         if (bill.type === 'income') {
@@ -955,13 +955,6 @@ app.get('/api/bills-calculator', (req, res) => {
         }
       });
     }
-    
-    // Get detected recurring bills (from transaction history)
-    const detected = detectRecurring().filter(r => r.isRecurring && r.category !== 'Income');
-    detected.forEach(bill => {
-      const occurrencesPerMonth = 30 / (bill.avgInterval || 30);
-      totalMonthlyBills += (bill.avgAmount || 0) * occurrencesPerMonth;
-    });
     
     // Ensure all values are numbers
     totalMonthlyBills = parseFloat(totalMonthlyBills) || 0;
