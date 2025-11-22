@@ -130,8 +130,8 @@
       padding: 48px 40px; 
       border-radius: 24px; 
       margin-bottom: 32px; 
-      border: 1px solid var(--border-color); 
-      box-shadow: var(--card-shadow); 
+      border: 2px solid var(--accent-primary); 
+      box-shadow: 0 0 32px rgba(0, 217, 255, 0.25), var(--card-shadow); 
       animation: slideIn 0.5s ease;
     }
     .header h1 { 
@@ -445,6 +445,14 @@
   <script>
     const API_URL = window.location.origin;
     
+    function formatCurrency(num) {
+      return '$' + num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    
     function showToast(message, type = 'info', duration = 3000) {
       const id = 'toast-' + Date.now();
       const toast = document.createElement('div');
@@ -498,21 +506,21 @@
         const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + t.amount, 0);
         const balance = income - expenses;
         
-        document.getElementById('totalIncome').textContent = '$' + income.toFixed(2);
-        document.getElementById('totalExpenses').textContent = '$' + expenses.toFixed(2);
-        document.getElementById('netBalance').textContent = '$' + balance.toFixed(2);
-        document.getElementById('financialScore').textContent = (95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0);
+        document.getElementById('totalIncome').textContent = formatCurrency(income);
+        document.getElementById('totalExpenses').textContent = formatCurrency(expenses);
+        document.getElementById('netBalance').textContent = formatCurrency(balance);
+        document.getElementById('financialScore').textContent = formatNumber((95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0));
         
         const monthlyBillsAmount = bills.reduce((s, b) => s + b.amount, 0);
         const paycheckAmount = 1500;
         const daysPerPaycheck = 14;
         const paychecksPerMonth = 30.44 / daysPerPaycheck;
         
-        document.getElementById('billsPerPaycheck').textContent = '$' + (monthlyBillsAmount / paychecksPerMonth).toFixed(2);
-        document.getElementById('monthlyBills').textContent = '$' + monthlyBillsAmount.toFixed(2);
+        document.getElementById('billsPerPaycheck').textContent = formatCurrency(monthlyBillsAmount / paychecksPerMonth);
+        document.getElementById('monthlyBills').textContent = formatCurrency(monthlyBillsAmount);
         document.getElementById('billsFreq').textContent = paychecksPerMonth.toFixed(1) + ' paychecks/month';
-        document.getElementById('toBillsAmount').textContent = '$' + (monthlyBillsAmount / paychecksPerMonth).toFixed(2);
-        document.getElementById('spendingAmount').textContent = '$' + (paycheckAmount - monthlyBillsAmount / paychecksPerMonth).toFixed(2);
+        document.getElementById('toBillsAmount').textContent = formatCurrency(monthlyBillsAmount / paychecksPerMonth);
+        document.getElementById('spendingAmount').textContent = formatCurrency(paycheckAmount - monthlyBillsAmount / paychecksPerMonth);
         
         loadUpcomingBills(bills);
         loadSpendingTrends(transactions);
@@ -524,7 +532,7 @@
     function loadUpcomingBills(bills) {
       const billsList = document.getElementById('upcomingBillsList');
       if (!bills.length) { billsList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills scheduled</div>'; return; }
-      billsList.innerHTML = bills.map(b => `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">Every ${b.frequency} days</div></div><div class="bill-amount">$${b.amount.toFixed(2)}</div></div>`).join('');
+      billsList.innerHTML = bills.map(b => `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">Every ${b.frequency} days</div></div><div class="bill-amount">${formatCurrency(b.amount)}</div></div>`).join('');
     }
     
     function loadSpendingTrends(transactions) {
@@ -536,14 +544,14 @@
       const totalSpend = sorted.reduce((s, [, a]) => s + a, 0);
       const trendsHtml = sorted.map(([cat, amt]) => {
         const pct = (amt / totalSpend * 100).toFixed(1);
-        return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">$${amt.toFixed(2)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
+        return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">${formatCurrency(amt)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
       }).join('');
       document.getElementById('spendingTrends').innerHTML = trendsHtml || '<div class="loading">No spending data</div>';
     }
     
     function loadRecentTransactions(transactions) {
       const recentTxs = transactions.slice(-10).reverse();
-      const html = recentTxs.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}$${t.amount.toFixed(2)}</div></div>`).join('');
+      const html = recentTxs.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</div></div>`).join('');
       document.getElementById('transactionsList').innerHTML = html || '<div class="loading">No transactions</div>';
     }
     
@@ -650,24 +658,24 @@
       html += `<h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 18px;">${dateStr}</h3>`;
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 12px;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Starting Balance</div>`;
-      html += `<div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">$${data.startBalance.toFixed(2)}</div>`;
+      html += `<div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">${formatCurrency(data.startBalance)}</div>`;
       html += `</div>`;
       
       html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">`;
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #34c759;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">+ Income</div>`;
-      html += `<div style="font-size: 18px; font-weight: 700; color: #34c759;">$${data.income.toFixed(2)}</div>`;
+      html += `<div style="font-size: 18px; font-weight: 700; color: #34c759;">${formatCurrency(data.income)}</div>`;
       html += `</div>`;
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #ff3b30;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">- Expenses</div>`;
-      html += `<div style="font-size: 18px; font-weight: 700; color: #ff3b30;">$${data.expense.toFixed(2)}</div>`;
+      html += `<div style="font-size: 18px; font-weight: 700; color: #ff3b30;">${formatCurrency(data.expense)}</div>`;
       html += `</div>`;
       html += `</div>`;
       
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border: 2px solid var(--accent-gold); margin-bottom: 16px;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Ending Balance</div>`;
       const endColor = data.endBalance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-      html += `<div style="font-size: 20px; font-weight: 700; color: ${endColor};">$${data.endBalance.toFixed(2)}</div>`;
+      html += `<div style="font-size: 20px; font-weight: 700; color: ${endColor};">${formatCurrency(data.endBalance)}</div>`;
       html += `</div>`;
       
       if (data.bills && data.bills.length > 0) {
@@ -677,7 +685,7 @@
           const color = b.type === 'income' ? '#34c759' : '#ff3b30';
           html += `<div style="padding: 10px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${color};">`;
           html += `<span style="color: var(--text-primary); font-weight: 500;">${b.name}</span>`;
-          html += `<span style="color: ${color}; font-weight: 700;">${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</span>`;
+          html += `<span style="color: ${color}; font-weight: 700;">${b.type === 'income' ? '+' : '-'}${formatCurrency(b.amount)}</span>`;
           html += `</div>`;
         });
         html += `</div>`;
