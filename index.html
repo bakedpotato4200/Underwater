@@ -1123,16 +1123,43 @@
       });
     }
 
+    function getSuggestedCategory(description) {
+      const desc = description.toLowerCase();
+      if (desc.match(/transfer|from account|to account|xfer|move|deposit|internal|between accounts/i)) return 'Transfer';
+      if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|chipotle|mcdonalds|subway|shake shack|chick fil|popeyes|panera|wingstop|chilis|applebees|olive garden/i)) return 'Food & Dining';
+      if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super|target|instacart|sprouts|aldi|publix/i)) return 'Groceries';
+      if (desc.match(/electric|gas|water|internet|phone|utility|comcast|verizon|at&t|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt/i)) return 'Utilities';
+      if (desc.match(/netflix|hulu|spotify|disney|prime|subscription|gym|apple|xbox|playstation|microsoft|youtube|hbo/i)) return 'Entertainment';
+      if (desc.match(/shell|chevron|exxon|bp|gas|fuel|parking|metro|transit|lyft|uber|carwash/i)) return 'Transportation';
+      if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|h&m|forever 21|gap|old navy/i)) return 'Shopping';
+      if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|dentist|urgent care/i)) return 'Health & Fitness';
+      if (desc.match(/salary|paycheck|deposit|income|bonus|interest|cash app|venmo|paypal|ach|wire/i)) return 'Income';
+      return 'Other';
+    }
+    
     function showCategoryModal(id) {
+      const txn = allTransactions.find(t => t.id == id);
+      const suggestedCat = txn ? getSuggestedCategory(txn.description) : null;
       const categories = ['Income', 'Utilities', 'Food & Dining', 'Groceries', 'Transportation', 'Entertainment', 'Shopping', 'Health & Fitness', 'Transfer', 'Other'];
       const modal = document.getElementById('categoryModal');
       if (!modal) {
         const newModal = document.createElement('div');
         newModal.id = 'categoryModal';
         newModal.className = 'modal active';
-        newModal.innerHTML = `
+        
+        let html = `
           <div class="modal-content">
-            <div class="modal-header">Change Category</div>
+            <div class="modal-header">Change Category</div>`;
+        
+        if (suggestedCat && suggestedCat !== txn.category) {
+          html += `
+            <div style="background: #d1e7dd; border: 1px solid #a6d6aa; padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+              <div style="font-size: 12px; color: #155724; font-weight: 600;">Suggested Category</div>
+              <button class="btn btn-primary" onclick="updateTransactionCategory(${id}, '${suggestedCat}'); document.getElementById('categoryModal').remove();" style="margin-top: 8px; width: 100%;">✓ ${suggestedCat}</button>
+            </div>`;
+        }
+        
+        html += `
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0;">
               ${categories.map(cat => `<button class="btn btn-secondary" onclick="updateTransactionCategory(${id}, '${cat}'); document.getElementById('categoryModal').remove();" style="text-align: center;">${cat}</button>`).join('')}
             </div>
