@@ -659,28 +659,21 @@
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
       
-      let html = `<div style="color: black;"><h3 style="margin-bottom: 16px; font-size: 18px; color: black;">📅 ${dateStr}</h3>`;
-      html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">`;
-      html += `<div style="padding: 14px; background: #f0f0f0; border-radius: 8px;"><div style="color: #666; font-size: 12px; margin-bottom: 4px;">Starting Balance</div><div style="font-size: 18px; font-weight: 700; color: black;">$${data.startBalance.toFixed(2)}</div></div>`;
-      html += `<div style="padding: 14px; background: #e8f5e9; border-radius: 8px; border: 2px solid #34c759;"><div style="color: #34c759; font-size: 12px; margin-bottom: 4px;">+ Income</div><div style="font-size: 18px; font-weight: 700; color: #34c759;">$${data.income.toFixed(2)}</div></div>`;
-      html += `<div style="padding: 14px; background: #ffebee; border-radius: 8px; border: 2px solid #ff3b30;"><div style="color: #ff3b30; font-size: 12px; margin-bottom: 4px;">- Expenses</div><div style="font-size: 18px; font-weight: 700; color: #ff3b30;">$${data.expense.toFixed(2)}</div></div>`;
+      let html = `<p style="font-size: 16px; font-weight: 700; color: black; margin: 0 0 12px 0;">📅 ${dateStr}</p>`;
+      html += `<p style="color: black; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">Starting Balance: <strong style="color: #0066cc;">$${data.startBalance.toFixed(2)}</strong></p>`;
+      html += `<p style="color: #34c759; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">+ Income: <strong>$${data.income.toFixed(2)}</strong></p>`;
+      html += `<p style="color: #ff3b30; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">- Expenses: <strong>$${data.expense.toFixed(2)}</strong></p>`;
       const endColor = data.endBalance >= 0 ? '#34c759' : '#ff3b30';
-      html += `<div style="padding: 14px; background: #f0f0f0; border-radius: 8px; border: 2px solid ${endColor};"><div style="color: ${endColor}; font-size: 12px; margin-bottom: 4px;">Ending Balance</div><div style="font-size: 18px; font-weight: 700; color: ${endColor};">$${data.endBalance.toFixed(2)}</div></div>`;
-      html += `</div>`;
+      html += `<p style="color: ${endColor}; margin: 0 0 12px 0; font-weight: 700; font-size: 16px;">Ending Balance: $${data.endBalance.toFixed(2)}</p>`;
       
       if (data.bills && data.bills.length > 0) {
-        html += `<div style="border-top: 1px solid #ddd; padding-top: 12px; margin-top: 12px;"><h4 style="color: black; margin-bottom: 12px; font-size: 14px;">Recurring Transactions This Day:</h4>`;
+        html += `<p style="color: black; margin: 12px 0 8px 0; font-weight: 700; font-size: 14px; border-top: 1px solid #ddd; padding-top: 12px;">Transactions Today:</p>`;
         data.bills.forEach(b => {
           const isIncome = b.type === 'income';
           const color = isIncome ? '#34c759' : '#ff3b30';
-          const bg = isIncome ? '#f0fdf4' : '#fdf0f0';
-          html += `<div style="padding: 12px; margin-bottom: 8px; background: ${bg}; border-left: 4px solid ${color}; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;"><div style="color: black; font-weight: 600; font-size: 14px;">${b.name}</div><div style="color: ${color}; font-weight: 700; font-size: 16px;">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
+          html += `<p style="color: ${color}; margin: 4px 0; font-weight: 600; font-size: 13px;">${b.name}: ${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</p>`;
         });
-        html += `</div>`;
-      } else {
-        html += `<div style="border-top: 1px solid #ddd; padding-top: 12px; margin-top: 12px; text-align: center; color: #999;">No transactions on this day</div>`;
       }
-      html += `</div>`;
       
       document.getElementById('dayBillsContent').innerHTML = html;
       document.getElementById('dayBillsHeader').textContent = `${dateStr} - Day Overview`;
