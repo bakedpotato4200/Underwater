@@ -1936,6 +1936,8 @@
             return new Date(b.date) - new Date(a.date);
           });
         
+        console.log(`Found ${matchingTxns.length} matching transactions for: "${txn.description}"`);
+        
         // If matching transactions found, ask user for bulk update
         if (matchingTxns.length > 0) {
           const bulkModal = document.createElement('div');

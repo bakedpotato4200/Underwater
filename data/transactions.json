@@ -1011,7 +1011,7 @@
     "id": 113,
     "date": "2025-10-24",
     "amount": -215,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "motorcycle payment - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
