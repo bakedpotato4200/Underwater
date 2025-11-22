@@ -1159,7 +1159,9 @@
       const bills = [];
       Object.entries(calendar).forEach(([date, calendarBills]) => {
         calendarBills.forEach(bill => {
-          bills.push({ ...bill, date });
+          if (bill.type !== 'withdrawal' && bill.type !== 'transfer') {
+            bills.push({ ...bill, date });
+          }
         });
       });
       bills.sort((a, b) => new Date(a.date) - new Date(b.date));
