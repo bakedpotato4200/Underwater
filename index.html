@@ -567,6 +567,23 @@
     </div>
   </div>
 
+  <!-- Debt Payoff Calculator Modal -->
+  <div id="payoffCalculatorModal" class="modal">
+    <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header">Debt Payoff Calculator</div>
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Extra Monthly Payment</label>
+        <input type="number" id="extraPayment" placeholder="0.00" step="0.01" value="0" style="width: 100%; padding: 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 14px;">
+      </div>
+      <button class="btn btn-primary" onclick="calculatePayoffScenarios()" style="width: 100%; margin-bottom: 16px;">Calculate</button>
+      <div id="payoffResults" style="display: none;">
+        <div id="payoffComparison" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;"></div>
+        <div id="strategyComparison" style="background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e5e7;"></div>
+      </div>
+      <button class="btn btn-secondary" onclick="closeModal('payoffCalculatorModal')" style="width: 100%; margin-top: 16px;">Close</button>
+    </div>
+  </div>
+
   <!-- Recurring Bills Modal -->
   <div id="recurringBillModal" class="modal">
     <div class="modal-content">
@@ -1049,13 +1066,86 @@
       }
       list.innerHTML = debts.map(d => `
         <div class="bill-item">
-          <div>
+          <div style="flex: 1;">
             <div class="bill-name">${d.name || d.creditor}</div>
-            <div class="bill-date">${d.rate || d.interestRate || 0}% interest</div>
+            <div class="bill-date">${d.rate || d.interestRate || 0}% interest • Min payment: $${(d.minPayment || 0).toFixed(2)}</div>
           </div>
-          <div class="bill-amount">$${(d.balance || 0).toLocaleString()}</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="bill-amount">$${(d.balance || 0).toLocaleString()}</div>
+            <button class="btn btn-small" style="background: #0071e3; color: white; padding: 6px 10px; font-size: 12px;" onclick="openPayoffCalculator(${JSON.stringify(d).replace(/"/g, '&quot;')})">Payoff</button>
+          </div>
         </div>
       `).join('');
+    }
+
+    let currentDebtForPayoff = null;
+
+    function openPayoffCalculator(debt) {
+      currentDebtForPayoff = debt;
+      document.getElementById('extraPayment').value = '0';
+      document.getElementById('payoffResults').style.display = 'none';
+      openModal('payoffCalculatorModal');
+    }
+
+    function calculatePayoffScenarios() {
+      if (!currentDebtForPayoff) return;
+      const debt = currentDebtForPayoff;
+      const balance = debt.balance || 0;
+      const rate = (debt.rate || debt.interestRate || 0) / 100 / 12;
+      const minPayment = debt.minPayment || 50;
+      const extraPayment = parseFloat(document.getElementById('extraPayment').value) || 0;
+
+      const calculate = (monthlyPayment) => {
+        let remaining = balance;
+        let totalInterest = 0;
+        let months = 0;
+        const maxMonths = 600;
+
+        while (remaining > 0 && months < maxMonths) {
+          const interest = remaining * rate;
+          totalInterest += interest;
+          remaining = remaining + interest - monthlyPayment;
+          months++;
+        }
+
+        return {
+          months: months < maxMonths ? months : 0,
+          years: (months / 12).toFixed(1),
+          totalInterest: totalInterest.toFixed(2),
+          totalPaid: (balance + totalInterest).toFixed(2)
+        };
+      };
+
+      const current = calculate(minPayment);
+      const withExtra = calculate(minPayment + extraPayment);
+      
+      let resultsHtml = `
+        <div style="background: #f0f3ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #0071e3;">
+          <div style="font-weight: 600; color: #000; margin-bottom: 4px;">With Current Payment ($${minPayment.toFixed(2)}/mo)</div>
+          <div style="font-size: 13px; color: #666;">
+            <div>⏱️ ${current.months > 0 ? `${current.years} years (${current.months} months)` : 'Could not calculate'}</div>
+            <div>💰 Total Interest: $${current.totalInterest}</div>
+          </div>
+        </div>
+      `;
+
+      if (extraPayment > 0) {
+        const saved = (parseFloat(current.totalInterest) - parseFloat(withExtra.totalInterest)).toFixed(2);
+        const monthsSaved = current.months - withExtra.months;
+        resultsHtml += `
+          <div style="background: #d1e7dd; padding: 12px; border-radius: 8px; border-left: 4px solid #34c759;">
+            <div style="font-weight: 600; color: #155724; margin-bottom: 4px;">With Extra Payment ($${(minPayment + extraPayment).toFixed(2)}/mo)</div>
+            <div style="font-size: 13px; color: #155724;">
+              <div>⏱️ ${withExtra.months > 0 ? `${withExtra.years} years (${withExtra.months} months)` : 'Could not calculate'}</div>
+              <div>💰 Total Interest: $${withExtra.totalInterest}</div>
+              <div style="margin-top: 4px; font-weight: 600;">✓ Save $${saved} in ${monthsSaved} months!</div>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('payoffComparison').innerHTML = resultsHtml;
+      document.getElementById('payoffResults').style.display = 'block';
     }
 
     function displayRecurring(recurring) {
