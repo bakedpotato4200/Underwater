@@ -672,13 +672,18 @@
         content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; text-align: center; color: var(--text-secondary);">No recurring transactions this day</div>`;
       }
       
-      console.log('Setting modal content');
-      document.getElementById('dayBillsContent').innerHTML = content;
+      console.log('Setting modal content:', content.substring(0, 100));
+      const contentDiv = document.getElementById('dayBillsContent');
+      console.log('Content div found:', contentDiv);
+      if (contentDiv) contentDiv.innerHTML = content;
       const modal = document.getElementById('dayBillsModal');
       const header = modal.querySelector('.modal-header');
       if (header) header.textContent = `Day ${day} - Financial Overview`;
-      console.log('Opening modal');
-      openModal('dayBillsModal');
+      console.log('Modal content set, innerHTML:', contentDiv ? contentDiv.innerHTML.substring(0, 100) : 'NO DIV');
+      setTimeout(() => {
+        console.log('Opening modal');
+        openModal('dayBillsModal');
+      }, 50);
     }
     
     async function loadAutomation() {
