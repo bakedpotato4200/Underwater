@@ -1843,13 +1843,21 @@
         }
         
         // Find other transactions with the same merchant/description
-        const merchantName = txn.description.split(' ')[0].toLowerCase(); // Get merchant name
-        const matchingTxns = allTransactions.filter(t => 
-          t.id !== id && 
-          t.description.toLowerCase().includes(merchantName) &&
-          t.category !== category &&
-          t.type === 'expense'
-        );
+        // Extract merchant name (usually first 1-3 words before numbers/special chars)
+        const descLower = txn.description.toLowerCase();
+        const merchantParts = descLower.split(/[\d\-\s]+/).filter(p => p.length > 2); // Get words with >2 chars
+        const merchantName = merchantParts[0]; // First significant word
+        
+        // Match transactions with same merchant - be flexible with matching
+        const matchingTxns = allTransactions.filter(t => {
+          if (t.id === id || t.category === category || t.type !== 'expense') return false;
+          const tDescLower = t.description.toLowerCase();
+          
+          // Match if description contains the merchant name, or first word matches
+          const tFirstWord = tDescLower.split(/[\d\-\s]+/).filter(p => p.length > 2)[0];
+          return (tDescLower.includes(merchantName) && merchantName.length > 2) || 
+                 (tFirstWord === merchantName && merchantName.length > 3);
+        });
         
         // If matching transactions found, ask user for bulk update
         if (matchingTxns.length > 0) {

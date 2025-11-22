@@ -165,7 +165,7 @@
     "id": 19,
     "date": "2025-10-31",
     "amount": 215,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1272,7 +1272,7 @@
     "id": 142,
     "date": "2025-10-31",
     "amount": 1154,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Savings XXXXXXX0688",
     "type": "income",
     "excluded": false
