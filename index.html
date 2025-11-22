@@ -1706,9 +1706,9 @@
       });
 
       // Attach event listener to month selector
-      const monthSelector = document.getElementById('monthSelector');
-      if (monthSelector) {
-        monthSelector.addEventListener('change', function() {
+      const monthSelectorElement = document.getElementById('monthSelector');
+      if (monthSelectorElement) {
+        monthSelectorElement.addEventListener('change', function() {
           if (this.value) {
             selectSingleMonth(this.value);
           } else {
