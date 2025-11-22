@@ -539,10 +539,12 @@
       document.getElementById('transactionsList').innerHTML = html || '<div class="loading">No transactions</div>';
     }
     
+    let calendarBills = [];
+    
     async function loadCalendar() {
       try {
         const res = await fetch(API_URL + '/api/recurring-bills');
-        const bills = await res.json();
+        calendarBills = await res.json();
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth();
@@ -558,9 +560,9 @@
         }
         
         for (let i = 1; i <= lastDay.getDate(); i++) {
-          const dayBills = bills && bills.length ? bills.filter(b => b.frequency && (i % parseInt(b.frequency) === 0)) : [];
+          const dayBills = calendarBills && calendarBills.length ? calendarBills.filter(b => b.frequency && (i % parseInt(b.frequency) === 0)) : [];
           const billNames = dayBills.map(b => b.name).join(', ');
-          calendarHtml += `<div class="calendar-day ${dayBills.length ? 'has-bills' : ''}" title="${billNames}"><div class="calendar-day-date">${i}</div>${dayBills.length ? '<div style="font-size: 9px; color: var(--accent-gold); margin-top: 2px; font-weight: 700;">📅</div>' : ''}</div>`;
+          calendarHtml += `<div class="calendar-day ${dayBills.length ? 'has-bills' : ''}" onclick="showDayBills(${i})" style="cursor: pointer;" title="Click to see bills"><div class="calendar-day-date">${i}</div>${dayBills.length ? '<div style="font-size: 9px; color: var(--accent-gold); margin-top: 2px; font-weight: 700;">📅</div>' : ''}</div>`;
         }
         
         for (let i = 1; i <= nextDays; i++) {
@@ -570,6 +572,28 @@
         calendarHtml += '</div>';
         document.getElementById('calendarView').innerHTML = calendarHtml;
       } catch (e) { console.error('Calendar error:', e); document.getElementById('calendarView').innerHTML = '<div style="color: red; padding: 20px;">Error loading calendar</div>'; }
+    }
+    
+    function showDayBills(day) {
+      const dayBills = calendarBills && calendarBills.length ? calendarBills.filter(b => b.frequency && (day % parseInt(b.frequency) === 0)) : [];
+      const totalBillsAmount = dayBills.reduce((sum, b) => sum + (b.amount || 0), 0);
+      const paycheckAmount = 1500;
+      const incomeAfterBills = paycheckAmount - totalBillsAmount;
+      
+      let content = `<div style="margin-bottom: 16px;"><strong style="color: var(--text-primary); font-size: 16px;">Day ${day}</strong></div>`;
+      
+      if (dayBills.length === 0) {
+        content += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this day</div>';
+      } else {
+        dayBills.forEach(b => {
+          content += `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">${b.type === 'income' ? 'Income' : 'Bill'}</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? 'var(--accent-success)' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
+        });
+        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px;"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 700; color: var(--text-primary);">Total Bills:</span><span style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">$${totalBillsAmount.toFixed(2)}</span></div><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;"><span style="font-weight: 700; color: var(--text-primary);">Income Left:</span><span style="font-size: 18px; font-weight: 800; color: ${incomeAfterBills >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">$${incomeAfterBills.toFixed(2)}</span></div></div>`;
+      }
+      
+      document.getElementById('dayBillsContent').innerHTML = content;
+      document.querySelector('.modal-header').textContent = `Bills for Day ${day}`;
+      openModal('dayBillsModal');
     }
     
     async function loadAutomation() {
