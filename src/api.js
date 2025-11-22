@@ -204,8 +204,8 @@ function generateBillCalendar(months = 3) {
             if (checkStr === dateStr) {
               calendar[dateStr].push({
                 merchant: bill.name,
-                amount: bill.amount,
-                type: 'expense',
+                amount: bill.type === 'income' ? Math.abs(bill.amount) : bill.amount,
+                type: bill.type || 'expense',
                 daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
                 frequency: bill.frequency
               });
