@@ -1855,9 +1855,23 @@
             <div style="font-size: 13px; font-weight: 600; color: #000;">${cat}</div>
           </div>`;
         });
-        html += `</div>
+        html += `</div>`;
         
-          <div style="margin-bottom: 16px; padding: 12px 14px; border: 1.5px solid #e5e5e7; border-radius: 10px; background: #f9fafb;">
+        // Show recent custom categories
+        const customCats = getCustomCategories();
+        if (customCats.length > 0) {
+          html += `<div style="margin-bottom: 16px;">
+            <div style="font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Recent Custom</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">`;
+          customCats.forEach(cat => {
+            html += `<div class="cat-option custom-cat" data-cat="${cat}" style="padding: 12px 14px; border: 1.5px solid #d1f0ff; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f0f7ff;">
+              <div style="font-size: 13px; font-weight: 600; color: #0071e3;">${cat}</div>
+            </div>`;
+          });
+          html += `</div></div>`;
+        }
+        
+        html += `<div style="margin-bottom: 16px; padding: 12px 14px; border: 1.5px solid #e5e5e7; border-radius: 10px; background: #f9fafb;">
             <input type="text" id="customCategory" placeholder="Custom category..." style="width: 100%; border: none; background: transparent; font-size: 13px; outline: none; font-weight: 500; color: #000;" />
           </div>
           
@@ -1893,11 +1907,15 @@
           });
         }
         
-        // Category option clicks
+        // Category option clicks (including custom categories)
         document.querySelectorAll('.cat-option').forEach(option => {
           option.addEventListener('click', () => {
             document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
-            option.style.background = '#f0f3ff';
+            if (option.classList.contains('custom-cat')) {
+              option.style.background = '#d1f0ff';
+            } else {
+              option.style.background = '#f0f3ff';
+            }
             selectedCategory = option.dataset.cat;
             customInput.value = '';
             updateSaveButton();
@@ -1919,6 +1937,7 @@
         saveBtn.addEventListener('click', () => {
           const cat = selectedCategory || customInput.value.trim();
           if (cat) {
+            saveCustomCategory(cat);
             newModal.remove();
             updateTransactionCategory(id, cat);
           }
