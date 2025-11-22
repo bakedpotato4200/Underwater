@@ -1131,3 +1131,73 @@ app.post('/api/learn-exclusion', express.json(), (req, res) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+
+// Automation endpoints
+const automationRulesFile = path.join(dataDir, 'automation-rules.json');
+let automationData = loadData(automationRulesFile);
+
+app.get('/api/automation/rules', (req, res) => {
+  automationData = loadData(automationRulesFile);
+  res.json(automationData || { rules: [], history: [] });
+});
+
+app.post('/api/automation/rules', express.json(), (req, res) => {
+  const { name, frequency, billsAmount, spendingAmount } = req.body;
+  if (!name || !frequency || billsAmount === undefined || spendingAmount === undefined) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  
+  automationData = loadData(automationRulesFile);
+  const rule = {
+    id: Date.now(),
+    name,
+    frequency: parseInt(frequency),
+    billsAmount: parseFloat(billsAmount),
+    spendingAmount: parseFloat(spendingAmount),
+    createdAt: new Date().toISOString(),
+    active: true
+  };
+  
+  automationData.rules = automationData.rules || [];
+  automationData.rules.push(rule);
+  saveData(automationRulesFile, automationData);
+  res.json(rule);
+});
+
+app.delete('/api/automation/rules/:id', (req, res) => {
+  const ruleId = parseInt(req.params.id);
+  automationData = loadData(automationRulesFile);
+  automationData.rules = automationData.rules.filter(r => r.id !== ruleId);
+  saveData(automationRulesFile, automationData);
+  res.json({ success: true });
+});
+
+app.post('/api/automation/execute', express.json(), (req, res) => {
+  automationData = loadData(automationRulesFile);
+  if (!automationData.rules || automationData.rules.length === 0) {
+    return res.status(400).json({ error: 'No rules configured' });
+  }
+  
+  const rule = automationData.rules[0];
+  const transfer = {
+    id: Date.now(),
+    ruleId: rule.id,
+    ruleName: rule.name,
+    billsAmount: rule.billsAmount,
+    spendingAmount: rule.spendingAmount,
+    totalTransferred: rule.billsAmount + rule.spendingAmount,
+    executedAt: new Date().toISOString(),
+    status: 'completed'
+  };
+  
+  automationData.history = automationData.history || [];
+  automationData.history.push(transfer);
+  saveData(automationRulesFile, automationData);
+  res.json(transfer);
+});
+
+app.get('/api/automation/history', (req, res) => {
+  automationData = loadData(automationRulesFile);
+  const history = (automationData.history || []).slice(-10).reverse();
+  res.json(history);
+});

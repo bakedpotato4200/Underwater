@@ -307,6 +307,7 @@
       <button onclick="switchTab('trends'); toggleSidebar();">Trends</button>
       <button onclick="switchTab('calendar'); toggleSidebar();">Calendar</button>
       <button onclick="switchTab('insights'); toggleSidebar();">Insights</button>
+      <button onclick="switchTab('automation'); toggleSidebar();">Automation</button>
       <button onclick="switchTab('transactions'); toggleSidebar();">All Transactions</button>
     </div>
   </div>
@@ -443,6 +444,75 @@
         <div class="card full">
           <h2>Cash Flow Projection</h2>
           <div id="cashFlowChart" style="display: flex; align-items: flex-end; justify-content: space-around; height: 180px; gap: 8px; margin: 20px 0;"></div>
+        </div>
+      </div>
+
+      <div id="automation" class="tab-content" style="display: none;">
+        <div class="dashboard">
+          <!-- Automation Status -->
+          <div class="card full" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: white; border: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">🤖 Automation Hub</div>
+                <div style="font-size: 14px; opacity: 0.9;">Set it and forget it - automated transfers for peace of mind</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 8px;">Status</div>
+                <div style="font-size: 18px; font-weight: 700;" id="automationStatus">Ready ✓</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Create Rule -->
+          <div class="card full">
+            <h2>📋 Create Transfer Rule</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+              <div class="form-group">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Rule Name</label>
+                <input type="text" id="ruleName" placeholder="e.g., Biweekly Transfer" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Frequency</label>
+                <select id="ruleFrequency" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+                  <option value="7">Weekly</option>
+                  <option value="14" selected>Bi-weekly</option>
+                  <option value="30">Monthly</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Bills Amount ($)</label>
+                <input type="number" id="ruleBillsAmount" placeholder="400.00" step="0.01" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+              </div>
+              <div class="form-group">
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Spending Amount ($)</label>
+                <input type="number" id="ruleSpendingAmount" placeholder="1100.00" step="0.01" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary);">
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="createTransferRule()" style="width: 100%; padding: 14px;">+ Create Rule</button>
+          </div>
+
+          <!-- Active Rules -->
+          <div class="card full">
+            <h2>⚙️ Active Rules</h2>
+            <div id="activeRulesList" style="display: grid; gap: 12px;">
+              <div class="loading">Loading rules...</div>
+            </div>
+            <div style="margin-top: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid #0891b2;">
+              <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <button class="btn btn-primary" onclick="executeTransferNow()" style="flex: 1;">▶️ Execute Transfer Now</button>
+                <button class="btn btn-secondary" onclick="loadTransferRules()" style="flex: 1;">🔄 Refresh</button>
+              </div>
+              <div style="font-size: 12px; color: var(--text-secondary);">Next scheduled transfer: <span id="nextTransferDate" style="font-weight: 700; color: #0891b2;">—</span></div>
+            </div>
+          </div>
+
+          <!-- Transfer History -->
+          <div class="card full">
+            <h2>📜 Transfer History</h2>
+            <div id="transferHistoryList" style="display: grid; gap: 10px; max-height: 400px; overflow-y: auto;">
+              <div class="loading">Loading history...</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3346,3 +3416,120 @@
   </script>
 </body>
 </html>
+
+    // Automation functions
+    async function loadTransferRules() {
+      try {
+        const data = await fetch(API_URL + '/api/automation/rules').then(r => r.json());
+        const rules = data.rules || [];
+        const history = data.history || [];
+        
+        // Display active rules
+        const rulesList = document.getElementById('activeRulesList');
+        if (rules.length === 0) {
+          rulesList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No automation rules yet. Create one to get started!</div>';
+        } else {
+          rulesList.innerHTML = rules.map(rule => `
+            <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">${rule.name}</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Every ${rule.frequency} days</div>
+                <div style="display: flex; gap: 16px; font-size: 13px; margin-top: 8px;">
+                  <span style="color: #ff3b30;">📤 Bills: $${rule.billsAmount.toFixed(2)}</span>
+                  <span style="color: #34c759;">💵 Spending: $${rule.spendingAmount.toFixed(2)}</span>
+                </div>
+              </div>
+              <button onclick="deleteTransferRule(${rule.id}); loadTransferRules();" class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;">Delete</button>
+            </div>
+          `).join('');
+        }
+        
+        // Display transfer history
+        const historyList = document.getElementById('transferHistoryList');
+        if (history.length === 0) {
+          historyList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No transfers yet</div>';
+        } else {
+          historyList.innerHTML = history.map(h => `
+            <div style="background: var(--bg-secondary); padding: 12px; border-radius: 6px; border-left: 4px solid #0891b2;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 600; color: var(--text-primary);">${h.ruleName}</span>
+                <span style="font-size: 12px; color: var(--text-secondary);">${new Date(h.executedAt).toLocaleDateString()}</span>
+              </div>
+              <div style="font-size: 13px; color: #0891b2; font-weight: 700;">Transferred: $${h.totalTransferred.toFixed(2)}</div>
+            </div>
+          `).join('');
+        }
+        
+        // Calculate next transfer date
+        if (rules.length > 0) {
+          const rule = rules[0];
+          const nextDate = new Date();
+          nextDate.setDate(nextDate.getDate() + rule.frequency);
+          document.getElementById('nextTransferDate').textContent = nextDate.toLocaleDateString();
+        }
+      } catch (e) {
+        console.error('Error loading transfer rules:', e);
+      }
+    }
+    
+    async function createTransferRule() {
+      const name = document.getElementById('ruleName').value;
+      const frequency = document.getElementById('ruleFrequency').value;
+      const billsAmount = document.getElementById('ruleBillsAmount').value;
+      const spendingAmount = document.getElementById('ruleSpendingAmount').value;
+      
+      if (!name || !billsAmount || !spendingAmount) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      try {
+        const response = await fetch(API_URL + '/api/automation/rules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, frequency, billsAmount, spendingAmount })
+        });
+        
+        if (response.ok) {
+          alert('✓ Transfer rule created!');
+          document.getElementById('ruleName').value = '';
+          document.getElementById('ruleBillsAmount').value = '';
+          document.getElementById('ruleSpendingAmount').value = '';
+          loadTransferRules();
+        }
+      } catch (e) {
+        console.error('Error creating rule:', e);
+        alert('Error creating rule');
+      }
+    }
+    
+    async function deleteTransferRule(ruleId) {
+      if (!confirm('Delete this rule?')) return;
+      try {
+        await fetch(API_URL + `/api/automation/rules/${ruleId}`, { method: 'DELETE' });
+        loadTransferRules();
+      } catch (e) {
+        console.error('Error deleting rule:', e);
+      }
+    }
+    
+    async function executeTransferNow() {
+      if (!confirm('Execute transfer now?')) return;
+      try {
+        const response = await fetch(API_URL + '/api/automation/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          const transfer = await response.json();
+          alert(`✓ Transfer complete!\nBills: $${transfer.billsAmount.toFixed(2)}\nSpending: $${transfer.spendingAmount.toFixed(2)}\nTotal: $${transfer.totalTransferred.toFixed(2)}`);
+          loadTransferRules();
+        } else {
+          alert('No rules configured');
+        }
+      } catch (e) {
+        console.error('Error executing transfer:', e);
+        alert('Error executing transfer');
+      }
+    }
