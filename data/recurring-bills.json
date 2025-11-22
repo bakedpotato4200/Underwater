@@ -4,6 +4,7 @@
     "name": "Paycheck",
     "amount": 1500,
     "frequency": 14,
-    "startDate": "2025-06-06"
+    "startDate": "2025-06-06",
+    "type": "income"
   }
 ]
