@@ -1921,13 +1921,14 @@
           });
         }
         
-        // Function to extract meaningful keywords from description
+        // Function to extract meaningful keywords from description - reads entire description
         function extractKeywords(desc) {
-          const commonWords = ['the', 'a', 'an', 'and', 'or', 'to', 'from', 'by', 'at', 'in', 'on', 'for', 'with', 'is', 'are', 'was', 'were', 'be', 'deposit', 'withdrawal', 'transfer', 'spending', 'savings', 'xxxxxxx', 'account'];
-          return desc.toLowerCase()
+          const commonWords = ['the', 'a', 'an', 'and', 'or', 'to', 'from', 'by', 'at', 'in', 'on', 'for', 'with', 'is', 'are', 'was', 'were', 'be', 'deposit', 'withdrawal', 'transfer', 'spending', 'savings', 'xxxxxxx', 'account', 'card', 'payment', 'purchase'];
+          const words = desc.toLowerCase()
             .split(/[\s\-\d]+/)
-            .filter(word => word.length > 2 && !commonWords.includes(word))
-            .slice(0, 5); // Get up to 5 meaningful keywords
+            .filter(word => word.length > 2 && !commonWords.includes(word));
+          // Return all meaningful words (not just first 5) for more comprehensive matching
+          return words.slice(0, 20); // Get up to 20 meaningful keywords for better context
         }
         
         // Function to calculate similarity score between two descriptions
@@ -1938,6 +1939,7 @@
           if (keywords1.length === 0 || keywords2.length === 0) return 0;
           
           const matches = keywords1.filter(kw => keywords2.includes(kw)).length;
+          // Adjusted to match if 35%+ keyword overlap (more lenient since we're reading more words)
           return matches / Math.max(keywords1.length, keywords2.length);
         }
         
@@ -1948,7 +1950,7 @@
             
             // Calculate similarity score based on entire description
             const similarity = calculateSimilarity(txn.description, t.description);
-            return similarity > 0.4; // Match if 40%+ keyword overlap
+            return similarity > 0.35; // Match if 35%+ keyword overlap (more accurate with more words)
           })
           .sort((a, b) => {
             // Sort by similarity score (highest first)
