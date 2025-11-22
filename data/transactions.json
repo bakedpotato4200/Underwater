@@ -1371,7 +1371,7 @@
     "id": 153,
     "date": "2025-10-06",
     "amount": -83.98,
-    "category": "Other",
+    "category": "Shopping",
     "description": "Withdrawal from 770510487C FU SHAN SHI WEI YOU KE JI YOU XIAN IAT PAYPAL",
     "type": "expense",
     "excluded": false
@@ -1533,7 +1533,7 @@
     "id": 171,
     "date": "2025-09-02",
     "amount": -83.79,
-    "category": "Other",
+    "category": "Utilities",
     "description": "Withdrawal from AEP PUBLIC SERVI BILL PAY",
     "type": "expense",
     "excluded": false
@@ -1551,7 +1551,7 @@
     "id": 173,
     "date": "2025-09-03",
     "amount": -1150,
-    "category": "Other",
+    "category": "Rent",
     "description": "Withdrawal from LynCo, Inc. RESIDENT",
     "type": "expense",
     "excluded": false
@@ -2199,7 +2199,7 @@
     "id": 245,
     "date": "2025-07-01",
     "amount": -49,
-    "category": "Other",
+    "category": "Credit card payment",
     "description": "Withdrawal from WF Card RETRY PYMT",
     "type": "expense",
     "excluded": false
@@ -2235,7 +2235,7 @@
     "id": 249,
     "date": "2025-07-02",
     "amount": -1150,
-    "category": "Other",
+    "category": "Rent",
     "description": "Withdrawal from LynCo, Inc. RESIDENT",
     "type": "expense",
     "excluded": false
@@ -2307,7 +2307,7 @@
     "id": 257,
     "date": "2025-07-07",
     "amount": -100,
-    "category": "Other",
+    "category": "Utilities",
     "description": "Withdrawal from AEP PUBLIC SERVI RETRY PYMT",
     "type": "expense",
     "excluded": false
@@ -3378,7 +3378,7 @@
     "id": 376,
     "date": "2025-06-03",
     "amount": -1150,
-    "category": "Other",
+    "category": "Rent",
     "description": "Withdrawal from LynCo, Inc. RESIDENT",
     "type": "expense",
     "excluded": false
