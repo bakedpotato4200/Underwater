@@ -1095,13 +1095,18 @@
       
       try {
         showToast(`Excluding ${ids.length} transactions...`, 'info');
+        
+        // Refresh transaction data from server first
+        const freshTransactions = await fetch(API_URL + '/api/transactions').then(r => r.json());
+        console.log(`Loaded ${freshTransactions.length} fresh transactions from server`);
+        
         let successCount = 0;
         let failCount = 0;
         
         for (const id of ids) {
           try {
-            // Find the transaction to check if it's already excluded
-            const txn = allTransactions.find(t => t.id == id);
+            // Find the transaction from FRESH data to check current excluded state
+            const txn = freshTransactions.find(t => t.id == id);
             const isAlreadyExcluded = txn && txn.excluded;
             
             console.log(`Excluding transaction ${id}... (currently excluded: ${isAlreadyExcluded})`);
