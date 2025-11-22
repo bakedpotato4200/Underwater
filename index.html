@@ -874,42 +874,54 @@
 
     function applyFilters() {
       const today = new Date(2025, 10, 21);
-      const search = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase() : '';
+      const searchBox = document.getElementById('searchBox');
+      const search = searchBox ? searchBox.value.toLowerCase().trim() : '';
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
       
+      console.log('Applying filters:', {typeFilter: currentTypeFilter, dateFilter: currentDateFilter, search, itemCount: items.length});
+      
       items.forEach(item => {
-        const type = item.getAttribute('data-type') || '';
-        const dateStr = item.getAttribute('data-date') || '';
+        const type = item.getAttribute('data-type');
+        const dateStr = item.getAttribute('data-date');
         const text = item.textContent.toLowerCase();
         
-        // Apply type filter
-        if (currentTypeFilter !== 'all' && type !== currentTypeFilter) {
-          item.style.display = 'none';
-          return;
-        }
-        
-        // Apply date filter
-        if (currentDateFilter !== 'all' && dateStr) {
-          const [y, m, d] = dateStr.split('-');
-          const txnDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-          const days = Math.floor((today - txnDate) / (86400000));
-          
-          if (currentDateFilter === 'month' && (txnDate.getMonth() !== today.getMonth() || txnDate.getFullYear() !== today.getFullYear())) {
-            item.style.display = 'none';
-            return;
-          } else if (currentDateFilter === '30days' && (days < 0 || days > 30)) {
-            item.style.display = 'none';
-            return;
-          } else if (currentDateFilter === '3months' && (days < 0 || days > 90)) {
-            item.style.display = 'none';
-            return;
-          } else if (currentDateFilter === 'year' && txnDate.getFullYear() !== today.getFullYear()) {
+        // Type filter
+        if (currentTypeFilter !== 'all') {
+          if (type !== currentTypeFilter) {
             item.style.display = 'none';
             return;
           }
         }
         
-        // Apply search filter
+        // Date filter
+        if (currentDateFilter !== 'all') {
+          if (!dateStr) {
+            item.style.display = 'none';
+            return;
+          }
+          
+          const parts = dateStr.split('-');
+          const txnDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          const daysDiff = Math.floor((today - txnDate) / 86400000);
+          
+          let shouldShow = false;
+          if (currentDateFilter === 'month') {
+            shouldShow = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
+          } else if (currentDateFilter === '30days') {
+            shouldShow = daysDiff >= 0 && daysDiff <= 30;
+          } else if (currentDateFilter === '3months') {
+            shouldShow = daysDiff >= 0 && daysDiff <= 90;
+          } else if (currentDateFilter === 'year') {
+            shouldShow = txnDate.getFullYear() === today.getFullYear();
+          }
+          
+          if (!shouldShow) {
+            item.style.display = 'none';
+            return;
+          }
+        }
+        
+        // Search filter
         if (search && !text.includes(search)) {
           item.style.display = 'none';
           return;
