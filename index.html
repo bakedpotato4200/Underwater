@@ -476,7 +476,7 @@
       document.getElementById('overviewHeader').style.display = tab === 'overview' ? 'block' : 'none';
       if (tab === 'overview') { document.getElementById('overviewContent').style.display = 'grid'; }
       else if (tab === 'transactions') { document.getElementById('transactionsContent').style.display = 'grid'; }
-      else { document.getElementById(tab + 'Content').style.display = 'block'; }
+      else { document.getElementById(tab + 'Content').style.display = 'grid'; }
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
       if (tab === 'calendar') { setTimeout(loadCalendar, 100); }
@@ -642,35 +642,22 @@
       const data = calendarData[day];
       if (!data) return;
       
-      let content = '';
-      content += `<div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 12px;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Starting Balance</div><div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">$${data.startBalance.toFixed(2)}</div></div>`;
-      
-      if (data.income > 0) {
-        content += `<div style="padding: 12px; background: #f0fdf4; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #34c759;"><div style="font-size: 12px; color: #34c759; margin-bottom: 4px;">+ Income</div><div style="font-size: 18px; font-weight: 700; color: #34c759;">$${data.income.toFixed(2)}</div></div>`;
-      }
-      
-      if (data.expense > 0) {
-        content += `<div style="padding: 12px; background: #fdf0f0; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #ff3b30;"><div style="font-size: 12px; color: #ff3b30; margin-bottom: 4px;">- Expenses</div><div style="font-size: 18px; font-weight: 700; color: #ff3b30;">$${data.expense.toFixed(2)}</div></div>`;
-      }
-      
-      const endBalColor = data.endBalance >= 0 ? '#34c759' : '#ff3b30';
-      content += `<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 12px; border: 2px solid ${endBalColor};"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Ending Balance</div><div style="font-size: 24px; font-weight: 800; color: ${endBalColor};">$${data.endBalance.toFixed(2)}</div></div>`;
+      let content = `<div style="color: black; font-size: 16px; padding: 20px;"><strong>Day ${day} Financial Details</strong><br><br>Starting: $${data.startBalance.toFixed(2)}<br>Income: $${data.income.toFixed(2)}<br>Expenses: $${data.expense.toFixed(2)}<br>Ending: $${data.endBalance.toFixed(2)}<br><br>`;
       
       if (data.bills && data.bills.length > 0) {
-        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px;"><div style="font-weight: 700; color: var(--text-primary); margin-bottom: 12px; font-size: 14px;">Recurring Transactions:</div>`;
+        content += `<strong>Transactions:</strong><br>`;
         data.bills.forEach(b => {
-          const isIncome = b.type === 'income';
-          const bgColor = isIncome ? '#f0fdf4' : '#fdf0f0';
-          const borderColor = isIncome ? '#34c759' : '#ff3b30';
-          const textColor = isIncome ? '#34c759' : '#ff3b30';
-          content += `<div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 12px; margin-bottom: 8px; border-radius: 6px;"><div style="display: flex; justify-content: space-between; align-items: center;"><div><div style="font-weight: 600; color: var(--text-primary);">${b.name}</div><div style="font-size: 11px; color: var(--text-tertiary); margin-top: 2px;">Every ${b.frequency} days</div></div><div style="font-weight: 700; font-size: 14px; color: ${textColor};">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div></div>`;
+          content += `${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}<br>`;
         });
-        content += `</div>`;
       } else {
-        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px; text-align: center; color: var(--text-secondary); padding: 16px;">No recurring transactions this day</div>`;
+        content += `No recurring transactions`;
       }
+      content += `</div>`;
       
-      document.getElementById('dayBillsContent').innerHTML = content;
+      const contentDiv = document.getElementById('dayBillsContent');
+      if (contentDiv) {
+        contentDiv.innerHTML = content;
+      }
       const header = document.querySelector('#dayBillsModal .modal-header');
       if (header) header.textContent = `Day ${day} - Financial Overview`;
       openModal('dayBillsModal');
