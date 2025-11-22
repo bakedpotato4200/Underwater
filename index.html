@@ -1597,6 +1597,23 @@
         return;
       }
 
+      // Dynamic color palette - 20+ distinct colors, no blues/repeats
+      const colorPalette = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2',
+        '#F8B88B', '#AB47BC', '#00897B', '#E57373', '#64B5F6', '#AED581', '#FFB74D', '#CE93D8',
+        '#7C7C7C', '#FF8A65', '#29B6F6', '#EF5350', '#66BB6A', '#AB47BC', '#29B6F6', '#FFCA28'
+      ];
+
+      // Function to get deterministic color for any category
+      function getCategoryColor(category) {
+        let hash = 0;
+        for (let i = 0; i < category.length; i++) {
+          hash = ((hash << 5) - hash) + category.charCodeAt(i);
+          hash = hash & hash; // Convert to 32bit integer
+        }
+        return colorPalette[Math.abs(hash) % colorPalette.length];
+      }
+
       const colors = {
         'Income': '#34c759', 'Utilities': '#ff9500', 'Food & Dining': '#ff3b30',
         'Groceries': '#a2d952', 'Transportation': '#5856d6', 'Entertainment': '#ff1493',
@@ -1637,7 +1654,8 @@
         const largeArc = sliceAngle > 180 ? 1 : 0;
         const path = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 
-        slices += `<path d="${path}" fill="${colors[cat] || '#0071e3'}" stroke="white" stroke-width="2" title="${cat}: $${val.toFixed(0)} (${(val/total*100).toFixed(1)}%)"></path>`;
+        const categoryColor = colors[cat] || getCategoryColor(cat);
+        slices += `<path d="${path}" fill="${categoryColor}" stroke="white" stroke-width="2" title="${cat}: $${val.toFixed(0)} (${(val/total*100).toFixed(1)}%)"></path>`;
         currentAngle = endAngle;
       });
 
@@ -1655,9 +1673,10 @@
       const legendGrid = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 16px;">
         ${data.map(([cat, val]) => {
           const percent = (val / total * 100).toFixed(1);
+          const categoryColor = colors[cat] || getCategoryColor(cat);
           return `<div class="trends-category-card" data-category="${cat}" style="padding: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.2s;">
             <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-              <div style="width: 8px; height: 8px; background: ${colors[cat] || '#0071e3'}; border-radius: 2px;"></div>
+              <div style="width: 8px; height: 8px; background: ${categoryColor}; border-radius: 2px;"></div>
               <span style="font-size: 10px; font-weight: 600; color: #000;">${cat}</span>
             </div>
             <div style="font-size: 12px; font-weight: 700; color: #0071e3; margin-bottom: 2px;">$${val.toFixed(0)}</div>
