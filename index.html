@@ -1648,9 +1648,12 @@
         { label: 'Last Year', months: 12 }
       ];
 
-      const buttons = periods.map(p => `
-        <button class="trends-period-btn" data-months="${p.months}" style="padding: 6px 14px; border: 1px solid ${!singleMonth && trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${!singleMonth && trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${!singleMonth && trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
-      `).join('');
+      const periodSelector = `
+        <select id="periodSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: ${!singleMonth ? '#0071e3' : '#f9fafb'}; color: ${!singleMonth ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
+          <option value="" ${!singleMonth && trendsPeriod === 4 ? 'selected' : ''} style="color: #000; background: #fff;">View Period</option>
+          ${periods.map(p => `<option value="${p.months}" ${!singleMonth && trendsPeriod === p.months ? 'selected' : ''} style="color: #000; background: #fff;">${p.label}</option>`).join('')}
+        </select>
+      `;
 
       const monthSelector = `
         <select id="monthSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: ${singleMonth ? '#0071e3' : '#f9fafb'}; color: ${singleMonth ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -1679,9 +1682,8 @@
 
       container.innerHTML = `
         <div style="max-width: 900px; margin: 0 auto;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 24px;" id="trendsButtonsContainer">
-            ${buttons}
-            <div style="width: 1px; height: 24px; background: #e5e5e7;"></div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 24px;" id="trendsButtonsContainer">
+            ${periodSelector}
             ${monthSelector}
           </div>
           <div style="background: white; border: 1px solid #e5e5e7; border-radius: 12px; padding: 32px; text-align: center;">
@@ -1697,13 +1699,15 @@
         </div>
       `;
 
-      // Attach event listeners to buttons
-      document.querySelectorAll('.trends-period-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const months = parseInt(this.dataset.months);
-          changeTrendsPeriod(months);
+      // Attach event listener to period selector
+      const periodSelectorElement = document.getElementById('periodSelector');
+      if (periodSelectorElement) {
+        periodSelectorElement.addEventListener('change', function() {
+          if (this.value) {
+            changeTrendsPeriod(parseInt(this.value));
+          }
         });
-      });
+      }
 
       // Attach event listener to month selector
       const monthSelectorElement = document.getElementById('monthSelector');
