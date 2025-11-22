@@ -933,14 +933,17 @@ app.delete('/api/recurring-bills/:id', (req, res) => {
 // Bills Calculator endpoint
 app.get('/api/bills-calculator', (req, res) => {
   try {
+    // Reload bills from disk to ensure we have the latest
+    const freshBills = loadData(recurringBillsFile);
+    
     // Calculate total monthly bills from recurring bills
     let totalMonthlyBills = 0;
     let paycheckAmount = 0;
     let paycheckFrequency = 30; // default
     
     // Get all recurring bills
-    if (Array.isArray(recurringBills)) {
-      recurringBills.forEach(bill => {
+    if (Array.isArray(freshBills)) {
+      freshBills.forEach(bill => {
         if (bill.type === 'income') {
           paycheckAmount = bill.amount;
           paycheckFrequency = bill.frequency;
