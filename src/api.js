@@ -65,6 +65,12 @@ function saveData(file, data) {
 
 // Initialize data from files
 let transactions = loadData(transactionsFile);
+
+// Function to get fresh transaction data
+function getTransactions() {
+  transactions = loadData(transactionsFile);
+  return transactions;
+}
 let debts = loadData(debtsFile);
 let subscriptions = loadData(subscriptionsFile);
 let goals = loadData(goalsFile);
