@@ -170,7 +170,7 @@ function generateBillCalendar(months = 3) {
         if (t.type === 'income' && t.date === dateStr && !t.excluded) {
           calendar[dateStr].push({
             merchant: t.description,
-            amount: t.amount,
+            amount: Math.abs(t.amount),
             category: t.category || 'Income',
             type: 'income',
             daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24))
