@@ -1399,6 +1399,11 @@
     let trendsPeriod = 4;
     let trendsData = {};
 
+    function changeTrendsPeriod(monthCount) {
+      trendsPeriod = monthCount;
+      displaySpendingTrendsPie(monthCount);
+    }
+
     function displaySpendingTrendsPie(monthCount) {
       const trends = trendsData;
       const container = document.getElementById('trendsChart');
@@ -1459,14 +1464,6 @@
         currentAngle = endAngle;
       });
 
-      const legend = data.map(([cat, val]) => {
-        const percent = (val / total * 100).toFixed(1);
-        return `<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 0;">
-          <div style="width: 12px; height: 12px; background: ${colors[cat] || '#0071e3'}; border-radius: 2px;"></div>
-          <span>${cat}: $${val.toFixed(0)} (${percent}%)</span>
-        </div>`;
-      }).join('');
-
       const periods = [
         { label: 'This Month', months: 1 },
         { label: 'Last 2 Months', months: 2 },
@@ -1477,7 +1474,7 @@
       ];
 
       const buttons = periods.map(p => `
-        <button onclick="trendsPeriod=${p.months}; displaySpendingTrendsPie(${p.months});" style="padding: 6px 14px; border: 1px solid ${trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
+        <button onclick="changeTrendsPeriod(${p.months})" style="padding: 6px 14px; border: 1px solid ${trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
       `).join('');
 
       const periodLabel = periods.find(p => p.months === monthCount)?.label || 'Last 4 Months';
