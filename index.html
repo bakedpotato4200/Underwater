@@ -1756,56 +1756,97 @@
       const oldModal = document.getElementById('categoryModal');
       if (oldModal) oldModal.remove();
       
+      let selectedCategory = null;
+      
       const newModal = document.createElement('div');
       newModal.id = 'categoryModal';
       newModal.className = 'modal active';
+      newModal.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(6px);';
       
-      let html = `<div class="modal-content"><div class="modal-header">Change Category</div>`;
+      let html = `<div style="background: white; border-radius: 20px; padding: 32px; max-width: 440px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+        <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #000; letter-spacing: -0.5px;">Select Category</div>
+        <div style="font-size: 13px; color: #999; margin-bottom: 20px;">${txn.description}</div>`;
       
       if (suggestedCat && suggestedCat !== txn.category) {
-        html += `<div style="background: #d1e7dd; border: 1px solid #a6d6aa; padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
-          <div style="font-size: 12px; color: #155724; font-weight: 600;">Suggested Category</div>
-          <button class="btn btn-primary" style="margin-top: 8px; width: 100%;">✓ ${suggestedCat}</button></div>`;
+        html += `<div style="margin-bottom: 16px; padding: 10px 14px; background: #e8f4f8; border: 1.5px solid #0071e3; border-radius: 10px; cursor: pointer; transition: all 0.2s;" class="suggested-cat" data-cat="${suggestedCat}">
+          <div style="font-size: 11px; color: #0071e3; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">✨ Suggested</div>
+          <div style="font-size: 14px; font-weight: 600; color: #0071e3;">${suggestedCat}</div>
+        </div>`;
       }
       
-      html += `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0;">`;
+      html += `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">`;
       categories.forEach(cat => {
-        html += `<button class="btn btn-secondary" style="text-align: center;">${cat}</button>`;
+        html += `<div class="cat-option" data-cat="${cat}" style="padding: 12px 14px; border: 1.5px solid #e5e5e7; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: white;">
+          <div style="font-size: 13px; font-weight: 600; color: #000;">${cat}</div>
+        </div>`;
       });
       html += `</div>
-        <div style="margin: 16px 0; padding: 12px; border: 1px solid #d5d5d7; border-radius: 8px; background: #f9f9fb;">
-          <label style="display: block; font-size: 12px; font-weight: 600; color: #000; margin-bottom: 8px;">Or create custom:</label>
-          <input type="text" id="customCategory" placeholder="Enter custom category" style="width: 100%; padding: 10px 12px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; margin-bottom: 8px;" />
-          <button class="btn btn-primary" id="setCustomBtn" style="width: 100%; text-align: center;">Set Custom</button>
+      
+        <div style="margin-bottom: 16px; padding: 12px 14px; border: 1.5px solid #e5e5e7; border-radius: 10px; background: #f9fafb;">
+          <input type="text" id="customCategory" placeholder="Custom category..." style="width: 100%; border: none; background: transparent; font-size: 13px; outline: none; font-weight: 500; color: #000;" />
         </div>
-        <button class="btn btn-secondary" id="cancelCatBtn" style="width: 100%;">Cancel</button></div>`;
+        
+        <button class="btn btn-primary" id="saveCatBtn" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; opacity: 0.5; cursor: not-allowed;">Save Category</button>
+        <button style="width: 100%; padding: 12px; margin-top: 8px; font-size: 13px; font-weight: 600; border-radius: 12px; background: #f5f5f7; border: none; color: #000; cursor: pointer; transition: all 0.2s;" id="cancelCatBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
+      </div>`;
       
       newModal.innerHTML = html;
       document.body.appendChild(newModal);
       
-      // Add event listeners for buttons
-      const content = newModal.querySelector('.modal-content');
-      const buttons = content.querySelectorAll('.btn');
+      const saveBtn = document.getElementById('saveCatBtn');
+      const customInput = document.getElementById('customCategory');
       
-      // Suggested category button
-      if (suggestedCat && suggestedCat !== txn.category) {
-        buttons[0].addEventListener('click', () => {
-          updateTransactionCategory(id, suggestedCat);
+      const updateSaveButton = () => {
+        if (selectedCategory || customInput.value.trim()) {
+          saveBtn.style.opacity = '1';
+          saveBtn.style.cursor = 'pointer';
+          saveBtn.textContent = selectedCategory ? `Save ${selectedCategory}` : 'Save Custom';
+        } else {
+          saveBtn.style.opacity = '0.5';
+          saveBtn.style.cursor = 'not-allowed';
+        }
+      };
+      
+      // Suggested category option
+      const suggestedOption = newModal.querySelector('.suggested-cat');
+      if (suggestedOption) {
+        suggestedOption.addEventListener('click', () => {
+          document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
+          suggestedOption.style.background = '#d1f0ff';
+          selectedCategory = suggestedCat;
+          updateSaveButton();
         });
       }
       
-      // Category buttons
-      const catButtons = Array.from(buttons).slice(suggestedCat && suggestedCat !== txn.category ? 1 : 0, -2);
-      catButtons.forEach((btn, idx) => {
-        btn.addEventListener('click', () => {
-          updateTransactionCategory(id, categories[idx]);
+      // Category option clicks
+      document.querySelectorAll('.cat-option').forEach(option => {
+        option.addEventListener('click', () => {
+          document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
+          option.style.background = '#f0f3ff';
+          selectedCategory = option.dataset.cat;
+          customInput.value = '';
+          updateSaveButton();
         });
       });
       
-      // Set custom button
-      document.getElementById('setCustomBtn').addEventListener('click', () => {
-        const cat = document.getElementById('customCategory').value.trim();
-        if (cat) updateTransactionCategory(id, cat);
+      // Custom input
+      customInput.addEventListener('input', () => {
+        if (customInput.value.trim()) {
+          document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
+          selectedCategory = null;
+          updateSaveButton();
+        } else {
+          updateSaveButton();
+        }
+      });
+      
+      // Save button
+      saveBtn.addEventListener('click', () => {
+        const cat = selectedCategory || customInput.value.trim();
+        if (cat) {
+          newModal.remove();
+          updateTransactionCategory(id, cat);
+        }
       });
       
       // Cancel button
@@ -1818,7 +1859,7 @@
         if (e.target === newModal) newModal.remove();
       });
       
-      setTimeout(() => document.getElementById('customCategory').focus(), 100);
+      setTimeout(() => customInput.focus(), 100);
     }
 
     async function updateTransactionCategory(id, category) {
@@ -1887,34 +1928,35 @@
           const totalAmount = matchingTxns.reduce((sum, t) => sum + Math.abs(t.amount), 0);
           
           bulkModal.innerHTML = `
-            <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
-              <div style="font-size: 22px; font-weight: 800; margin-bottom: 24px; color: #000; letter-spacing: -0.5px;">Smart Category Update</div>
-              <div style="margin-bottom: 20px; padding: 16px; background: #f0f3ff; border-radius: 12px; border-left: 4px solid #0071e3;">
-                <div style="font-weight: 600; color: #000; margin-bottom: 8px;">Found ${matchingTxns.length} similar ${matchingTxns.length === 1 ? 'transaction' : 'transactions'}</div>
-                <div style="font-size: 13px; color: #666; margin-bottom: 8px;">From <strong>${txn.description}</strong></div>
-                <div style="font-size: 13px; color: #666; margin-bottom: 12px;">Total Amount: <strong>$${totalAmount.toFixed(2)}</strong></div>
-                <div style="font-size: 12px; color: #0071e3; cursor: pointer; font-weight: 600;" id="selectAllToggle" onclick="document.querySelectorAll('.txn-checkbox').forEach(cb => cb.checked = !cb.checked); updateBulkCounter();">Select/Deselect All</div>
+            <div style="background: white; border-radius: 20px; padding: 32px; max-width: 480px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+              <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #000; letter-spacing: -0.5px;">Smart Category Update</div>
+              <div style="font-size: 13px; color: #999; margin-bottom: 20px;">Found ${matchingTxns.length} similar transaction${matchingTxns.length !== 1 ? 's' : ''}</div>
+              
+              <div style="margin-bottom: 16px; padding: 12px; background: #f5f5f7; border-radius: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="font-size: 13px; font-weight: 600; color: #000;">Select transactions to update:</div>
+                  <div style="font-size: 12px; color: #0071e3; cursor: pointer; font-weight: 600; transition: opacity 0.2s;" id="selectAllToggle" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="document.querySelectorAll('.txn-checkbox').forEach(cb => cb.checked = !cb.checked); updateBulkCounter();">Select All</div>
+                </div>
+                <div style="max-height: 280px; overflow-y: auto; background: white; border-radius: 8px; padding: 8px;">
+                  ${matchingTxns.map((t, idx) => `
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='transparent'">
+                      <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3;" onchange="updateBulkCounter()">
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 12px; color: #000; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.date} - ${t.description}</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 2px;">Was: ${t.category}</div>
+                      </div>
+                      <span style="font-weight: 600; color: #0071e3; font-size: 12px; flex-shrink: 0;">$${Math.abs(t.amount).toFixed(2)}</span>
+                    </label>
+                  `).join('')}
+                </div>
               </div>
-              <div style="margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 8px; max-height: 250px; overflow-y: auto;">
-                <div style="font-size: 12px; font-weight: 600; color: #000; margin-bottom: 12px;">Check transactions to update:</div>
-                ${matchingTxns.map((t, idx) => `
-                  <label style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 6px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer;" onchange="updateBulkCounter()">
-                    <div style="flex: 1;">
-                      <div style="font-size: 11px; color: #000; font-weight: 500;">${t.date} - ${t.description}</div>
-                      <div style="font-size: 10px; color: #999; margin-top: 2px;">Current: ${t.category}</div>
-                    </div>
-                    <span style="font-weight: 600; color: #0071e3; font-size: 12px;">$${Math.abs(t.amount).toFixed(2)}</span>
-                  </label>
-                `).join('')}
+              
+              <div style="padding: 12px; background: #e8f4f8; border-radius: 10px; margin-bottom: 16px; border-left: 3px solid #0071e3;">
+                <div style="font-size: 12px; color: #0071e3; font-weight: 600;">Will update to: <strong>${category}</strong></div>
               </div>
-              <div style="color: #666; font-size: 12px; margin-bottom: 20px;">
-                Update selected to <strong>${category}</strong>?
-              </div>
-              <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" id="bulkConfirmBtn" style="flex: 1;">Update Selected</button>
-                <button class="btn btn-secondary" id="bulkCancelBtn" style="flex: 1;">Just This One</button>
-              </div>
+              
+              <button class="btn btn-primary" id="bulkConfirmBtn" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; margin-bottom: 8px;">Save Changes</button>
+              <button style="width: 100%; padding: 12px; font-size: 13px; font-weight: 600; border-radius: 12px; background: #f5f5f7; border: none; color: #000; cursor: pointer; transition: all 0.2s;" id="bulkCancelBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
             </div>
           `;
           

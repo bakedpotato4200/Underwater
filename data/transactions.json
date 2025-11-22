@@ -201,7 +201,7 @@
     "id": 23,
     "date": "2025-10-01",
     "amount": -153,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -381,7 +381,7 @@
     "id": 43,
     "date": "2025-10-06",
     "amount": -83.98,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1299,7 +1299,7 @@
     "id": 145,
     "date": "2025-10-31",
     "amount": -215,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1857,7 +1857,7 @@
     "id": 207,
     "date": "2025-09-13",
     "amount": -85,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1866,7 +1866,7 @@
     "id": 208,
     "date": "2025-09-13",
     "amount": -205,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1875,7 +1875,7 @@
     "id": 209,
     "date": "2025-09-13",
     "amount": -100,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1884,7 +1884,7 @@
     "id": 210,
     "date": "2025-09-13",
     "amount": -50,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1893,7 +1893,7 @@
     "id": 211,
     "date": "2025-09-13",
     "amount": -70,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -1992,7 +1992,7 @@
     "id": 222,
     "date": "2025-09-26",
     "amount": -156.35,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2487,7 +2487,7 @@
     "id": 277,
     "date": "2025-07-01",
     "amount": -70,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2505,7 +2505,7 @@
     "id": 279,
     "date": "2025-07-01",
     "amount": -56.52,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2532,7 +2532,7 @@
     "id": 282,
     "date": "2025-07-05",
     "amount": -212.83,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2550,7 +2550,7 @@
     "id": 284,
     "date": "2025-07-05",
     "amount": -84,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2559,7 +2559,7 @@
     "id": 285,
     "date": "2025-07-05",
     "amount": -100,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2586,7 +2586,7 @@
     "id": 288,
     "date": "2025-07-05",
     "amount": -601.15,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2595,7 +2595,7 @@
     "id": 289,
     "date": "2025-07-05",
     "amount": -156.3,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2712,7 +2712,7 @@
     "id": 302,
     "date": "2025-07-10",
     "amount": -25,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2721,7 +2721,7 @@
     "id": 303,
     "date": "2025-07-11",
     "amount": -182,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2883,7 +2883,7 @@
     "id": 321,
     "date": "2025-07-17",
     "amount": -45,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -2928,7 +2928,7 @@
     "id": 326,
     "date": "2025-07-18",
     "amount": -85.99,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -3126,7 +3126,7 @@
     "id": 348,
     "date": "2025-07-23",
     "amount": -55,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -3135,7 +3135,7 @@
     "id": 349,
     "date": "2025-07-23",
     "amount": -35,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -3324,7 +3324,7 @@
     "id": 370,
     "date": "2025-07-01",
     "amount": -967,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -3693,7 +3693,7 @@
     "id": 411,
     "date": "2025-06-14",
     "amount": -632,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -4017,7 +4017,7 @@
     "id": 447,
     "date": "2025-06-30",
     "amount": -100,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
