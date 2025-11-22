@@ -174,7 +174,7 @@
     "id": 20,
     "date": "2025-10-31",
     "amount": -45,
-    "category": "Transportation",
+    "category": "Credit card",
     "description": "Withdrawal from WF Card RETRY PYMT BPF_DSS_0_1031115504.txt",
     "type": "expense",
     "excluded": false

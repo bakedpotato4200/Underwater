@@ -1551,40 +1551,51 @@
       const txn = allTransactions.find(t => t.id == id);
       const suggestedCat = txn ? getSuggestedCategory(txn.description) : null;
       const categories = ['Income', 'Utilities', 'Food & Dining', 'Groceries', 'Transportation', 'Entertainment', 'Shopping', 'Health & Fitness', 'Transfer', 'Other'];
-      const modal = document.getElementById('categoryModal');
-      if (!modal) {
-        const newModal = document.createElement('div');
-        newModal.id = 'categoryModal';
-        newModal.className = 'modal active';
-        
-        let html = `
-          <div class="modal-content">
-            <div class="modal-header">Change Category</div>`;
-        
-        if (suggestedCat && suggestedCat !== txn.category) {
-          html += `
-            <div style="background: #d1e7dd; border: 1px solid #a6d6aa; padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
-              <div style="font-size: 12px; color: #155724; font-weight: 600;">Suggested Category</div>
-              <button class="btn btn-primary" onclick="updateTransactionCategory(${id}, '${suggestedCat}'); document.getElementById('categoryModal').remove();" style="margin-top: 8px; width: 100%;">✓ ${suggestedCat}</button>
-            </div>`;
-        }
-        
+      
+      // Remove any existing modal first
+      const oldModal = document.getElementById('categoryModal');
+      if (oldModal) oldModal.remove();
+      
+      const newModal = document.createElement('div');
+      newModal.id = 'categoryModal';
+      newModal.className = 'modal active';
+      
+      let html = `
+        <div class="modal-content">
+          <div class="modal-header">Change Category</div>`;
+      
+      if (suggestedCat && suggestedCat !== txn.category) {
         html += `
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0;">
-              ${categories.map(cat => `<button class="btn btn-secondary" onclick="updateTransactionCategory(${id}, '${cat}'); document.getElementById('categoryModal').remove();" style="text-align: center;">${cat}</button>`).join('')}
-            </div>
-            <div style="margin: 16px 0; padding: 12px; border: 1px solid #d5d5d7; border-radius: 8px; background: #f9f9fb;">
-              <label style="display: block; font-size: 12px; font-weight: 600; color: #000; margin-bottom: 8px;">Or create custom:</label>
-              <input type="text" id="customCategory" placeholder="Enter custom category" style="width: 100%; padding: 10px 12px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; margin-bottom: 8px;" />
-              <button class="btn btn-primary" onclick="const cat = document.getElementById('customCategory').value.trim(); if (cat) { updateTransactionCategory(${id}, cat); document.getElementById('categoryModal').remove(); } else { alert('Please enter a category name'); }" style="width: 100%; text-align: center;">Set Custom</button>
-            </div>
-            <button class="btn btn-secondary" onclick="document.getElementById('categoryModal').remove();" style="width: 100%;">Cancel</button>
-          </div>
-        `;
-        newModal.innerHTML = html;
-        document.body.appendChild(newModal);
-        setTimeout(() => document.getElementById('customCategory').focus(), 100);
+          <div style="background: #d1e7dd; border: 1px solid #a6d6aa; padding: 12px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+            <div style="font-size: 12px; color: #155724; font-weight: 600;">Suggested Category</div>
+            <button class="btn btn-primary" onclick="updateTransactionCategory(${id}, '${suggestedCat}'); document.getElementById('categoryModal').remove();" style="margin-top: 8px; width: 100%;">✓ ${suggestedCat}</button>
+          </div>`;
       }
+      
+      html += `
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0;">
+            ${categories.map(cat => `<button class="btn btn-secondary" onclick="updateTransactionCategory(${id}, '${cat}'); document.getElementById('categoryModal').remove();" style="text-align: center;">${cat}</button>`).join('')}
+          </div>
+          <div style="margin: 16px 0; padding: 12px; border: 1px solid #d5d5d7; border-radius: 8px; background: #f9f9fb;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #000; margin-bottom: 8px;">Or create custom:</label>
+            <input type="text" id="customCategory" placeholder="Enter custom category" style="width: 100%; padding: 10px 12px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; margin-bottom: 8px;" />
+            <button class="btn btn-primary" onclick="const cat = document.getElementById('customCategory').value.trim(); if (cat) { updateTransactionCategory(${id}, cat); document.getElementById('categoryModal').remove(); } else { alert('Please enter a category name'); }" style="width: 100%; text-align: center;">Set Custom</button>
+          </div>
+          <button class="btn btn-secondary" onclick="document.getElementById('categoryModal').remove();" style="width: 100%;">Cancel</button>
+        </div>
+      `;
+      newModal.innerHTML = html;
+      document.body.appendChild(newModal);
+      
+      // Add click-outside-to-close functionality
+      newModal.addEventListener('click', (e) => {
+        if (e.target === newModal) newModal.remove();
+      });
+      
+      setTimeout(() => {
+        const input = document.getElementById('customCategory');
+        if (input) input.focus();
+      }, 100);
     }
 
     async function updateTransactionCategory(id, category) {
