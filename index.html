@@ -1369,7 +1369,14 @@
       
       document.getElementById('dayBillsHeader').textContent = `Details for ${dateFormatted}`;
       
+      // Use bank balance if set, otherwise use header balance
       const currentBalance = currentBankBalance > 0 ? currentBankBalance : parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
+      
+      // Check if this date is in the past
+      const today = new Date();
+      const dateObj = new Date(dateStr);
+      const isPastDate = dateObj < today && dateObj.toDateString() !== today.toDateString();
+      
       let totalIncome = 0;
       let totalExpenses = 0;
       
@@ -1416,8 +1423,17 @@
         }
         
         // Calculate the ending balance for this specific day
-        const dayStartBalance = currentBalance;
-        const dayEndBalance = dayStartBalance + totalIncome - totalExpenses;
+        // For future dates with bank balance set, use current balance + future changes
+        // For past dates, show history note
+        let dayStartBalance = currentBalance;
+        let dayEndBalance = dayStartBalance + totalIncome - totalExpenses;
+        
+        if (isPastDate && currentBankBalance > 0) {
+          html = `<div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #ff9800; color: #856404;">
+            <strong>📅 Historical Date</strong><br>
+            <span style="font-size: 12px;">This is a past transaction. The balance shown below is your current balance with today's bills/income applied.</span>
+          </div>` + html;
+        }
         
         // Summary
         html += `
