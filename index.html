@@ -1044,10 +1044,19 @@
 
     function toggleSelectAllTransactions() {
       const isChecked = document.getElementById('selectAllTxns').checked;
-      const checkboxes = document.querySelectorAll('#fullTransactionsList .txn-checkbox');
-      checkboxes.forEach(cb => {
-        cb.checked = isChecked;
+      const fullList = document.getElementById('fullTransactionsList');
+      
+      // Find all transaction items and their checkboxes
+      const transactionItems = fullList.querySelectorAll('.transaction-item');
+      console.log(`Toggling ${transactionItems.length} transaction checkboxes to ${isChecked}`);
+      
+      transactionItems.forEach(item => {
+        const checkbox = item.querySelector('.txn-checkbox');
+        if (checkbox) {
+          checkbox.checked = isChecked;
+        }
       });
+      
       updateBulkActionButtons();
     }
 
