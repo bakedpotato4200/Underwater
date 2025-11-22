@@ -479,7 +479,7 @@
     
     async function loadDashboard() {
       try {
-        const [txRes, billsRes] = await Promise.all([fetch(API_URL + '/api/transactions'), fetch(API_URL + '/api/bills')]);
+        const [txRes, billsRes] = await Promise.all([fetch(API_URL + '/api/transactions'), fetch(API_URL + '/api/recurring-bills')]);
         const transactions = await txRes.json();
         const bills = await billsRes.json();
         
@@ -537,7 +537,7 @@
     
     async function loadCalendar() {
       try {
-        const res = await fetch(API_URL + '/api/bills');
+        const res = await fetch(API_URL + '/api/recurring-bills');
         const bills = await res.json();
         const now = new Date();
         const year = now.getFullYear();
