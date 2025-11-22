@@ -415,15 +415,15 @@
         </div>
       </div>
 
-      <div id="trendsContent" style="display: none;"><div class="card full"><h2>📊 Category Spending Trends</h2><div id="trendsChart" style="margin-top: 20px;"><div class="loading">Loading...</div></div></div></div>
+      <div id="trendsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📊 Category Spending Trends</h2><div id="trendsChart" style="margin-top: 20px;"><div class="loading">Loading...</div></div></div></div>
       
-      <div id="calendarContent" style="display: none;"><div class="card full"><h2>📆 Bills Calendar</h2><div id="calendarView" style="margin-top: 20px;"><div class="loading">Loading calendar...</div></div></div></div>
+      <div id="calendarContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📆 Bills Calendar</h2><div id="calendarView" style="margin-top: 20px;"><div class="loading">Loading calendar...</div></div></div></div>
       
-      <div id="insightsContent" style="display: none;"><div class="card full"><h2>💡 Financial Insights</h2><div id="insightsList" style="margin-top: 20px;"><div class="loading">Loading insights...</div></div></div></div>
+      <div id="insightsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>💡 Financial Insights</h2><div id="insightsList" style="margin-top: 20px;"><div style="color: var(--text-secondary); text-align: center; padding: 20px;">Financial insights will appear here</div></div></div></div>
       
-      <div id="automationContent" style="display: none;"><div class="card full"><h2>⚙️ Automation Hub</h2><div id="automationHub" style="margin-top: 20px;"><div class="loading">Loading automation...</div></div></div></div>
+      <div id="automationContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>⚙️ Automation Hub</h2><div id="automationHub" style="margin-top: 20px;"><div class="loading">Loading automation...</div></div></div></div>
       
-      <div id="transactionsContent" style="display: none;"><div class="card full"><h2>🔍 All Transactions</h2><div style="margin-top: 20px;"><input type="text" id="transactionSearch" class="search-box" placeholder="Search transactions..." onkeyup="filterTransactions()"><div id="allTransactionsList"><div class="loading">Loading transactions...</div></div></div></div></div>
+      <div id="transactionsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>🔍 All Transactions</h2><div style="margin-top: 20px;"><input type="text" id="transactionSearch" class="search-box" placeholder="Search transactions..." onkeyup="filterTransactions()"><div id="allTransactionsList" style="display: grid; gap: 0;"><div class="loading">Loading transactions...</div></div></div></div></div>
     </div>
   </div>
 
@@ -467,12 +467,14 @@
     function switchTab(tab) {
       document.querySelectorAll('[id$="Content"]').forEach(el => el.style.display = 'none');
       document.getElementById('overviewHeader').style.display = tab === 'overview' ? 'block' : 'none';
-      if (tab === 'overview') document.getElementById('overviewContent').style.display = 'grid';
-      else document.getElementById(tab + 'Content').style.display = tab === 'transactions' ? 'grid' : 'block';
+      if (tab === 'overview') { document.getElementById('overviewContent').style.display = 'grid'; }
+      else if (tab === 'transactions') { document.getElementById('transactionsContent').style.display = 'grid'; }
+      else { document.getElementById(tab + 'Content').style.display = 'block'; }
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
-      if (tab === 'calendar') loadCalendar();
-      if (tab === 'automation') loadAutomation();
+      if (tab === 'calendar') { loadCalendar(); }
+      if (tab === 'automation') { loadAutomation(); }
+      if (tab === 'trends') { loadTrends(); }
     }
     
     let currentTransactionId = null;
@@ -578,6 +580,10 @@
     }
     
     async function executeTransfer(ruleIndex) { try { await fetch(API_URL + '/api/automation/execute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ruleIndex }) }); showToast('Transfer executed!', 'success'); loadAutomation(); } catch (e) { showToast('Error executing transfer', 'error'); } }
+    
+    function loadTrends() { const txRes = fetch(API_URL + '/api/transactions').then(r => r.json()).then(transactions => { loadSpendingTrends(transactions); document.getElementById('trendsChart').innerHTML = document.getElementById('spendingTrends').innerHTML; }).catch(e => console.error('Trends error:', e)); }
+    
+    function loadAllTransactions() { const txRes = fetch(API_URL + '/api/transactions').then(r => r.json()).then(transactions => { const html = transactions.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}$${t.amount.toFixed(2)}</div></div>`).join(''); document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No transactions</div>'; }).catch(e => console.error('Transactions error:', e)); }
     
     function filterTransactions() { const search = document.getElementById('transactionSearch').value.toLowerCase(); document.querySelectorAll('#allTransactionsList .transaction-item').forEach(el => { el.style.display = el.textContent.toLowerCase().includes(search) ? 'flex' : 'none'; }); }
     
