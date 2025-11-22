@@ -1029,7 +1029,7 @@
     "id": 115,
     "date": "2025-10-24",
     "amount": -65,
-    "category": "Subscriptions",
+    "category": "Income",
     "description": "aroura - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1434,7 +1434,7 @@
     "id": 160,
     "date": "2025-10-24",
     "amount": 75,
-    "category": "Income",
+    "category": "Transfer",
     "description": "storage - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
