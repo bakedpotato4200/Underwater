@@ -1124,11 +1124,12 @@
 
     function displayRecurring(recurring) {
       const list = document.getElementById('recurringList');
-      if (!recurring.length) {
+      const filtered = recurring.filter(r => r.type !== 'withdrawal' && r.type !== 'transfer');
+      if (!filtered.length) {
         list.innerHTML = '<div class="loading">No recurring bills detected</div>';
         return;
       }
-      list.innerHTML = recurring.slice(0, 5).map(r => `
+      list.innerHTML = filtered.slice(0, 5).map(r => `
         <div class="bill-item">
           <div>
             <div class="bill-name">${r.merchant}</div>
