@@ -872,7 +872,7 @@
     function filterTransactions() {
       const search = document.getElementById('searchBox').value.toLowerCase();
       const now = new Date();
-      const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       
       // Get all items and filter them
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
@@ -890,23 +890,19 @@
         // Date filter
         let showDate = true;
         if (currentDateFilter !== 'all' && dateStr) {
-          const itemDateNum = parseInt(dateStr.replace(/-/g, ''));
-          const todayNum = parseInt(today.replace(/-/g, ''));
+          const [iy, im, id] = dateStr.split('-').map(Number);
+          const itemDate = new Date(iy, im - 1, id);
           
           if (currentDateFilter === 'month') {
-            const itemMonth = dateStr.substring(0, 7);
-            const todayMonth = today.substring(0, 7);
-            showDate = itemMonth === todayMonth;
-          } else if (currentDateFilter === '30days' || currentDateFilter === '3months') {
-            const daysDays = currentDateFilter === '30days' ? 30 : 90;
-            const [iy, im, id] = dateStr.split('-').map(Number);
-            const itemDate = new Date(iy, im - 1, id, 0, 0, 0);
-            const daysDiff = (now - itemDate) / (1000 * 60 * 60 * 24);
-            showDate = daysDiff >= 0 && daysDiff <= daysDays;
+            showDate = itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
+          } else if (currentDateFilter === '30days') {
+            const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
+            showDate = daysDiff >= 0 && daysDiff <= 30;
+          } else if (currentDateFilter === '3months') {
+            const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
+            showDate = daysDiff >= 0 && daysDiff <= 90;
           } else if (currentDateFilter === 'year') {
-            const itemYear = dateStr.substring(0, 4);
-            const todayYear = today.substring(0, 4);
-            showDate = itemYear === todayYear;
+            showDate = itemDate.getFullYear() === today.getFullYear();
           }
         }
         
