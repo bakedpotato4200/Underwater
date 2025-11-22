@@ -930,6 +930,48 @@ app.delete('/api/recurring-bills/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// Bills Calculator endpoint
+app.get('/api/bills-calculator', (req, res) => {
+  // Calculate total monthly bills from recurring bills
+  let totalMonthlyBills = 0;
+  let paycheckAmount = 0;
+  let paycheckFrequency = 30; // default
+  
+  // Get all recurring bills
+  if (Array.isArray(recurringBills)) {
+    recurringBills.forEach(bill => {
+      if (bill.type === 'income') {
+        paycheckAmount = bill.amount;
+        paycheckFrequency = bill.frequency;
+      } else {
+        // Calculate monthly occurrence
+        const occurrencesPerMonth = 30 / bill.frequency;
+        totalMonthlyBills += bill.amount * occurrencesPerMonth;
+      }
+    });
+  }
+  
+  // Get detected recurring bills
+  const detected = detectRecurring().filter(r => r.isRecurring && r.category !== 'Income');
+  detected.forEach(bill => {
+    const occurrencesPerMonth = 30 / bill.avgInterval;
+    totalMonthlyBills += bill.avgAmount * occurrencesPerMonth;
+  });
+  
+  const paychecksPerMonth = 30 / paycheckFrequency;
+  const billsPerPaycheck = totalMonthlyBills / paychecksPerMonth;
+  const spendingPerPaycheck = paycheckAmount - billsPerPaycheck;
+  
+  res.json({
+    paycheckAmount: Math.round(paycheckAmount * 100) / 100,
+    paycheckFrequency,
+    paychecksPerMonth: Math.round(paychecksPerMonth * 100) / 100,
+    totalMonthlyBills: Math.round(totalMonthlyBills * 100) / 100,
+    billsPerPaycheck: Math.round(billsPerPaycheck * 100) / 100,
+    spendingPerPaycheck: Math.round(spendingPerPaycheck * 100) / 100
+  });
+});
+
 // Bank balance endpoints
 app.get('/api/bank-balance', (req, res) => {
   res.json(bankBalance);

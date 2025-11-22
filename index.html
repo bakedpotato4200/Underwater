@@ -296,6 +296,13 @@
             </div>
           </div>
 
+          <div class="card">
+            <h2>Bills Account Calculator</h2>
+            <div id="billsCalculator" style="background: linear-gradient(135deg, #f5f7fa 0%, #f0f3ff 100%); padding: 16px; border-radius: 12px; border: 1px solid #e0e6ff;">
+              <div class="loading" style="text-align: center; color: #666;">Calculating...</div>
+            </div>
+          </div>
+
           <div class="card" style="cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" onclick="switchTab('transactions')" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
             <h2 style="color: #0071e3;">Recurring Bills</h2>
             <div id="recurringList" style="max-height: 400px; overflow-y: auto; pointer-events: none;">
@@ -740,7 +747,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, recurringBills, bankBalanceData] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, recurringBills, bankBalanceData, billsCalc] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -754,7 +761,8 @@
           fetch(API_URL + '/api/spending-trends').then(r => r.json()),
           fetch(API_URL + '/api/exclusion-rules').then(r => r.json()),
           fetch(API_URL + '/api/recurring-bills').then(r => r.json()),
-          fetch(API_URL + '/api/bank-balance').then(r => r.json())
+          fetch(API_URL + '/api/bank-balance').then(r => r.json()),
+          fetch(API_URL + '/api/bills-calculator').then(r => r.json())
         ]);
         
         // Store bank balance for calendar calculations
@@ -783,6 +791,7 @@
         displaySpendingTrends(trends);
         displayExclusionRules(rules);
         loadBillBuffer(30);
+        displayBillsCalculator(billsCalc);
         displayRecommendations(insights.recommendations);
       } catch (e) {
         console.error('Error loading data:', e);
@@ -2729,6 +2738,48 @@
         display.textContent = '—';
         document.getElementById('bankBalanceInput').value = '';
       }
+    }
+
+    function displayBillsCalculator(calc) {
+      const container = document.getElementById('billsCalculator');
+      if (!calc || !calc.paycheckAmount) {
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Add a paycheck in Manage Bills to see calculations</div>';
+        return;
+      }
+
+      const html = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div style="background: white; padding: 12px; border-radius: 8px; border-left: 4px solid #34c759;">
+            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Per Paycheck</div>
+            <div style="font-size: 16px; font-weight: 700; color: #000;">${calc.paycheckAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div style="font-size: 10px; color: #999; margin-top: 4px;">Every ${calc.paycheckFrequency} days</div>
+          </div>
+          <div style="background: white; padding: 12px; border-radius: 8px; border-left: 4px solid #ff9500;">
+            <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Monthly Bills</div>
+            <div style="font-size: 16px; font-weight: 700; color: #000;">$${calc.totalMonthlyBills.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div style="font-size: 10px; color: #999; margin-top: 4px;">${calc.paychecksPerMonth.toFixed(1)} paychecks/month</div>
+          </div>
+        </div>
+
+        <div style="background: white; padding: 14px; border-radius: 8px; border: 2px solid #0071e3; margin-bottom: 12px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">To Bills Account</div>
+              <div style="font-size: 20px; font-weight: 700; color: #ff3b30;">$${calc.billsPerPaycheck.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+              <div style="font-size: 10px; color: #999; margin-top: 4px;">per paycheck</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Spending Account</div>
+              <div style="font-size: 20px; font-weight: 700; color: #34c759;">$${calc.spendingPerPaycheck.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+              <div style="font-size: 10px; color: #999; margin-top: 4px;">leftover per paycheck</div>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #666; background: #f0f7ff; padding: 10px; border-radius: 6px; text-align: center;">
+            ✓ Transfer <strong>$${calc.billsPerPaycheck.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> to bills account, keep <strong>$${calc.spendingPerPaycheck.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> for spending
+          </div>
+        </div>
+      `;
+      container.innerHTML = html;
     }
 
     async function displayRecurringBillsList() {
