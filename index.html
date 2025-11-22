@@ -1705,9 +1705,12 @@
             body: JSON.stringify({ description: txn.description })
           });
         }
-        loadData();
+        
+        // Immediately update the UI to show exclusion visual feedback
+        await loadTransactions();
+        showToast(currentlyExcluded ? 'Transaction included' : 'Transaction excluded', 'success');
       } catch (e) {
-        alert('Failed to exclude: ' + e.message);
+        showToast('Failed to exclude: ' + e.message, 'error');
       }
     }
 
@@ -2345,15 +2348,6 @@
         document.getElementById('debtName').value = '';
         document.getElementById('debtBalance').value = '';
         showToast('Debt added successfully', 'success');
-        loadData();
-      } catch (e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
-
-    async function toggleExclude(txnId) {
-      try {
-        await fetch(API_URL + `/api/transactions/${txnId}/toggle-exclude`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
         loadData();
       } catch (e) {
         showToast('Error: ' + e.message, 'error');
