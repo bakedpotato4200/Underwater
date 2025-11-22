@@ -471,10 +471,11 @@
       else if (tab === 'transactions') { document.getElementById('transactionsContent').style.display = 'grid'; }
       else { document.getElementById(tab + 'Content').style.display = 'block'; }
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-      if (tab === 'calendar') { loadCalendar(); }
-      if (tab === 'automation') { loadAutomation(); }
-      if (tab === 'trends') { loadTrends(); }
+      if (event && event.target) event.target.classList.add('active');
+      if (tab === 'calendar') { setTimeout(loadCalendar, 100); }
+      if (tab === 'automation') { setTimeout(loadAutomation, 100); }
+      if (tab === 'trends') { setTimeout(loadTrends, 100); }
+      if (tab === 'transactions') { setTimeout(loadAllTransactions, 100); }
     }
     
     let currentTransactionId = null;
@@ -557,8 +558,9 @@
         }
         
         for (let i = 1; i <= lastDay.getDate(); i++) {
-          const dayBills = bills.filter(b => (i % b.frequency) === 0);
-          calendarHtml += `<div class="calendar-day ${dayBills.length ? 'has-bills' : ''}"><div class="calendar-day-date">${i}</div>${dayBills.length ? '<div style="font-size: 9px; color: var(--accent-gold); margin-top: 2px; font-weight: 700;">Bills Due</div>' : ''}</div>`;
+          const dayBills = bills && bills.length ? bills.filter(b => b.frequency && (i % parseInt(b.frequency) === 0)) : [];
+          const billNames = dayBills.map(b => b.name).join(', ');
+          calendarHtml += `<div class="calendar-day ${dayBills.length ? 'has-bills' : ''}" title="${billNames}"><div class="calendar-day-date">${i}</div>${dayBills.length ? '<div style="font-size: 9px; color: var(--accent-gold); margin-top: 2px; font-weight: 700;">📅</div>' : ''}</div>`;
         }
         
         for (let i = 1; i <= nextDays; i++) {
@@ -567,7 +569,7 @@
         
         calendarHtml += '</div>';
         document.getElementById('calendarView').innerHTML = calendarHtml;
-      } catch (e) { console.error('Calendar error:', e); }
+      } catch (e) { console.error('Calendar error:', e); document.getElementById('calendarView').innerHTML = '<div style="color: red; padding: 20px;">Error loading calendar</div>'; }
     }
     
     async function loadAutomation() {
