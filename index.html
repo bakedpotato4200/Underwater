@@ -654,28 +654,25 @@
     
     function showDayDetails(day) {
       const data = calendarData[day];
-      if (!data) return;
+      if (!data) { alert('No data for day ' + day); return; }
       
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
       
-      let html = `<p style="font-size: 16px; font-weight: 700; color: black; margin: 0 0 12px 0;">📅 ${dateStr}</p>`;
-      html += `<p style="color: black; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">Starting Balance: <strong style="color: #0066cc;">$${data.startBalance.toFixed(2)}</strong></p>`;
-      html += `<p style="color: #34c759; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">+ Income: <strong>$${data.income.toFixed(2)}</strong></p>`;
-      html += `<p style="color: #ff3b30; margin: 0 0 8px 0; font-weight: 600; font-size: 14px;">- Expenses: <strong>$${data.expense.toFixed(2)}</strong></p>`;
-      const endColor = data.endBalance >= 0 ? '#34c759' : '#ff3b30';
-      html += `<p style="color: ${endColor}; margin: 0 0 12px 0; font-weight: 700; font-size: 16px;">Ending Balance: $${data.endBalance.toFixed(2)}</p>`;
+      let text = `Starting Balance: $${data.startBalance.toFixed(2)}\n`;
+      text += `Income: $${data.income.toFixed(2)}\n`;
+      text += `Expenses: $${data.expense.toFixed(2)}\n`;
+      text += `Ending Balance: $${data.endBalance.toFixed(2)}\n`;
       
       if (data.bills && data.bills.length > 0) {
-        html += `<p style="color: black; margin: 12px 0 8px 0; font-weight: 700; font-size: 14px; border-top: 1px solid #ddd; padding-top: 12px;">Transactions Today:</p>`;
+        text += `\nTransactions:\n`;
         data.bills.forEach(b => {
-          const isIncome = b.type === 'income';
-          const color = isIncome ? '#34c759' : '#ff3b30';
-          html += `<p style="color: ${color}; margin: 4px 0; font-weight: 600; font-size: 13px;">${b.name}: ${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</p>`;
+          text += `${b.name}: ${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}\n`;
         });
       }
       
-      document.getElementById('dayBillsContent').innerHTML = html;
+      const contentDiv = document.getElementById('dayBillsContent');
+      contentDiv.innerHTML = `<pre style="color: black; font-family: inherit; white-space: pre-wrap; word-wrap: break-word;">${text}</pre>`;
       document.getElementById('dayBillsHeader').textContent = `${dateStr} - Day Overview`;
       openModal('dayBillsModal');
     }
