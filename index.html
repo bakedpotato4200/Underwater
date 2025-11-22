@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Budget Tracker</title>
+  <title>Underwater - Smart Budget</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -16,7 +16,7 @@
     :root {
       --bg-primary: #ffffff;
       --bg-secondary: #f9fafb;
-      --bg-tertiary: #f0f3ff;
+      --bg-tertiary: #f0f9ff;
       --text-primary: #000;
       --text-secondary: #666;
       --text-tertiary: #999;
@@ -26,15 +26,59 @@
     }
     
     body.dark-mode {
-      --bg-primary: #1a1a1a;
-      --bg-secondary: #2a2a2a;
-      --bg-tertiary: #1f3a5f;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+      --bg-primary: #0f172a;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+      --bg-secondary: #1e293b;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+      --bg-tertiary: #164e63;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
       --text-primary: #ffffff;
-      --text-secondary: #a0a0a0;
-      --text-tertiary: #707070;
-      --border-color: #404040;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+      --text-secondary: #94a3b8;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+      --text-tertiary: #64748b;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+      --border-color: #334155;
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
       --card-shadow: rgba(0,0,0,0.3);
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
       --hover-shadow: rgba(0,0,0,0.4);
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
+    }
+    }
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #164e63 0%, #0f2f3f 100%);
+      border-right-color: #06b6d4;
     }
     
     body {
@@ -51,7 +95,7 @@
     /* Sidebar */
     .sidebar { 
       width: 200px; 
-      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      background: linear-gradient(180deg, #e0f7ff 0%, #cffafe 100%);
       position: fixed; 
       height: 100vh; 
       left: 0; 
@@ -73,11 +117,11 @@
       display: flex; 
       align-items: center; 
       justify-content: space-between; 
-      background: linear-gradient(135deg, var(--bg-tertiary) 0%, transparent 100%);
+      background: linear-gradient(135deg, #0f4c63 0%, transparent 100%);
       transition: background 0.3s, border 0.3s;
     }
     .sidebar-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; }
-    .sidebar-close:hover { color: #0071e3; transform: rotate(90deg); }
+    .sidebar-close:hover { color: #0891b2; transform: rotate(90deg); }
     .nav-tabs { display: flex; flex-direction: column; gap: 4px; padding: 12px; }
     .nav-tabs button { 
       background: none; 
@@ -93,8 +137,8 @@
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       border-radius: 8px;
     }
-    .nav-tabs button:hover { background: var(--bg-tertiary); color: #0071e3; transform: translateX(4px); }
-    .nav-tabs button.active { color: #0071e3; border-left-color: #0071e3; background: linear-gradient(90deg, var(--bg-tertiary) 0%, transparent 100%); font-weight: 600; }
+    .nav-tabs button:hover { background: var(--bg-tertiary); color: #0891b2; transform: translateX(4px); }
+    .nav-tabs button.active { color: #06b6d4; border-left-color: #06b6d4; background: linear-gradient(90deg, var(--bg-tertiary) 0%, transparent 100%); font-weight: 600; }
     
     /* Menu Toggle */
     .menu-toggle { 
@@ -112,7 +156,7 @@
       color: var(--text-secondary);
       box-shadow: 0 2px 12px var(--card-shadow);
     }
-    .menu-toggle:hover { background: #0071e3; color: white; transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,113,227,0.25); }
+    .menu-toggle:hover { background: #0891b2; color: white; transform: scale(1.08); box-shadow: 0 4px 16px rgba(8,145,178,0.25); }
     .menu-toggle:active { transform: scale(0.96); }
     .menu-toggle.sidebar-open { left: 220px; }
     
@@ -122,7 +166,7 @@
     
     /* Header */
     .header { background: var(--bg-primary); padding: 40px; border-radius: 20px; margin-bottom: 24px; border: 1px solid var(--border-color); box-shadow: 0 4px 16px var(--card-shadow); animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); transition: background 0.3s, border 0.3s, box-shadow 0.3s; }
-    .header h1 { color: var(--text-primary); font-size: 36px; font-weight: 800; margin-bottom: 6px; background: linear-gradient(135deg, #0071e3 0%, #34c759 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; }
+    .header h1 { color: var(--text-primary); font-size: 36px; font-weight: 800; margin-bottom: 6px; background: linear-gradient(135deg, #0891b2 0%, #34c759 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.5px; }
     .header p { color: var(--text-secondary); font-size: 15px; }
     
     /* Alerts */
@@ -130,21 +174,21 @@
     .alert-banner.warning { border-left-color: #f5a623; background: linear-gradient(90deg, #fffbf0 0%, #ffffff 100%); }
     .alert-banner.alert { border-left-color: #ff3b30; background: linear-gradient(90deg, #fff5f3 0%, #ffffff 100%); }
     .alert-banner.success { border-left-color: #34c759; background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); }
-    .alert-banner.info { border-left-color: #0071e3; background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); }
+    .alert-banner.info { border-left-color: #0891b2; background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); }
     .alert-banner strong { color: var(--text-primary); font-size: 13px; font-weight: 700; }
     .alert-banner p { color: var(--text-secondary); font-size: 12px; margin: 0; }
     
     /* Stats */
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-top: 24px; }
     .stat-card { background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%); border: 1px solid var(--border-color); padding: 24px 20px; border-radius: 14px; text-align: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 12px var(--card-shadow); }
-    .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px var(--hover-shadow); border-color: #0071e3; }
-    .stat-value { font-size: 32px; font-weight: 800; color: #0071e3; animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px var(--hover-shadow); border-color: #0891b2; }
+    .stat-value { font-size: 32px; font-weight: 800; color: #0891b2; animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .stat-label { font-size: 12px; color: var(--text-tertiary); margin-top: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
     
     /* Buttons */
     .btn { padding: 11px 20px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .btn-primary { background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,113,227,0.35); }
+    .btn-primary { background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: white; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(8,145,178,0.35); }
     .btn-primary:active { transform: translateY(-1px); }
     .btn-secondary { background: linear-gradient(135deg, #f5f5f7 0%, #e5e5e7 100%); color: var(--text-primary); font-weight: 600; }
     .btn-secondary:hover { background: linear-gradient(135deg, #e5e5e7 0%, #d5d5d7 100%); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
@@ -153,7 +197,7 @@
     /* Cards */
     .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px; }
     .card { background: var(--bg-primary); border-radius: 14px; padding: 24px; border: 1px solid var(--border-color); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 12px var(--card-shadow); animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px var(--hover-shadow); border-color: #0071e3; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px var(--hover-shadow); border-color: #0891b2; }
     .card h2 { color: var(--text-primary); margin-bottom: 18px; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; letter-spacing: -0.3px; }
     .card.full { grid-column: 1/-1; }
     
@@ -163,10 +207,10 @@
     .category-item:hover { background: var(--bg-secondary); transform: translateX(2px); }
     .category-item:last-child { border-bottom: none; }
     .category-name { color: var(--text-primary); font-weight: 600; flex: 1; }
-    .category-amount { color: #0071e3; font-weight: 800; }
+    .category-amount { color: #0891b2; font-weight: 800; }
     
     .bill-item { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%); padding: 16px 14px; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .bill-item:hover { border-color: #0071e3; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
+    .bill-item:hover { border-color: #0891b2; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
     .bill-name { color: var(--text-primary); font-weight: 700; font-size: 13px; }
     .bill-date { color: var(--text-tertiary); font-size: 11px; margin-top: 3px; }
     .bill-amount { color: #ff3b30; font-weight: 800; font-size: 14px; }
@@ -198,23 +242,23 @@
     /* Date Filters */
     .date-filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
     .filter-btn { padding: 10px 18px; border-radius: 22px; border: 1.5px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .filter-btn:hover { border-color: #0071e3; color: #0071e3; box-shadow: 0 2px 8px rgba(0,113,227,0.1); }
-    .filter-btn.active { background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%); color: white; border-color: #0071e3; box-shadow: 0 4px 12px rgba(0,113,227,0.25); }
+    .filter-btn:hover { border-color: #0891b2; color: #0891b2; box-shadow: 0 2px 8px rgba(0,113,227,0.1); }
+    .filter-btn.active { background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: white; border-color: #0891b2; box-shadow: 0 4px 12px rgba(0,113,227,0.25); }
     
     /* Velocity Chart */
     .velocity-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; gap: 10px; margin: 24px 0; }
-    .velocity-bar { background: linear-gradient(180deg, #0071e3 0%, #0077ed 100%); border-radius: 8px 8px 0 0; flex: 1; min-height: 24px; display: flex; align-items: flex-end; justify-content: center; color: white; font-size: 10px; font-weight: 700; animation: growBar 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 6px 16px rgba(0,113,227,0.2); }
+    .velocity-bar { background: linear-gradient(180deg, #0891b2 0%, #06b6d4 100%); border-radius: 8px 8px 0 0; flex: 1; min-height: 24px; display: flex; align-items: flex-end; justify-content: center; color: white; font-size: 10px; font-weight: 700; animation: growBar 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 6px 16px rgba(0,113,227,0.2); }
     .velocity-bar:hover { transform: scaleY(1.08); box-shadow: 0 8px 20px rgba(0,113,227,0.3); }
     
     /* Calendar */
     .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 18px; }
     .calendar-day { background: var(--bg-primary); padding: 12px 8px; border-radius: 10px; text-align: center; font-size: 11px; min-height: 80px; display: flex; flex-direction: column; border: 1px solid var(--border-color); transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--text-primary); }
-    .calendar-day:hover { border-color: #0071e3; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
+    .calendar-day:hover { border-color: #0891b2; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
     .calendar-day.other-month { opacity: 0.25; }
-    .calendar-day.has-bills { background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%); color: white; border-color: #0071e3; box-shadow: 0 6px 16px rgba(0,113,227,0.25); }
+    .calendar-day.has-bills { background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: white; border-color: #0891b2; box-shadow: 0 6px 16px rgba(0,113,227,0.25); }
     .calendar-day-date { font-weight: 800; margin-bottom: 4px; }
     .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 10px; }
-    .weekday { text-align: center; font-weight: 700; color: #0071e3; font-size: 12px; letter-spacing: 0.5px; }
+    .weekday { text-align: center; font-weight: 700; color: #0891b2; font-size: 12px; letter-spacing: 0.5px; }
     
     /* Modal */
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(6px); animation: fadeIn 0.25s ease-out; }
@@ -225,7 +269,7 @@
     .form-group label { display: block; margin-bottom: 10px; color: var(--text-primary); font-weight: 700; font-size: 13px; letter-spacing: -0.2px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1.5px solid #d5d5d7; border-radius: 10px; font-size: 13px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: inherit; }
     .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: var(--text-secondary); }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0891b2; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
     .action-buttons { display: flex; gap: 10px; margin-top: 28px; }
     .action-buttons button { flex: 1; }
     
@@ -233,9 +277,9 @@
     .loading { color: var(--text-secondary); text-align: center; padding: 28px 20px; font-size: 13px; animation: pulse 2.5s ease-in-out infinite; }
     .search-box { width: 100%; padding: 11px 15px; border: 1.5px solid #d5d5d7; border-radius: 10px; margin-bottom: 14px; font-size: 13px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: inherit; }
     .search-box:hover { border-color: var(--text-secondary); }
-    .search-box:focus { outline: none; border-color: #0071e3; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
-    .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #0071e3; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .insight-box:hover { border-color: #0071e3; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
+    .search-box:focus { outline: none; border-color: #0891b2; box-shadow: 0 0 0 4px rgba(0,113,227,0.12); }
+    .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid #0891b2; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .insight-box:hover { border-color: #0891b2; box-shadow: 0 6px 16px rgba(0,113,227,0.12); transform: translateY(-2px); }
     .insight-box strong { color: var(--text-primary); font-size: 13px; font-weight: 700; }
     .insight-box span { color: var(--text-secondary); font-size: 12px; display: block; margin-top: 6px; }
     
@@ -302,8 +346,8 @@
         <!-- Top Row: Primary Cards (Bills Calculator + Upcoming Bills) -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
           <!-- Bills Account Calculator -->
-          <div class="card" style="border: 2px solid #0071e3; background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);">
-            <h2 style="color: #0071e3;">💰 Bills Account Calculator</h2>
+          <div class="card" style="border: 2px solid #0891b2; background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);">
+            <h2 style="color: #0891b2;">💰 Bills Account Calculator</h2>
             <div id="billsCalculator" style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
               <div class="loading" style="text-align: center; color: var(--text-secondary);">Calculating...</div>
             </div>
@@ -349,13 +393,13 @@
             <div id="debtsList" style="max-height: 300px; overflow-y: auto;">
               <div class="loading">No debts added</div>
             </div>
-            <button class="btn btn-primary" onclick="showAIAdvisor()" style="width: 100%; margin-top: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">🤖 AI Debt Advisor</button>
+            <button class="btn btn-primary" onclick="showAIAdvisor()" style="width: 100%; margin-top: 12px; background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); border: none;">🤖 AI Debt Advisor</button>
           </div>
         </div>
 
         <!-- Fourth Row: Quick Actions + Bank Balance -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-          <div class="card full" style="background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%); border: none; color: white;">
+          <div class="card full" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); border: none; color: white;">
             <h2 style="color: white; margin: 0 0 16px 0;">⚙️ Quick Actions</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
               <button class="btn btn-primary" onclick="showAddTransactionModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600; padding: 10px;">+ Add</button>
@@ -372,7 +416,7 @@
               <button class="btn btn-primary" onclick="saveBankBalance()" style="padding: 12px 20px;">Set</button>
               <button class="btn btn-secondary" onclick="clearBankBalance()" style="padding: 12px 20px;">Clear</button>
             </div>
-            <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary);">Current: <span id="bankBalanceDisplay" style="font-weight: 700; color: #0071e3;">—</span></div>
+            <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary);">Current: <span id="bankBalanceDisplay" style="font-weight: 700; color: #0891b2;">—</span></div>
           </div>
         </div>
 
@@ -404,7 +448,7 @@
       <div id="insights" class="tab-content" style="display: none;">
         <div class="dashboard">
           <!-- Financial Health Scorecard -->
-          <div class="card full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+          <div class="card full" style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); color: white; border: none;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; align-items: center;">
               <div style="text-align: center;">
                 <div style="font-size: 48px; font-weight: 800; margin-bottom: 8px;" id="healthScore">—</div>
@@ -428,7 +472,7 @@
           <!-- Key Metrics -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
             <div class="card full">
-              <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">📊 Monthly Cash Flow</h3>
+              <h3 style="margin: 0 0 16px 0; color: #0891b2; font-size: 14px; font-weight: 600;">📊 Monthly Cash Flow</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div style="background: #f0f7ff; padding: 12px; border-radius: 8px; border-left: 3px solid #34c759;">
                   <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Income</div>
@@ -446,19 +490,19 @@
             </div>
 
             <div class="card full">
-              <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">🎯 Spending Velocity</h3>
+              <h3 style="margin: 0 0 16px 0; color: #0891b2; font-size: 14px; font-weight: 600;">🎯 Spending Velocity</h3>
               <div style="display: grid; gap: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
                   <span style="font-size: 12px; color: var(--text-secondary);">Daily Average</span>
-                  <span style="font-weight: 700; font-size: 14px; color: #0071e3;" id="velocityDaily">$0</span>
+                  <span style="font-weight: 700; font-size: 14px; color: #0891b2;" id="velocityDaily">$0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
                   <span style="font-size: 12px; color: var(--text-secondary);">7-Day Total</span>
-                  <span style="font-weight: 700; font-size: 14px; color: #0071e3;" id="velocityWeekly">$0</span>
+                  <span style="font-weight: 700; font-size: 14px; color: #0891b2;" id="velocityWeekly">$0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-secondary); border-radius: 6px;">
                   <span style="font-size: 12px; color: var(--text-secondary);">30-Day Total</span>
-                  <span style="font-weight: 700; font-size: 14px; color: #0071e3;" id="velocityMonthly">$0</span>
+                  <span style="font-weight: 700; font-size: 14px; color: #0891b2;" id="velocityMonthly">$0</span>
                 </div>
               </div>
             </div>
@@ -466,7 +510,7 @@
 
           <!-- Buffer & Bills Info -->
           <div class="card full">
-            <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">💰 Bill Buffer & Emergency Fund</h3>
+            <h3 style="margin: 0 0 16px 0; color: #0891b2; font-size: 14px; font-weight: 600;">💰 Bill Buffer & Emergency Fund</h3>
             <div id="bufferedInfoContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
               <div class="loading">Calculating...</div>
             </div>
@@ -474,7 +518,7 @@
 
           <!-- Actionable Recommendations -->
           <div class="card full">
-            <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">💡 Smart Recommendations</h3>
+            <h3 style="margin: 0 0 16px 0; color: #0891b2; font-size: 14px; font-weight: 600;">💡 Smart Recommendations</h3>
             <div id="smartRecsContainer" style="display: grid; gap: 12px;">
               <div class="loading">Loading recommendations...</div>
             </div>
@@ -482,7 +526,7 @@
 
           <!-- Data Quality Check -->
           <div class="card full">
-            <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">📋 Transaction Health</h3>
+            <h3 style="margin: 0 0 16px 0; color: #0891b2; font-size: 14px; font-weight: 600;">📋 Transaction Health</h3>
             <div id="transactionHealthContainer" style="display: grid; gap: 10px;">
               <div class="loading">Checking data...</div>
             </div>
@@ -546,7 +590,7 @@
                 <select id="categoryFilter" onchange="filterByCategory(this.value)" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: var(--bg-primary); cursor: pointer;">
                   <option value="all">All Categories</option>
                 </select>
-                <button onclick="document.getElementById('categoryFilter').value = 'all'; filterByCategory('all')" style="padding: 6px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: var(--bg-primary); cursor: pointer; font-weight: 600; color: #0071e3; transition: all 0.2s;" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='white'">All</button>
+                <button onclick="document.getElementById('categoryFilter').value = 'all'; filterByCategory('all')" style="padding: 6px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: var(--bg-primary); cursor: pointer; font-weight: 600; color: #0891b2; transition: all 0.2s;" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='white'">All</button>
               </div>
             </div>
             
@@ -569,7 +613,7 @@
           <!-- Bulk Actions -->
           <div id="bulkActionsContainer" style="display: none; gap: 8px; margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid #ffc107; align-items: center; flex-wrap: wrap;">
             <span id="selectedCount" style="font-size: 13px; font-weight: 600; color: var(--text-primary);"></span>
-            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="background: #e8f4f8; color: #0071e3; font-size: 12px; padding: 6px 12px;">Mark as Ignore</button>
+            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="background: #e8f4f8; color: #0891b2; font-size: 12px; padding: 6px 12px;">Mark as Ignore</button>
             <button class="btn" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="background: #ff3b30; color: white; font-size: 12px; padding: 6px 12px;">Delete</button>
           </div>
           
@@ -722,9 +766,9 @@
   <div id="makeRecurringModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">Make This a Recurring Bill</div>
-      <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0071e3;">
+      <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0891b2;">
         <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Transaction:</div>
-        <div id="recurringTxnPreview" style="font-weight: 600; color: #0071e3; font-size: 14px;">—</div>
+        <div id="recurringTxnPreview" style="font-weight: 600; color: #0891b2; font-size: 14px;">—</div>
       </div>
       <div class="form-group">
         <label>How often does this bill repeat?</label>
@@ -750,7 +794,7 @@
       <div class="modal-header">Add Recurring Transaction</div>
       
       <!-- Quick Add Form - Top Priority -->
-      <div style="background: var(--bg-primary); padding: 16px; border: 2px solid #0071e3; border-radius: 10px; margin-bottom: 16px;">
+      <div style="background: var(--bg-primary); padding: 16px; border: 2px solid #0891b2; border-radius: 10px; margin-bottom: 16px;">
         <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Quick Add</div>
         <div class="form-group">
           <label>What are you paying for? (e.g., Rent, Netflix)</label>
@@ -790,11 +834,11 @@
       <div id="recurringBillsStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e5e7;">
         <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; text-align: center;">
           <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Monthly Total</div>
-          <div id="monthlyTotal" style="font-size: 18px; font-weight: 700; color: #0071e3;">$0</div>
+          <div id="monthlyTotal" style="font-size: 18px; font-weight: 700; color: #0891b2;">$0</div>
         </div>
         <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; text-align: center;">
           <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 4px;">Next 30 Days</div>
-          <div id="nextDaysTotal" style="font-size: 18px; font-weight: 700; color: #0071e3;">$0</div>
+          <div id="nextDaysTotal" style="font-size: 18px; font-weight: 700; color: #0891b2;">$0</div>
         </div>
       </div>
       
@@ -998,9 +1042,9 @@
             <div style="padding: 12px; background: #f9f9fb; border-radius: 10px; border: 1px solid #e5e5e7;">
               <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">${cat}</div>
               <div style="background: #e5e5e7; height: 20px; border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
-                <div style="background: linear-gradient(90deg, #0071e3 0%, #0077ed 100%); height: 100%; width: ${percent}%; transition: width 0.3s ease;"></div>
+                <div style="background: linear-gradient(90deg, #0891b2 0%, #06b6d4 100%); height: 100%; width: ${percent}%; transition: width 0.3s ease;"></div>
               </div>
-              <div style="font-size: 12px; color: #0071e3; font-weight: 600;">$${amount.toFixed(0)}</div>
+              <div style="font-size: 12px; color: #0891b2; font-weight: 600;">$${amount.toFixed(0)}</div>
             </div>
           `;
         }).join('');
@@ -1446,7 +1490,7 @@
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
             <div class="bill-amount">$${(d.balance || 0).toLocaleString()}</div>
-            <button class="btn btn-small" style="background: #0071e3; color: white; padding: 6px 10px; font-size: 12px;" onclick="openPayoffCalculator(${JSON.stringify(d).replace(/"/g, '&quot;')})">Payoff</button>
+            <button class="btn btn-small" style="background: #0891b2; color: white; padding: 6px 10px; font-size: 12px;" onclick="openPayoffCalculator(${JSON.stringify(d).replace(/"/g, '&quot;')})">Payoff</button>
           </div>
         </div>
       `).join('');
@@ -1494,7 +1538,7 @@
       const withExtra = calculate(minPayment + extraPayment);
       
       let resultsHtml = `
-        <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #0071e3;">
+        <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #0891b2;">
           <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">With Current Payment ($${minPayment.toFixed(2)}/mo)</div>
           <div style="font-size: 13px; color: var(--text-secondary);">
             <div>⏱️ ${current.months > 0 ? `${current.years} years (${current.months} months)` : 'Could not calculate'}</div>
@@ -1681,7 +1725,7 @@
         
         // Summary
         html += `
-          <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid #0071e3;">
+          <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid #0891b2;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
               <span style="color: var(--text-primary); font-weight: 600;">Starting Balance:</span>
               <span style="font-weight: 600; color: var(--text-primary);">$${dayStartBalance.toFixed(2)}</span>
@@ -1698,7 +1742,7 @@
               <span style="font-weight: 600; color: #ff3b30;">-$${totalExpenses.toFixed(2)}</span>
             </div>
             ` : ''}
-            <div style="border-top: 1px solid #0071e3; padding-top: 8px; display: flex; justify-content: space-between;">
+            <div style="border-top: 1px solid #0891b2; padding-top: 8px; display: flex; justify-content: space-between;">
               <span style="font-weight: 700; color: var(--text-primary);">Ending Balance:</span>
               <span style="font-weight: 700; font-size: 16px; color: ${dayEndBalance >= 0 ? '#34c759' : '#ff3b30'};">$${dayEndBalance.toFixed(2)}</span>
             </div>
@@ -1776,7 +1820,7 @@
           // Calculate expenses and income for display
           const totalExpenses = items.filter(i => i.type !== 'income').reduce((sum, i) => sum + i.amount, 0);
           const totalIncome = Math.abs(items.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0));
-          const dayStyle = isToday ? 'background: #0071e3; color: white; font-weight: 700;' : '';
+          const dayStyle = isToday ? 'background: #0891b2; color: white; font-weight: 700;' : '';
           const itemsJson = JSON.stringify(items).replace(/"/g, '&quot;');
           
           let displayAmount = '';
@@ -1796,7 +1840,7 @@
           
           html += `<div class="calendar-day ${hasItems ? 'has-bills' : ''}" style="${dayStyle}${hasItems ? 'cursor: pointer;' : ''}" onclick="${hasItems ? `showDayBills('${dateStr}', ${itemsJson}, ${balanceAfterItems.toFixed(2)})` : ''}" title="${hasItems ? 'Click to see details' : ''}">
             <div class="calendar-day-date">${d}</div>
-            <div style="font-size: 11px; font-weight: 700; color: ${displayColor || (isToday ? 'white' : '#0071e3')};">
+            <div style="font-size: 11px; font-weight: 700; color: ${displayColor || (isToday ? 'white' : '#0891b2')};">
               ${displayAmount}
             </div>
             ${hasItems ? `<div style="font-size: 9px; margin-top: 2px; color: ${isToday ? '#e8e8e8' : '#666'};">After: $${balanceAfterItems.toFixed(0)}</div>` : ''}
@@ -1844,7 +1888,7 @@
       container.innerHTML = entries.map(([month, cf]) => {
         const height = (cf.balance / maxBalance) * 160;
         return `<div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-          <div style="height: ${height}px; background: #0071e3; border-radius: 4px; width: 100%; margin-bottom: 8px;"></div>
+          <div style="height: ${height}px; background: #0891b2; border-radius: 4px; width: 100%; margin-bottom: 8px;"></div>
           <div style="font-size: 12px; font-weight: 600; color: var(--text-primary);">$${(cf.balance / 1000).toFixed(1)}k</div>
           <div style="font-size: 11px; color: var(--text-secondary);">${month}</div>
         </div>`;
@@ -1885,9 +1929,9 @@
       const bufferEl = document.getElementById('bufferedInfoContainer');
       if (billsCalc && billsCalc.requiredBalance) {
         bufferEl.innerHTML = `
-          <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 8px; border-left: 4px solid #0071e3;">
+          <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 8px; border-left: 4px solid #0891b2;">
             <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Next 30 Days Bills</div>
-            <div style="font-size: 20px; font-weight: 700; color: #0071e3;">$${billsCalc.totalBillsAmount?.toFixed(0) || 0}</div>
+            <div style="font-size: 20px; font-weight: 700; color: #0891b2;">$${billsCalc.totalBillsAmount?.toFixed(0) || 0}</div>
           </div>
           <div style="background: #fff4e6; padding: 16px; border-radius: 8px; border-left: 4px solid #ff9500;">
             <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Safety Buffer (20%)</div>
@@ -1908,7 +1952,7 @@
         recsEl.innerHTML = '<div style="padding: 12px; color: var(--text-secondary); text-align: center;">Add debts or bills to get recommendations</div>';
       } else {
         recsEl.innerHTML = insights.recommendations.map((r, i) => `
-          <div style="padding: 14px; background: ${i % 2 === 0 ? '#f9fafb' : 'white'}; border-radius: 8px; border-left: 3px solid #0071e3;">
+          <div style="padding: 14px; background: ${i % 2 === 0 ? '#f9fafb' : 'white'}; border-radius: 8px; border-left: 3px solid #0891b2;">
             <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px; font-size: 13px;">${r.title}</div>
             <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">${r.desc}</div>
           </div>
@@ -1927,9 +1971,9 @@
         <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Categorized</div>
         <div style="font-size: 18px; font-weight: 700; color: ${categorizedPercent >= 95 ? '#34c759' : categorizedPercent >= 80 ? '#ff9500' : '#ff3b30'};">${categorizedPercent}%</div>
       </div>`;
-      healthHtml += `<div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border-left: 3px solid #0071e3;">
+      healthHtml += `<div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border-left: 3px solid #0891b2;">
         <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">Transactions</div>
-        <div style="font-size: 18px; font-weight: 700; color: #0071e3;">${total}</div>
+        <div style="font-size: 18px; font-weight: 700; color: #0891b2;">${total}</div>
       </div>`;
       healthHtml += '</div>';
       
@@ -2104,7 +2148,7 @@
       });
 
       const consolidatedSelector = `
-        <select id="trendsViewSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: #0071e3; color: white; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
+        <select id="trendsViewSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: #0891b2; color: white; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
           <option value="year-to-date" ${!singleMonth && trendsPeriod === 12 ? 'selected' : ''} style="color: var(--text-primary); background: var(--bg-primary);">Year to Date</option>
           <option value="this-month" ${!singleMonth && trendsPeriod === 1 ? 'selected' : ''} style="color: var(--text-primary); background: var(--bg-primary);">This Month</option>
           ${allMonths.reverse().map(m => {
@@ -2124,7 +2168,7 @@
               <div style="width: 8px; height: 8px; background: ${categoryColor}; border-radius: 2px;"></div>
               <span style="font-size: 10px; font-weight: 600; color: var(--text-primary);">${cat}</span>
             </div>
-            <div style="font-size: 12px; font-weight: 700; color: #0071e3; margin-bottom: 2px;">$${val.toFixed(0)}</div>
+            <div style="font-size: 12px; font-weight: 700; color: #0891b2; margin-bottom: 2px;">$${val.toFixed(0)}</div>
             <div style="font-size: 9px; color: var(--text-secondary);">${percent}%</div>
           </div>`;
         }).join('')}
@@ -2137,7 +2181,7 @@
           </div>
           <div style="background: var(--bg-primary); border: 1px solid #e5e5e7; border-radius: 12px; padding: 32px; text-align: center;">
             <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${periodLabel} Breakdown</div>
-            <div style="font-size: 32px; font-weight: 700; color: #0071e3; margin-bottom: 24px;">$${total.toFixed(0)}</div>
+            <div style="font-size: 32px; font-weight: 700; color: #0891b2; margin-bottom: 24px;">$${total.toFixed(0)}</div>
             <div style="display: flex; justify-content: center; margin-bottom: 24px;">
               <svg width="240" height="240" viewBox="0 0 200 200" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));">
                 ${slices}
@@ -2170,7 +2214,7 @@
         });
         card.addEventListener('mouseenter', function() {
           this.style.background = 'var(--bg-tertiary)';
-          this.style.borderColor = '#0071e3';
+          this.style.borderColor = '#0891b2';
         });
         card.addEventListener('mouseleave', function() {
           this.style.background = 'var(--bg-secondary)';
@@ -2424,7 +2468,7 @@
       const txn = transactions.find(t => t.id === id);
       
       menu.innerHTML = `
-        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #0071e3; font-weight: 600; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showMakeRecurringModal(${id}); document.getElementById('transactionMenu').remove();">🔄 Make Recurring Bill</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #0891b2; font-weight: 600; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showMakeRecurringModal(${id}); document.getElementById('transactionMenu').remove();">🔄 Make Recurring Bill</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id});">Change Category</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
@@ -2540,9 +2584,9 @@
           const isSameAsCurrent = suggestedCat === txn.category;
           const suggestionStyle = isSameAsCurrent 
             ? 'background: #e8f4e8; border: 1.5px solid #34c759;' 
-            : 'background: #e8f4f8; border: 1.5px solid #0071e3;';
+            : 'background: #e8f4f8; border: 1.5px solid #0891b2;';
           const suggestionLabel = isSameAsCurrent ? '✓ Correct' : '✨ Suggested';
-          const suggestionColor = isSameAsCurrent ? '#34c759' : '#0071e3';
+          const suggestionColor = isSameAsCurrent ? '#34c759' : '#0891b2';
           
           html += `<div style="margin-bottom: 12px; padding: 8px 12px; ${suggestionStyle} border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="suggested-cat" data-cat="${suggestedCat}">
             <div style="font-size: 10px; color: ${suggestionColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">${suggestionLabel}</div>
@@ -2715,24 +2759,24 @@
               <div style="margin-bottom: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                   <div style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Select transactions to update:</div>
-                  <div style="font-size: 12px; color: #0071e3; cursor: pointer; font-weight: 600; transition: opacity 0.2s;" id="selectAllToggle" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="document.querySelectorAll('.txn-checkbox').forEach(cb => cb.checked = !cb.checked); updateBulkCounter();">Select All</div>
+                  <div style="font-size: 12px; color: #0891b2; cursor: pointer; font-weight: 600; transition: opacity 0.2s;" id="selectAllToggle" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="document.querySelectorAll('.txn-checkbox').forEach(cb => cb.checked = !cb.checked); updateBulkCounter();">Select All</div>
                 </div>
                 <div style="max-height: 280px; overflow-y: auto; background: var(--bg-primary); border-radius: 8px; padding: 8px;">
                   ${matchingTxns.map((t, idx) => `
                     <label style="display: flex; align-items: flex-start; gap: 10px; padding: 8px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='transparent'">
-                      <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3; margin-top: 2px; flex-shrink: 0;" onchange="updateBulkCounter()">
+                      <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0891b2; margin-top: 2px; flex-shrink: 0;" onchange="updateBulkCounter()">
                       <div style="flex: 1; min-width: 0;">
                         <div style="font-size: 12px; color: var(--text-primary); font-weight: 500; word-wrap: break-word; white-space: normal; line-height: 1.4;">${t.date} - ${t.description}</div>
                         <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Was: ${t.category}</div>
                       </div>
-                      <span style="font-weight: 600; color: #0071e3; font-size: 12px; flex-shrink: 0; margin-top: 2px;">$${Math.abs(t.amount).toFixed(2)}</span>
+                      <span style="font-weight: 600; color: #0891b2; font-size: 12px; flex-shrink: 0; margin-top: 2px;">$${Math.abs(t.amount).toFixed(2)}</span>
                     </label>
                   `).join('')}
                 </div>
               </div>
               
-              <div style="padding: 12px; background: #e8f4f8; border-radius: 10px; margin-bottom: 16px; border-left: 3px solid #0071e3;">
-                <div style="font-size: 12px; color: #0071e3; font-weight: 600;">Will update to: <strong>${category}</strong></div>
+              <div style="padding: 12px; background: #e8f4f8; border-radius: 10px; margin-bottom: 16px; border-left: 3px solid #0891b2;">
+                <div style="font-size: 12px; color: #0891b2; font-weight: 600;">Will update to: <strong>${category}</strong></div>
               </div>
               
               <button class="btn btn-primary" id="bulkConfirmBtn" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; margin-bottom: 8px;">Save Changes</button>
@@ -2811,7 +2855,7 @@
       `).join('');
 
       container.innerHTML = `
-        <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px; font-size: 12px; color: #0071e3; border-left: 3px solid #0071e3;">
+        <div style="margin-bottom: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px; font-size: 12px; color: #0891b2; border-left: 3px solid #0891b2;">
           Exclude a transaction to automatically exclude similar future transactions by merchant name.
         </div>
         ${rulesHtml}
@@ -2838,7 +2882,7 @@
       `).join('');
 
       const periodButtons = [7, 14, 30, 90, 360].map(d => `
-        <button style="background: ${d === data.days ? '#0071e3' : '#e5e5e7'}; color: ${d === data.days ? 'white' : '#000'}; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;" onclick="loadBillBuffer(${d})">${d}d</button>
+        <button style="background: ${d === data.days ? '#0891b2' : '#e5e5e7'}; color: ${d === data.days ? 'white' : '#000'}; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;" onclick="loadBillBuffer(${d})">${d}d</button>
       `).join('');
 
       container.innerHTML = `
@@ -2852,17 +2896,17 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px;">
-          <div style="background: var(--bg-tertiary); border: 1px solid #0071e3; padding: 16px; border-radius: 8px;">
+          <div style="background: var(--bg-tertiary); border: 1px solid #0891b2; padding: 16px; border-radius: 8px;">
             <div style="color: var(--text-secondary); font-size: 12px;">Total Bills</div>
-            <div style="font-size: 24px; font-weight: 700; color: #0071e3;">$${data.totalBillsAmount.toFixed(2)}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #0891b2;">$${data.totalBillsAmount.toFixed(2)}</div>
           </div>
 
-          <div style="background: var(--bg-tertiary); border: 1px solid #0071e3; padding: 16px; border-radius: 8px;">
+          <div style="background: var(--bg-tertiary); border: 1px solid #0891b2; padding: 16px; border-radius: 8px;">
             <div style="color: var(--text-secondary); font-size: 12px;">Safety Buffer (20%)</div>
-            <div style="font-size: 24px; font-weight: 700; color: #0071e3;">$${data.recommendedBuffer.toFixed(2)}</div>
+            <div style="font-size: 24px; font-weight: 700; color: #0891b2;">$${data.recommendedBuffer.toFixed(2)}</div>
           </div>
 
-          <div style="background: #0071e3; padding: 16px; border-radius: 8px; grid-column: 1/-1;">
+          <div style="background: #0891b2; padding: 16px; border-radius: 8px; grid-column: 1/-1;">
             <div style="color: rgba(255,255,255,0.8); font-size: 12px;">Required Account Balance</div>
             <div style="font-size: 28px; font-weight: 700; color: white;">$${data.requiredBalance.toFixed(2)}</div>
             <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 8px;">You'll have $${data.leftoverAfterBills.toFixed(2)} left after paying all bills in the next ${data.days} days</div>
@@ -3162,7 +3206,7 @@
             </div>
           </div>
 
-          <div style="background: var(--bg-primary); padding: 14px; border-radius: 8px; border: 2px solid #0071e3; margin-bottom: 12px;">
+          <div style="background: var(--bg-primary); padding: 14px; border-radius: 8px; border: 2px solid #0891b2; margin-bottom: 12px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
               <div>
                 <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">To Bills Account</div>
@@ -3225,13 +3269,13 @@
           const freqNames = {7: 'Weekly', 14: 'Bi-weekly', 30: 'Monthly', 365: 'Annually'};
           const freqName = freqNames[b.frequency] || b.frequency + 'd';
           return `
-            <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0071e3; display: flex; justify-content: space-between; align-items: center;">
+            <div style="background: var(--bg-primary); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0891b2; display: flex; justify-content: space-between; align-items: center;">
               <div style="flex: 1;">
                 <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${b.name}</div>
                 <div style="font-size: 12px; color: var(--text-secondary);">${freqName} starting ${b.startDate}</div>
               </div>
               <div style="display: flex; gap: 12px; align-items: center;">
-                <div style="font-weight: 700; font-size: 16px; color: #0071e3; min-width: 60px; text-align: right;">$${b.amount.toFixed(2)}</div>
+                <div style="font-weight: 700; font-size: 16px; color: #0891b2; min-width: 60px; text-align: right;">$${b.amount.toFixed(2)}</div>
                 <button style="background: #ff3b30; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;" onclick="deleteRecurringBill(${b.id})">Remove</button>
               </div>
             </div>
