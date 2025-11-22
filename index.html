@@ -851,6 +851,20 @@
     let currentCategoryFilter = 'all';
     let allTransactions = [];
     let fullTransactionData = [];
+    
+    // Load and save custom categories from localStorage
+    function getCustomCategories() {
+      const stored = localStorage.getItem('customCategories');
+      return stored ? JSON.parse(stored) : [];
+    }
+    
+    function saveCustomCategory(category) {
+      const customCats = getCustomCategories();
+      if (!customCats.includes(category)) {
+        customCats.push(category);
+        localStorage.setItem('customCategories', JSON.stringify(customCats));
+      }
+    }
 
     function filterByType(type) {
       currentTypeFilter = type;

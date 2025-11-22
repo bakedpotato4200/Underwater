@@ -174,7 +174,7 @@
     "id": 20,
     "date": "2025-10-31",
     "amount": -45,
-    "category": "Credit card",
+    "category": "Credit card payment",
     "description": "Withdrawal from WF Card RETRY PYMT BPF_DSS_0_1031115504.txt",
     "type": "expense",
     "excluded": false
@@ -1425,7 +1425,7 @@
     "id": 159,
     "date": "2025-10-20",
     "amount": -35,
-    "category": "Credi card payment",
+    "category": "Credit card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -1920,7 +1920,7 @@
     "id": 214,
     "date": "2025-09-15",
     "amount": -901,
-    "category": "Credi card payment",
+    "category": "Credit card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -2127,7 +2127,7 @@
     "id": 237,
     "date": "2025-09-02",
     "amount": -74,
-    "category": "Credi card payment",
+    "category": "Credit card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -2172,7 +2172,7 @@
     "id": 242,
     "date": "2025-09-15",
     "amount": -70,
-    "category": "Credi card payment",
+    "category": "Credit card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -3360,7 +3360,7 @@
     "id": 374,
     "date": "2025-07-25",
     "amount": -35,
-    "category": "Credi card payment",
+    "category": "Credit card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
@@ -4044,7 +4044,7 @@
     "id": 450,
     "date": "2025-06-24",
     "amount": -1177,
-    "category": "Credi card payment",
+    "category": "Credit card payment",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
