@@ -937,10 +937,16 @@
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0;">
               ${categories.map(cat => `<button class="btn btn-secondary" onclick="updateTransactionCategory(${id}, '${cat}'); document.getElementById('categoryModal').remove();" style="text-align: center;">${cat}</button>`).join('')}
             </div>
-            <button class="btn btn-secondary" onclick="document.getElementById('categoryModal').remove();" style="width: 100%; margin-top: 12px;">Cancel</button>
+            <div style="margin: 16px 0; padding: 12px; border: 1px solid #d5d5d7; border-radius: 8px; background: #f9f9fb;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #000; margin-bottom: 8px;">Or create custom:</label>
+              <input type="text" id="customCategory" placeholder="Enter custom category" style="width: 100%; padding: 10px 12px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; margin-bottom: 8px;" />
+              <button class="btn btn-primary" onclick="const cat = document.getElementById('customCategory').value.trim(); if (cat) { updateTransactionCategory(${id}, cat); document.getElementById('categoryModal').remove(); } else { alert('Please enter a category name'); }" style="width: 100%; text-align: center;">Set Custom</button>
+            </div>
+            <button class="btn btn-secondary" onclick="document.getElementById('categoryModal').remove();" style="width: 100%;">Cancel</button>
           </div>
         `;
         document.body.appendChild(newModal);
+        setTimeout(() => document.getElementById('customCategory').focus(), 100);
       }
     }
 
