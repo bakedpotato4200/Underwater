@@ -1046,10 +1046,7 @@
       const isChecked = document.getElementById('selectAllTxns').checked;
       const checkboxes = document.querySelectorAll('#fullTransactionsList .txn-checkbox');
       checkboxes.forEach(cb => {
-        const item = cb.closest('.transaction-item');
-        if (item && item.style.display !== 'none') {
-          cb.checked = isChecked;
-        }
+        cb.checked = isChecked;
       });
       updateBulkActionButtons();
     }
