@@ -847,6 +847,7 @@
 
     let currentDateFilter = 'all';
     let currentTypeFilter = 'all';
+    let allTransactions = [];
 
     function filterByType(type) {
       currentTypeFilter = type;
@@ -876,59 +877,37 @@
       const today = new Date(2025, 10, 21);
       const searchBox = document.getElementById('searchBox');
       const search = searchBox ? searchBox.value.toLowerCase().trim() : '';
-      const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
       
-      console.log('Applying filters:', {typeFilter: currentTypeFilter, dateFilter: currentDateFilter, search, itemCount: items.length});
-      
-      items.forEach(item => {
-        const type = item.getAttribute('data-type');
-        const dateStr = item.getAttribute('data-date');
-        const text = item.textContent.toLowerCase();
-        
+      let filtered = allTransactions.filter(t => {
         // Type filter
-        if (currentTypeFilter !== 'all') {
-          if (type !== currentTypeFilter) {
-            item.style.display = 'none';
-            return;
-          }
-        }
+        if (currentTypeFilter !== 'all' && t.type !== currentTypeFilter) return false;
         
         // Date filter
         if (currentDateFilter !== 'all') {
-          if (!dateStr) {
-            item.style.display = 'none';
-            return;
-          }
-          
-          const parts = dateStr.split('-');
-          const txnDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+          const txnDate = new Date(t.date);
           const daysDiff = Math.floor((today - txnDate) / 86400000);
           
-          let shouldShow = false;
           if (currentDateFilter === 'month') {
-            shouldShow = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
+            if (txnDate.getMonth() !== today.getMonth() || txnDate.getFullYear() !== today.getFullYear()) return false;
           } else if (currentDateFilter === '30days') {
-            shouldShow = daysDiff >= 0 && daysDiff <= 30;
+            if (daysDiff < 0 || daysDiff > 30) return false;
           } else if (currentDateFilter === '3months') {
-            shouldShow = daysDiff >= 0 && daysDiff <= 90;
+            if (daysDiff < 0 || daysDiff > 90) return false;
           } else if (currentDateFilter === 'year') {
-            shouldShow = txnDate.getFullYear() === today.getFullYear();
-          }
-          
-          if (!shouldShow) {
-            item.style.display = 'none';
-            return;
+            if (txnDate.getFullYear() !== today.getFullYear()) return false;
           }
         }
         
         // Search filter
-        if (search && !text.includes(search)) {
-          item.style.display = 'none';
-          return;
+        if (search) {
+          const text = (t.description + ' ' + t.category + ' ' + t.amount).toLowerCase();
+          if (!text.includes(search)) return false;
         }
         
-        item.style.display = 'flex';
+        return true;
       });
+      
+      displayTransactions(filtered);
     }
     
     function getCategoryColor(category) {
