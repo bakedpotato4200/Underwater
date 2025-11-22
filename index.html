@@ -1126,7 +1126,7 @@
       const list = document.getElementById('recurringList');
       const filtered = recurring.filter(r => {
         const merchant = (r.merchant || '').toLowerCase();
-        return !merchant.match(/withdrawal|transfer|internal|from account|to account|xfer|move|deposit to|acct|between accounts/i);
+        return !merchant.match(/withdrawal|transfer|internal|from account|to account|xfer|move|deposit to|acct|between accounts|^ke$/i);
       });
       if (!filtered.length) {
         list.innerHTML = '<div class="loading">No recurring bills detected</div>';
@@ -1163,7 +1163,8 @@
       const bills = [];
       Object.entries(calendar).forEach(([date, calendarBills]) => {
         calendarBills.forEach(bill => {
-          if (bill.type !== 'withdrawal' && bill.type !== 'transfer') {
+          const merchant = (bill.merchant || '').toLowerCase();
+          if (bill.type !== 'withdrawal' && bill.type !== 'transfer' && !merchant.match(/^ke$/i)) {
             bills.push({ ...bill, date });
           }
         });
