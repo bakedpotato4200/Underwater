@@ -2032,6 +2032,7 @@
         
         const suggestedCat = await getSuggestedCategory(txn.description);
         const categories = ['Income', 'Utilities', 'Food & Dining', 'Groceries', 'Transportation', 'Entertainment', 'Shopping', 'Health & Fitness', 'Transfer', 'Other'];
+        const customCats = getCustomCategories();
         
         console.log(`Modal opened for transaction ${id}: "${txn.description}", current: ${txn.category}, suggested: ${suggestedCat}`);
         
@@ -2040,55 +2041,51 @@
         const newModal = document.createElement('div');
         newModal.id = 'categoryModal';
         newModal.className = 'modal active';
-        newModal.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10005; align-items: center; justify-content: center; backdrop-filter: blur(6px);';
+        newModal.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10005; align-items: center; justify-content: center; backdrop-filter: blur(6px); overflow: auto;';
       
-        let html = `<div style="background: white; border-radius: 20px; padding: 32px; max-width: 440px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
-          <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #000; letter-spacing: -0.5px;">Select Category</div>
-          <div style="font-size: 13px; color: #999; margin-bottom: 20px;">${txn.description}</div>`;
+        let html = `<div style="background: white; border-radius: 20px; padding: 24px; max-width: 380px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3); margin: auto; my-space: auto;">
+          <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px; color: #000; letter-spacing: -0.5px;">Select Category</div>
+          <div style="font-size: 12px; color: #999; margin-bottom: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${txn.description}</div>`;
         
-        // Always show suggestion, with different styling if it matches current category
+        // Always show suggestion - more compact
         if (suggestedCat) {
           const isSameAsCurrent = suggestedCat === txn.category;
           const suggestionStyle = isSameAsCurrent 
             ? 'background: #e8f4e8; border: 1.5px solid #34c759;' 
             : 'background: #e8f4f8; border: 1.5px solid #0071e3;';
-          const suggestionLabel = isSameAsCurrent ? '✓ Already Correct' : '✨ Suggested';
+          const suggestionLabel = isSameAsCurrent ? '✓ Correct' : '✨ Suggested';
           const suggestionColor = isSameAsCurrent ? '#34c759' : '#0071e3';
           
-          html += `<div style="margin-bottom: 16px; padding: 10px 14px; ${suggestionStyle} border-radius: 10px; cursor: pointer; transition: all 0.2s;" class="suggested-cat" data-cat="${suggestedCat}">
-            <div style="font-size: 11px; color: ${suggestionColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${suggestionLabel}</div>
-            <div style="font-size: 14px; font-weight: 600; color: ${suggestionColor};">${suggestedCat}</div>
+          html += `<div style="margin-bottom: 12px; padding: 8px 12px; ${suggestionStyle} border-radius: 8px; cursor: pointer; transition: all 0.2s;" class="suggested-cat" data-cat="${suggestedCat}">
+            <div style="font-size: 10px; color: ${suggestionColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">${suggestionLabel}</div>
+            <div style="font-size: 13px; font-weight: 600; color: ${suggestionColor};">${suggestedCat}</div>
           </div>`;
         }
         
-        html += `<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">`;
+        // Dropdown select
+        html += `<select id="categorySelect" style="width: 100%; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; border: 1.5px solid #e5e5e7; border-radius: 8px; background: white; color: #000; font-weight: 500; cursor: pointer;">
+          <option value="">Choose a category...</option>`;
+        
         categories.forEach(cat => {
-          html += `<div class="cat-option" data-cat="${cat}" style="padding: 12px 14px; border: 1.5px solid #e5e5e7; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: white;">
-            <div style="font-size: 13px; font-weight: 600; color: #000;">${cat}</div>
-          </div>`;
+          html += `<option value="${cat}">${cat}</option>`;
         });
-        html += `</div>`;
         
-        // Show recent custom categories
-        const customCats = getCustomCategories();
         if (customCats.length > 0) {
-          html += `<div style="margin-bottom: 16px;">
-            <div style="font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Recent Custom</div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">`;
+          html += `<optgroup label="Recent Custom">`;
           customCats.forEach(cat => {
-            html += `<div class="cat-option custom-cat" data-cat="${cat}" style="padding: 12px 14px; border: 1.5px solid #d1f0ff; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f0f7ff;">
-              <div style="font-size: 13px; font-weight: 600; color: #0071e3;">${cat}</div>
-            </div>`;
+            html += `<option value="${cat}">${cat}</option>`;
           });
-          html += `</div></div>`;
+          html += `</optgroup>`;
         }
         
-        html += `<div style="margin-bottom: 16px; padding: 12px 14px; border: 1.5px solid #e5e5e7; border-radius: 10px; background: #f9fafb;">
-            <input type="text" id="customCategory" placeholder="Custom category..." style="width: 100%; border: none; background: transparent; font-size: 13px; outline: none; font-weight: 500; color: #000;" />
-          </div>
-          
-          <button class="btn btn-primary" id="saveCatBtn" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; opacity: 0.5; cursor: not-allowed;">Save Category</button>
-          <button style="width: 100%; padding: 12px; margin-top: 8px; font-size: 13px; font-weight: 600; border-radius: 12px; background: #f5f5f7; border: none; color: #000; cursor: pointer; transition: all 0.2s;" id="cancelCatBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
+        html += `</select>
+        
+        <div style="margin-bottom: 12px; padding: 10px 12px; border: 1.5px solid #e5e5e7; border-radius: 8px; background: #f9fafb;">
+          <input type="text" id="customCategory" placeholder="Or type custom..." style="width: 100%; border: none; background: transparent; font-size: 13px; outline: none; font-weight: 500; color: #000;" />
+        </div>
+        
+        <button class="btn btn-primary" id="saveCatBtn" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 600; border-radius: 8px; opacity: 0.5; cursor: not-allowed; margin-bottom: 8px;">Save Category</button>
+        <button style="width: 100%; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 8px; background: #f5f5f7; border: none; color: #000; cursor: pointer; transition: all 0.2s;" id="cancelCatBtn" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='#f5f5f7'">Cancel</button>
         </div>`;
         
         newModal.innerHTML = html;
@@ -2096,6 +2093,7 @@
         
         const saveBtn = document.getElementById('saveCatBtn');
         const customInput = document.getElementById('customCategory');
+        const categorySelect = document.getElementById('categorySelect');
         
         const updateSaveButton = () => {
           if (selectedCategory || customInput.value.trim()) {
@@ -2105,6 +2103,7 @@
           } else {
             saveBtn.style.opacity = '0.5';
             saveBtn.style.cursor = 'not-allowed';
+            saveBtn.textContent = 'Save Category';
           }
         };
         
@@ -2112,37 +2111,32 @@
         const suggestedOption = newModal.querySelector('.suggested-cat');
         if (suggestedOption) {
           suggestedOption.addEventListener('click', () => {
-            document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
-            suggestedOption.style.background = '#d1f0ff';
             selectedCategory = suggestedCat;
+            categorySelect.value = '';
+            customInput.value = '';
+            suggestedOption.style.background = '#d1f0ff';
             updateSaveButton();
           });
         }
         
-        // Category option clicks (including custom categories)
-        document.querySelectorAll('.cat-option').forEach(option => {
-          option.addEventListener('click', () => {
-            document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
-            if (option.classList.contains('custom-cat')) {
-              option.style.background = '#d1f0ff';
-            } else {
-              option.style.background = '#f0f3ff';
-            }
-            selectedCategory = option.dataset.cat;
+        // Dropdown select change
+        categorySelect.addEventListener('change', () => {
+          if (categorySelect.value) {
+            selectedCategory = categorySelect.value;
             customInput.value = '';
-            updateSaveButton();
-          });
+            suggestedOption?.style.clearProperty('background');
+          }
+          updateSaveButton();
         });
         
         // Custom input
         customInput.addEventListener('input', () => {
           if (customInput.value.trim()) {
-            document.querySelectorAll('.cat-option, .suggested-cat').forEach(el => el.style.background = 'white');
             selectedCategory = null;
-            updateSaveButton();
-          } else {
-            updateSaveButton();
+            categorySelect.value = '';
+            suggestedOption?.style.clearProperty('background');
           }
+          updateSaveButton();
         });
         
         // Save button
@@ -2165,7 +2159,7 @@
           if (e.target === newModal) newModal.remove();
         });
         
-        setTimeout(() => customInput.focus(), 100);
+        setTimeout(() => categorySelect.focus(), 100);
       }, 50);
     }
 

@@ -1344,7 +1344,7 @@
     "id": 150,
     "date": "2025-10-01",
     "amount": -967,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1389,7 +1389,7 @@
     "id": 155,
     "date": "2025-10-08",
     "amount": -25,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1398,7 +1398,7 @@
     "id": 156,
     "date": "2025-10-09",
     "amount": -8,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1407,7 +1407,7 @@
     "id": 157,
     "date": "2025-10-09",
     "amount": -126,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1560,7 +1560,7 @@
     "id": 174,
     "date": "2025-09-04",
     "amount": -153,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1569,7 +1569,7 @@
     "id": 175,
     "date": "2025-09-04",
     "amount": -3,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1587,7 +1587,7 @@
     "id": 177,
     "date": "2025-09-05",
     "amount": -213,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1596,7 +1596,7 @@
     "id": 178,
     "date": "2025-09-05",
     "amount": -24,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1686,7 +1686,7 @@
     "id": 188,
     "date": "2025-09-22",
     "amount": -47,
-    "category": "Other",
+    "category": "Credit card payment",
     "description": "Withdrawal from WF Card AUTO PAY",
     "type": "expense",
     "excluded": false
@@ -1695,7 +1695,7 @@
     "id": 189,
     "date": "2025-09-23",
     "amount": -40,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -1704,7 +1704,7 @@
     "id": 190,
     "date": "2025-09-23",
     "amount": -135.23,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2181,7 +2181,7 @@
     "id": 243,
     "date": "2025-09-23",
     "amount": -0.68,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2253,7 +2253,7 @@
     "id": 251,
     "date": "2025-07-05",
     "amount": -204.27,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2280,7 +2280,7 @@
     "id": 254,
     "date": "2025-07-05",
     "amount": -193.48,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2334,7 +2334,7 @@
     "id": 260,
     "date": "2025-07-10",
     "amount": -212,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2361,7 +2361,7 @@
     "id": 263,
     "date": "2025-07-12",
     "amount": -140,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2397,7 +2397,7 @@
     "id": 267,
     "date": "2025-07-17",
     "amount": -43,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2433,7 +2433,7 @@
     "id": 271,
     "date": "2025-07-22",
     "amount": -47,
-    "category": "Other",
+    "category": "Credit card payment",
     "description": "Withdrawal from WF Card AUTO PAY",
     "type": "expense",
     "excluded": false
@@ -2460,7 +2460,7 @@
     "id": 274,
     "date": "2025-07-25",
     "amount": -40,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -2469,7 +2469,7 @@
     "id": 275,
     "date": "2025-07-29",
     "amount": -58,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3342,7 +3342,7 @@
     "id": 372,
     "date": "2025-07-05",
     "amount": -69.51,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3369,7 +3369,7 @@
     "id": 375,
     "date": "2025-06-02",
     "amount": -100,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3414,7 +3414,7 @@
     "id": 380,
     "date": "2025-06-14",
     "amount": -40,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3432,7 +3432,7 @@
     "id": 382,
     "date": "2025-06-17",
     "amount": -200,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3450,7 +3450,7 @@
     "id": 384,
     "date": "2025-06-18",
     "amount": -20,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3459,7 +3459,7 @@
     "id": 385,
     "date": "2025-06-18",
     "amount": -50,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -3468,7 +3468,7 @@
     "id": 386,
     "date": "2025-06-19",
     "amount": -200,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
