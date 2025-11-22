@@ -6,5 +6,12 @@
     "frequency": 14,
     "startDate": "2025-06-06",
     "type": "income"
+  },
+  {
+    "id": 1763838928034,
+    "name": "Rent",
+    "amount": 400,
+    "frequency": 14,
+    "startDate": "2025-06-06"
   }
 ]
