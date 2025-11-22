@@ -480,19 +480,23 @@
     async function loadDashboard() {
       try {
         const [txRes, billsRes] = await Promise.all([fetch(API_URL + '/api/transactions'), fetch(API_URL + '/api/recurring-bills')]);
-        const transactions = await txRes.json();
-        const bills = await billsRes.json();
+        if (!txRes.ok || !billsRes.ok) { console.error('API error', txRes.status, billsRes.status); return; }
+        const transactions = Array.isArray(await txRes.json()) ? await txRes.json() : [];
+        const billsData = billsRes.clone();
+        const bills = Array.isArray(await billsData.json()) ? await billsRes.json() : [];
         
-        const income = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-        const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+        if (!transactions || !bills) { console.error('Invalid data'); return; }
+        
+        const income = transactions.filter(t => t && t.type === 'income' && !t.excluded).reduce((s, t) => s + (t.amount || 0), 0);
+        const expenses = transactions.filter(t => t && t.type === 'expense' && !t.excluded).reduce((s, t) => s + (t.amount || 0), 0);
         const balance = income - expenses;
         
-        document.getElementById('totalIncome').textContent = '$' + income.toFixed(2);
-        document.getElementById('totalExpenses').textContent = '$' + expenses.toFixed(2);
-        document.getElementById('netBalance').textContent = '$' + balance.toFixed(2);
-        document.getElementById('financialScore').textContent = (95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0);
+        document.getElementById('totalIncome').textContent = '$' + (income || 0).toFixed(2);
+        document.getElementById('totalExpenses').textContent = '$' + (expenses || 0).toFixed(2);
+        document.getElementById('netBalance').textContent = '$' + (balance || 0).toFixed(2);
+        document.getElementById('financialScore').textContent = (95 - Math.max(0, Math.min(95, (income > 0 ? expenses / income * 100 : 0)))).toFixed(0);
         
-        const monthlyBillsAmount = bills.reduce((s, b) => s + b.amount, 0);
+        const monthlyBillsAmount = (bills && bills.length) ? bills.reduce((s, b) => s + (b && b.amount ? b.amount : 0), 0) : 0;
         const paycheckAmount = 1500;
         const daysPerPaycheck = 14;
         const paychecksPerMonth = 30.44 / daysPerPaycheck;
@@ -503,10 +507,10 @@
         document.getElementById('toBillsAmount').textContent = '$' + (monthlyBillsAmount / paychecksPerMonth).toFixed(2);
         document.getElementById('spendingAmount').textContent = '$' + (paycheckAmount - monthlyBillsAmount / paychecksPerMonth).toFixed(2);
         
-        loadUpcomingBills(bills);
-        loadSpendingTrends(transactions);
-        loadRecentTransactions(transactions);
-      } catch (e) { console.error('Dashboard load error:', e); }
+        if (bills && bills.length) loadUpcomingBills(bills);
+        if (transactions && transactions.length) loadSpendingTrends(transactions);
+        if (transactions && transactions.length) loadRecentTransactions(transactions);
+      } catch (e) { console.error('Dashboard error:', e); }
     }
     
     function loadUpcomingBills(bills) {
