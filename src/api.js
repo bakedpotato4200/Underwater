@@ -939,29 +939,34 @@ app.get('/api/bills-calculator', (req, res) => {
     // Calculate total monthly bills from recurring bills
     let totalMonthlyBills = 0;
     let paycheckAmount = 0;
-    let paycheckFrequency = 30; // default
+    let paycheckFrequency = 30;
     
     // Get all recurring bills
-    if (Array.isArray(freshBills)) {
+    if (Array.isArray(freshBills) && freshBills.length > 0) {
       freshBills.forEach(bill => {
         if (bill.type === 'income') {
-          paycheckAmount = bill.amount;
-          paycheckFrequency = bill.frequency;
+          paycheckAmount = parseFloat(bill.amount) || 0;
+          paycheckFrequency = parseInt(bill.frequency) || 30;
         } else if (!bill.type || bill.type === 'expense') {
-          // Calculate monthly occurrence
-          const occurrencesPerMonth = 30 / bill.frequency;
-          const billAmount = bill.amount * occurrencesPerMonth;
-          totalMonthlyBills += billAmount;
+          const freq = parseInt(bill.frequency) || 30;
+          const amt = parseFloat(bill.amount) || 0;
+          const occurrencesPerMonth = 30 / freq;
+          totalMonthlyBills += amt * occurrencesPerMonth;
         }
       });
     }
     
-    // Get detected recurring bills
+    // Get detected recurring bills (from transaction history)
     const detected = detectRecurring().filter(r => r.isRecurring && r.category !== 'Income');
     detected.forEach(bill => {
-      const occurrencesPerMonth = 30 / bill.avgInterval;
-      totalMonthlyBills += bill.avgAmount * occurrencesPerMonth;
+      const occurrencesPerMonth = 30 / (bill.avgInterval || 30);
+      totalMonthlyBills += (bill.avgAmount || 0) * occurrencesPerMonth;
     });
+    
+    // Ensure all values are numbers
+    totalMonthlyBills = parseFloat(totalMonthlyBills) || 0;
+    paycheckAmount = parseFloat(paycheckAmount) || 0;
+    paycheckFrequency = parseInt(paycheckFrequency) || 30;
     
     const paychecksPerMonth = paycheckFrequency > 0 ? 30 / paycheckFrequency : 1;
     const billsPerPaycheck = paychecksPerMonth > 0 ? totalMonthlyBills / paychecksPerMonth : 0;
@@ -976,7 +981,7 @@ app.get('/api/bills-calculator', (req, res) => {
       spendingPerPaycheck: Math.round(spendingPerPaycheck * 100) / 100
     });
   } catch (e) {
-    console.error('Error calculating bills:', e);
+    console.error('Error calculating bills:', e.message);
     res.json({
       paycheckAmount: 0,
       paycheckFrequency: 30,
