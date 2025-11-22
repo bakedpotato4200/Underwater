@@ -579,7 +579,13 @@
         calendarData = {};
         
         for (let i = 1; i <= lastDay.getDate(); i++) {
-          const dayBills = calendarBills.filter(b => b.frequency && (i % parseInt(b.frequency) === 0));
+          const currentDate = new Date(year, month, i);
+          const dayBills = calendarBills.filter(b => {
+            if (!b.startDate || !b.frequency) return false;
+            const startDate = new Date(b.startDate);
+            const daysDiff = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+            return daysDiff >= 0 && daysDiff % parseInt(b.frequency) === 0;
+          });
           const dayIncome = dayBills.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
           const dayExpense = dayBills.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0);
           const endingBalance = runningBalance + dayIncome - dayExpense;
