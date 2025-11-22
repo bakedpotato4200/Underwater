@@ -911,8 +911,11 @@
       
       // Sort by date descending (newest first)
       const sorted = [...txns].sort((a, b) => new Date(b.date) - new Date(a.date));
-      const html = sorted.slice(0, 30).map(t => `
-        <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}">
+      const active = sorted.filter(t => !t.excluded).slice(0, 30);
+      const excluded = sorted.filter(t => t.excluded);
+      
+      const html = active.map(t => `
+        <li class="transaction-item">
           <div style="flex: 1;">
             <div class="transaction-date">${t.date}</div>
             <div class="transaction-desc">${t.description}</div>
@@ -926,7 +929,33 @@
           </div>
         </li>
       `).join('');
-      list.innerHTML = html;
+      
+      let fullHtml = html;
+      if (excluded.length > 0) {
+        fullHtml += `
+          <li style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #e5e5e7; list-style: none;">
+            <button onclick="document.getElementById('excludedTransactionsRecent').style.display = document.getElementById('excludedTransactionsRecent').style.display === 'none' ? 'block' : 'none'; this.textContent = document.getElementById('excludedTransactionsRecent').style.display === 'none' ? '▶ Excluded (' + ${excluded.length} + ')' : '▼ Excluded (' + ${excluded.length} + ')'" style="background: none; border: none; color: #86868b; font-weight: 600; cursor: pointer; padding: 0; font-size: 13px;">▶ Excluded (${excluded.length})</button>
+            <div id="excludedTransactionsRecent" style="display: none; margin-top: 12px;">
+              ${excluded.slice(0, 20).map(t => `
+                <div class="transaction-item" style="opacity: 0.6; text-decoration: line-through; color: #86868b;">
+                  <div style="flex: 1;">
+                    <div class="transaction-date">${t.date}</div>
+                    <div class="transaction-desc">${t.description}</div>
+                    <span style="font-size: 11px; color: #86868b;">${t.category}</span>
+                  </div>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <div class="transaction-amount ${t.type}">
+                      ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+                    </div>
+                    <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </li>
+        `;
+      }
+      list.innerHTML = fullHtml;
       
       // Apply filters to the full transaction list (respects current filter state)
       applyFilters();
@@ -1078,7 +1107,10 @@
       sortedMonths.forEach(monthKey => {
         const [year, month] = monthKey.split('-');
         const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-        const monthTotal = months[monthKey].reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
+        const monthTransactions = months[monthKey];
+        const activeMonth = monthTransactions.filter(t => !t.excluded);
+        const excludedMonth = monthTransactions.filter(t => t.excluded);
+        const monthTotal = activeMonth.reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
         
         fullHtml += `<div style="margin-bottom: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
@@ -1086,10 +1118,9 @@
             <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
           </div>`;
         
-        const monthTransactions = months[monthKey];
-        monthTransactions.forEach(t => {
+        activeMonth.forEach(t => {
           const isSelected = selectedTransactionIds.has(t.id);
-          fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
+          fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="margin-bottom: 6px;">
             <input type="checkbox" class="txn-checkbox" data-id="${t.id}" ${isSelected ? 'checked' : ''} onchange="updateCheckboxSelection(this)" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
@@ -1108,6 +1139,35 @@
             </div>
           </li>`;
         });
+        
+        if (excludedMonth.length > 0) {
+          fullHtml += `
+            <div style="margin-top: 12px; padding: 8px; border-top: 1px dashed #d5d5d7;">
+              <button onclick="const el = this.nextElementSibling; el.style.display = el.style.display === 'none' ? 'block' : 'none'; this.textContent = el.style.display === 'none' ? '▶ Excluded (' + ${excludedMonth.length} + ')' : '▼ Excluded (' + ${excludedMonth.length} + ')'" style="background: none; border: none; color: #86868b; font-weight: 600; cursor: pointer; padding: 0; font-size: 12px;">▶ Excluded (${excludedMonth.length})</button>
+              <div style="display: none; margin-top: 8px;">
+                ${excludedMonth.map(t => `
+                  <li class="transaction-item" style="opacity: 0.5; text-decoration: line-through; color: #86868b; margin-bottom: 6px;">
+                    <div style="flex: 1;">
+                      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                        <div class="transaction-desc">${t.description}</div>
+                        <div class="transaction-amount ${t.type}" style="margin-left: 8px;">
+                          ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
+                        </div>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div><span class="cat-badge ${getCategoryColor(t.category)}">${t.category}</span></div>
+                        <div class="transaction-date">${t.date}</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-left: 12px;">
+                      <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
+                    </div>
+                  </li>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
         
         fullHtml += '</div>';
       });
