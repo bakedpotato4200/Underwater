@@ -870,53 +870,48 @@
     }
 
     function filterTransactions() {
-      const search = document.getElementById('searchBox').value.toLowerCase();
-      // Use Nov 21, 2025 as today (actual current date)
-      const today = new Date(2025, 10, 21); // Month is 0-indexed, so 10 = November
+      const search = document.getElementById('searchBox').value.toLowerCase().trim();
+      const today = new Date(2025, 10, 21);
       
-      // Get all items and filter them
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
+      let visibleCount = 0;
+      
       items.forEach(item => {
-        const dateStr = item.getAttribute('data-date');
-        const type = item.getAttribute('data-type');
-        const text = item.textContent.toLowerCase();
+        let show = true;
         
         // Type filter
+        const type = item.getAttribute('data-type');
         if (currentTypeFilter !== 'all' && type !== currentTypeFilter) {
-          item.style.display = 'none';
-          return;
+          show = false;
         }
         
         // Date filter
-        let showDate = true;
-        if (currentDateFilter !== 'all' && dateStr) {
-          const [y, m, d] = dateStr.split('-').map(Number);
-          const txnDate = new Date(y, m - 1, d);
-          const daysDiff = Math.floor((today - txnDate) / (1000 * 60 * 60 * 24));
-          
-          if (currentDateFilter === 'month') {
-            showDate = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
-          } else if (currentDateFilter === '30days') {
-            showDate = daysDiff >= 0 && daysDiff <= 30;
-          } else if (currentDateFilter === '3months') {
-            showDate = daysDiff >= 0 && daysDiff <= 90;
-          } else if (currentDateFilter === 'year') {
-            showDate = txnDate.getFullYear() === today.getFullYear();
+        if (show && currentDateFilter !== 'all') {
+          const dateStr = item.getAttribute('data-date');
+          if (dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const txnDate = new Date(y, m - 1, d);
+            const daysDiff = Math.floor((today - txnDate) / (1000 * 60 * 60 * 24));
+            
+            if (currentDateFilter === 'month') {
+              show = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
+            } else if (currentDateFilter === '30days') {
+              show = daysDiff >= 0 && daysDiff <= 30;
+            } else if (currentDateFilter === '3months') {
+              show = daysDiff >= 0 && daysDiff <= 90;
+            } else if (currentDateFilter === 'year') {
+              show = txnDate.getFullYear() === today.getFullYear();
+            }
           }
         }
         
-        if (!showDate) {
-          item.style.display = 'none';
-          return;
-        }
-        
         // Search filter
-        if (search && !text.includes(search)) {
-          item.style.display = 'none';
-          return;
+        if (show && search) {
+          show = item.textContent.toLowerCase().includes(search);
         }
         
-        item.style.display = 'flex';
+        item.style.display = show ? 'flex' : 'none';
+        if (show) visibleCount++;
       });
     }
     
