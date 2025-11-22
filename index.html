@@ -540,11 +540,15 @@
     }
     
     let calendarBills = [];
+    let calendarData = {};
     
     async function loadCalendar() {
       try {
-        const res = await fetch(API_URL + '/api/recurring-bills');
-        calendarBills = await res.json();
+        const billsRes = await fetch(API_URL + '/api/recurring-bills');
+        calendarBills = await billsRes.json();
+        const balanceRes = await fetch(API_URL + '/api/balance');
+        const balanceData = await balanceRes.json();
+        
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth();
@@ -553,6 +557,27 @@
         const prevLastDay = new Date(year, month, 0).getDate();
         const nextDays = 42 - (lastDay.getDate() + firstDay.getDay());
         
+        // Calculate running balance for each day
+        let runningBalance = balanceData.balance || 0;
+        calendarData = {};
+        
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+          const dayBills = calendarBills.filter(b => b.frequency && (i % parseInt(b.frequency) === 0));
+          const dayIncome = dayBills.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
+          const dayExpense = dayBills.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0);
+          const endingBalance = runningBalance + dayIncome - dayExpense;
+          
+          calendarData[i] = {
+            startBalance: runningBalance,
+            income: dayIncome,
+            expense: dayExpense,
+            endBalance: endingBalance,
+            bills: dayBills
+          };
+          
+          runningBalance = endingBalance;
+        }
+        
         let calendarHtml = '<div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar">';
         
         for (let i = prevLastDay - firstDay.getDay() + 1; i <= prevLastDay; i++) {
@@ -560,9 +585,10 @@
         }
         
         for (let i = 1; i <= lastDay.getDate(); i++) {
-          const dayBills = calendarBills && calendarBills.length ? calendarBills.filter(b => b.frequency && (i % parseInt(b.frequency) === 0)) : [];
-          const billNames = dayBills.map(b => b.name).join(', ');
-          calendarHtml += `<div class="calendar-day ${dayBills.length ? 'has-bills' : ''}" onclick="showDayBills(${i})" style="cursor: pointer;" title="Click to see bills"><div class="calendar-day-date">${i}</div>${dayBills.length ? '<div style="font-size: 9px; color: var(--accent-gold); margin-top: 2px; font-weight: 700;">📅</div>' : ''}</div>`;
+          const hasBills = calendarData[i].bills.length > 0;
+          const endBal = calendarData[i].endBalance;
+          const balColor = endBal >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+          calendarHtml += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" onclick="showDayDetails(${i})" style="cursor: pointer; position: relative;"><div class="calendar-day-date" style="font-weight: 700;">${i}</div><div style="font-size: 10px; color: ${balColor}; font-weight: 600; margin-top: 4px;">$${endBal.toFixed(0)}</div>${hasBills ? '<div style="font-size: 8px; color: var(--accent-gold); margin-top: 2px;">●●●</div>' : ''}</div>`;
         }
         
         for (let i = 1; i <= nextDays; i++) {
@@ -571,28 +597,41 @@
         
         calendarHtml += '</div>';
         document.getElementById('calendarView').innerHTML = calendarHtml;
-      } catch (e) { console.error('Calendar error:', e); document.getElementById('calendarView').innerHTML = '<div style="color: red; padding: 20px;">Error loading calendar</div>'; }
+      } catch (e) { console.error('Calendar error:', e); document.getElementById('calendarView').innerHTML = '<div style="color: red; padding: 20px;">Error loading calendar: ' + e.message + '</div>'; }
     }
     
-    function showDayBills(day) {
-      const dayBills = calendarBills && calendarBills.length ? calendarBills.filter(b => b.frequency && (day % parseInt(b.frequency) === 0)) : [];
-      const totalBillsAmount = dayBills.reduce((sum, b) => sum + (b.amount || 0), 0);
-      const paycheckAmount = 1500;
-      const incomeAfterBills = paycheckAmount - totalBillsAmount;
+    function showDayDetails(day) {
+      const data = calendarData[day];
+      if (!data) return;
       
-      let content = `<div style="margin-bottom: 16px;"><strong style="color: var(--text-primary); font-size: 16px;">Day ${day}</strong></div>`;
+      let content = `<div style="display: grid; gap: 12px; margin-bottom: 20px;">`;
+      content += `<div style="display: flex; justify-content: space-between; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;"><span style="font-weight: 600; color: var(--text-secondary);">Starting Balance</span><span style="font-weight: 700; color: var(--text-primary);">$${data.startBalance.toFixed(2)}</span></div>`;
       
-      if (dayBills.length === 0) {
-        content += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this day</div>';
-      } else {
-        dayBills.forEach(b => {
-          content += `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">${b.type === 'income' ? 'Income' : 'Bill'}</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? 'var(--accent-success)' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
+      if (data.income > 0) {
+        content += `<div style="display: flex; justify-content: space-between; padding: 12px; background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); border-radius: 8px; border-left: 4px solid var(--accent-success);"><span style="font-weight: 600; color: var(--accent-success);">+ Income</span><span style="font-weight: 700; color: var(--accent-success);">$${data.income.toFixed(2)}</span></div>`;
+      }
+      
+      if (data.expense > 0) {
+        content += `<div style="display: flex; justify-content: space-between; padding: 12px; background: linear-gradient(90deg, #fdf0f0 0%, #ffffff 100%); border-radius: 8px; border-left: 4px solid var(--accent-danger);"><span style="font-weight: 600; color: var(--accent-danger);">- Expenses</span><span style="font-weight: 700; color: var(--accent-danger);">$${data.expense.toFixed(2)}</span></div>`;
+      }
+      
+      const endBalColor = data.endBalance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
+      content += `<div style="display: flex; justify-content: space-between; padding: 16px; background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%); border-radius: 8px; border: 2px solid ${endBalColor};"><span style="font-weight: 700; color: var(--text-primary); font-size: 14px;">Ending Balance</span><span style="font-weight: 800; color: ${endBalColor}; font-size: 18px;">$${data.endBalance.toFixed(2)}</span></div>`;
+      content += `</div>`;
+      
+      if (data.bills.length > 0) {
+        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px;"><div style="font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Transactions This Day:</div>`;
+        data.bills.forEach(b => {
+          const isIncome = b.type === 'income';
+          content += `<div class="bill-item" style="background: ${isIncome ? 'linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%)' : 'linear-gradient(90deg, #fdf0f0 0%, #ffffff 100%)'}; border-left: 4px solid ${isIncome ? 'var(--accent-success)' : 'var(--accent-danger)'}; padding: 12px;"><div><div class="bill-name">${b.name}</div><div class="bill-date" style="font-size: 11px; color: var(--text-tertiary);">${b.frequency} day cycle</div></div><div class="bill-amount" style="color: ${isIncome ? 'var(--accent-success)' : 'var(--accent-danger)'}; font-weight: 700;">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
         });
-        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px;"><div style="display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 700; color: var(--text-primary);">Total Bills:</span><span style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">$${totalBillsAmount.toFixed(2)}</span></div><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;"><span style="font-weight: 700; color: var(--text-primary);">Income Left:</span><span style="font-size: 18px; font-weight: 800; color: ${incomeAfterBills >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)'};">$${incomeAfterBills.toFixed(2)}</span></div></div>`;
+        content += `</div>`;
+      } else {
+        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; text-align: center; color: var(--text-secondary);">No transactions this day</div>`;
       }
       
       document.getElementById('dayBillsContent').innerHTML = content;
-      document.getElementById('dayBillsModal').querySelector('.modal-header').textContent = `Bills for Day ${day}`;
+      document.getElementById('dayBillsModal').querySelector('.modal-header').textContent = `Day ${day} - Financial Overview`;
       openModal('dayBillsModal');
     }
     
