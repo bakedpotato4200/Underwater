@@ -14,28 +14,5 @@
     "frequency": 14,
     "startDate": "2025-06-06",
     "type": "expense"
-  },
-  {
-    "id": 1763848995614,
-    "name": "Paycheck ",
-    "amount": 1500,
-    "frequency": 14,
-    "startDate": "2025-11-22",
-    "type": "income"
-  },
-  {
-    "id": 1763849156906,
-    "name": "Paycheck ",
-    "amount": 1509,
-    "frequency": 14,
-    "startDate": "2025-06-06",
-    "type": "income"
-  },
-  {
-    "id": 1763851524073,
-    "name": "Reny",
-    "amount": 400,
-    "frequency": 14,
-    "startDate": "2025-11-21"
   }
 ]
