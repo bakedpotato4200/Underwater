@@ -872,81 +872,71 @@
     function filterTransactions() {
       const search = document.getElementById('searchBox').value.toLowerCase();
       const sortBy = document.getElementById('sortBy').value;
-      currentSortBy = sortBy;
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const allItems = Array.from(document.querySelectorAll('#fullTransactionsList .transaction-item'));
       
-      // Get all transaction data from items still in DOM
-      let filteredTransactions = allItems.map(item => ({
-        html: item.outerHTML,
-        dateStr: item.getAttribute('data-date'),
-        type: item.getAttribute('data-type'),
-        amount: parseFloat(item.getAttribute('data-amount') || 0),
-        category: item.getAttribute('data-category'),
-        text: item.textContent.toLowerCase()
-      })).filter(t => {
-        const [year, month, day] = t.dateStr.split('-');
-        const itemDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        let showDate = false;
+      // Get all items
+      const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
+      let visibleItems = [];
+      
+      // Filter items
+      items.forEach(item => {
+        const dateStr = item.getAttribute('data-date');
+        const type = item.getAttribute('data-type');
+        const text = item.textContent.toLowerCase();
+        const amount = parseFloat(item.getAttribute('data-amount') || 0);
         
-        if (currentDateFilter === 'all') {
-          showDate = true;
-        } else if (currentDateFilter === 'month') {
-          showDate = itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
-        } else if (currentDateFilter === '30days') {
-          const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
-          showDate = daysDiff >= 0 && daysDiff <= 30;
-        } else if (currentDateFilter === '3months') {
-          const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
-          showDate = daysDiff >= 0 && daysDiff <= 90;
-        } else if (currentDateFilter === 'year') {
-          showDate = itemDate.getFullYear() === today.getFullYear();
+        // Type filter
+        if (currentTypeFilter !== 'all' && type !== currentTypeFilter) {
+          item.style.display = 'none';
+          return;
         }
         
-        const showType = currentTypeFilter === 'all' || t.type === currentTypeFilter;
-        const showSearch = search === '' || t.text.includes(search);
+        // Date filter
+        if (dateStr) {
+          const [year, month, day] = dateStr.split('-').map(Number);
+          const itemDate = new Date(year, month - 1, day);
+          let showDate = false;
+          
+          if (currentDateFilter === 'all') showDate = true;
+          else if (currentDateFilter === 'month') showDate = itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
+          else if (currentDateFilter === '30days') showDate = (today - itemDate) / (1000*60*60*24) <= 30 && (today - itemDate) >= 0;
+          else if (currentDateFilter === '3months') showDate = (today - itemDate) / (1000*60*60*24) <= 90 && (today - itemDate) >= 0;
+          else if (currentDateFilter === 'year') showDate = itemDate.getFullYear() === today.getFullYear();
+          
+          if (!showDate) {
+            item.style.display = 'none';
+            return;
+          }
+        }
         
-        return showDate && showType && showSearch;
+        // Search filter
+        if (search && !text.includes(search)) {
+          item.style.display = 'none';
+          return;
+        }
+        
+        item.style.display = 'flex';
+        visibleItems.push({ item, dateStr, amount });
       });
       
-      // Sort
-      filteredTransactions.sort((a, b) => {
+      // Sort visible items
+      visibleItems.sort((a, b) => {
         const aDate = new Date(a.dateStr);
         const bDate = new Date(b.dateStr);
         
-        if (sortBy === 'date-desc') return bDate - aDate;
         if (sortBy === 'date-asc') return aDate - bDate;
-        if (sortBy === 'amount-desc') return Math.abs(b.amount) - Math.abs(a.amount);
+        if (sortBy === 'date-desc') return bDate - aDate;
         if (sortBy === 'amount-asc') return Math.abs(a.amount) - Math.abs(b.amount);
-        if (sortBy === 'category') return a.category.localeCompare(b.category);
+        if (sortBy === 'amount-desc') return Math.abs(b.amount) - Math.abs(a.amount);
         return 0;
       });
       
-      // Group by month and rebuild HTML
-      const monthSections = {};
-      filteredTransactions.forEach(t => {
-        const [year, month] = t.dateStr.split('-');
-        const monthKey = `${year}-${month}`;
-        if (!monthSections[monthKey]) monthSections[monthKey] = [];
-        monthSections[monthKey].push(t.html);
+      // Reorder in DOM
+      const container = document.getElementById('fullTransactionsList');
+      visibleItems.forEach(obj => {
+        container.appendChild(obj.item);
       });
-      
-      let html = '';
-      const sortedMonths = Object.keys(monthSections).sort((a, b) => new Date(b) - new Date(a));
-      
-      sortedMonths.forEach(monthKey => {
-        const [year, month] = monthKey.split('-');
-        const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-        html += `<div style="margin-bottom: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
-            <div>${monthName}</div>
-          </div>
-          ${monthSections[monthKey].join('')}
-        </div>`;
-      });
-      
-      document.getElementById('fullTransactionsList').innerHTML = html;
     }
     
     function getCategoryColor(category) {
