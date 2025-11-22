@@ -1484,7 +1484,7 @@
       const legendGrid = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;">
         ${data.map(([cat, val]) => {
           const percent = (val / total * 100).toFixed(1);
-          return `<div style="padding: 10px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7;">
+          return `<div class="trends-category-card" data-category="${cat}" style="padding: 10px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7; cursor: pointer; transition: all 0.2s;">
             <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
               <div style="width: 10px; height: 10px; background: ${colors[cat] || '#0071e3'}; border-radius: 2px;"></div>
               <span style="font-size: 11px; font-weight: 600; color: #000;">${cat}</span>
@@ -1520,6 +1520,44 @@
           changeTrendsPeriod(months);
         });
       });
+
+      // Attach event listeners to category cards
+      document.querySelectorAll('.trends-category-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const category = this.dataset.category;
+          showPage('transactions');
+          setTimeout(() => {
+            filterTransactionsByCategory(category);
+          }, 100);
+        });
+        card.addEventListener('mouseenter', function() {
+          this.style.background = '#f0f3ff';
+          this.style.borderColor = '#0071e3';
+        });
+        card.addEventListener('mouseleave', function() {
+          this.style.background = '#f9fafb';
+          this.style.borderColor = '#e5e5e7';
+        });
+      });
+    }
+
+    function filterTransactionsByCategory(category) {
+      currentTypeFilter = '';
+      currentDateFilter = '';
+      document.querySelectorAll('.type-filter-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.date-filter-btn').forEach(btn => btn.classList.remove('active'));
+      
+      allTransactions.forEach(txn => {
+        txn.displayMatch = txn.category === category && !txn.excluded;
+      });
+      
+      displayTransactions();
+      applyFilters();
+      
+      const categoryTitle = document.querySelector('.page-title');
+      if (categoryTitle) {
+        categoryTitle.textContent = `${category} Transactions`;
+      }
     }
 
     function displaySpendingTrends(trends) {
