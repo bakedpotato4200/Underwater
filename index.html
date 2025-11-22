@@ -791,7 +791,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, recurringBills, bankBalanceData, billsCalc] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, fetchedRecurring, bankBalanceData, billsCalc] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -809,9 +809,9 @@
           fetch(API_URL + '/api/bills-calculator').then(r => r.json())
         ]);
         
-        // Store bank balance for calendar calculations
+        // Store data for global access
         currentBankBalance = bankBalanceData?.balance || 0;
-        recurringBills = recurringBills || [];
+        recurringBills = Array.isArray(fetchedRecurring) ? fetchedRecurring : [];
         transactions = txns;
         
         // Update bank balance input if loaded
