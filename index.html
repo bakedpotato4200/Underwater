@@ -406,29 +406,26 @@
               <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search transactions..." onkeyup="filterTransactions()" style="width: 100%; padding: 10px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 13px; background: white;">
             </div>
             
-            <!-- Filter Row 1: Type -->
-            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-              <span style="font-size: 12px; font-weight: 600; color: #666; display: flex; align-items: center;">Type:</span>
-              <button class="filter-btn active" onclick="filterByType('all'); updateTypeFilter(this)">All</button>
-              <button class="filter-btn" onclick="filterByType('income'); updateTypeFilter(this)">💰 Income</button>
-              <button class="filter-btn" onclick="filterByType('expense'); updateTypeFilter(this)">💸 Expenses</button>
-              <button class="filter-btn" onclick="filterByType('transfer'); updateTypeFilter(this)">↔️ Transfers</button>
-            </div>
-            
-            <!-- Filter Row 2: Date -->
-            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
-              <span style="font-size: 12px; font-weight: 600; color: #666; display: flex; align-items: center;">Period:</span>
-              <button class="filter-btn active" onclick="filterByDate('all'); updateActiveFilter(this)">All Time</button>
-              <button class="filter-btn" onclick="filterByDate('month'); updateActiveFilter(this)">This Month</button>
-              <button class="filter-btn" onclick="filterByDate('30days'); updateActiveFilter(this)">Last 30 Days</button>
-              <button class="filter-btn" onclick="filterByDate('3months'); updateActiveFilter(this)">Last 3 Months</button>
-              <button class="filter-btn" onclick="filterByDate('year'); updateActiveFilter(this)">This Year</button>
-            </div>
-
-            <!-- Filter Row 3: Category -->
-            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
-              <span style="font-size: 12px; font-weight: 600; color: #666; display: flex; align-items: center;">Category:</span>
-              <div id="categoryFilterButtons" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            <!-- Filter Dropdowns -->
+            <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+              <select id="typeFilter" onchange="filterByType(this.value)" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer;">
+                <option value="all">All Types</option>
+                <option value="income">💰 Income</option>
+                <option value="expense">💸 Expenses</option>
+                <option value="transfer">↔️ Transfers</option>
+              </select>
+              
+              <select id="periodFilter" onchange="filterByDate(this.value)" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer;">
+                <option value="all">All Time</option>
+                <option value="month">This Month</option>
+                <option value="30days">Last 30 Days</option>
+                <option value="3months">Last 3 Months</option>
+                <option value="year">This Year</option>
+              </select>
+              
+              <select id="categoryFilter" onchange="filterByCategory(this.value)" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer;">
+                <option value="all">All Categories</option>
+              </select>
             </div>
             
             <!-- Filter Row 3: Sort & Select -->
@@ -836,16 +833,16 @@
       // Apply filters to the full transaction list (respects current filter state)
       applyFilters();
       
-      // Update category filter buttons
+      // Update category filter dropdown
       const uniqueCategories = [...new Set(txns.map(t => t.category))].sort();
-      const categoryFilterContainer = document.getElementById('categoryFilterButtons');
-      if (categoryFilterContainer) {
-        categoryFilterContainer.innerHTML = `
-          <button class="filter-btn ${currentCategoryFilter === 'all' ? 'active' : ''}" onclick="filterByCategory('all'); updateActiveFilter(this)">All Categories</button>
-          ${uniqueCategories.map(cat => `
-            <button class="filter-btn ${currentCategoryFilter === cat ? 'active' : ''}" onclick="filterByCategory('${cat}'); updateActiveFilter(this)">${cat}</button>
-          `).join('')}
+      const categoryFilterSelect = document.getElementById('categoryFilter');
+      if (categoryFilterSelect) {
+        const currentValue = categoryFilterSelect.value;
+        categoryFilterSelect.innerHTML = `
+          <option value="all">All Categories</option>
+          ${uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
         `;
+        categoryFilterSelect.value = currentValue;
       }
     }
 
