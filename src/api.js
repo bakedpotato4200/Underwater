@@ -705,18 +705,32 @@ app.get('/api/spending-trends', (req, res) => {
 
 app.get('/api/bill-buffer', (req, res) => {
   const days = parseInt(req.query.days) || 30;
-  const recurring = detectRecurring().filter(r => r.isRecurring);
-  const calendar = generateBillCalendar(12);
-  
   const today = new Date();
   const cutoffDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
   
+  // Only use manually added recurring bills to avoid duplicates
   const billsWithDates = [];
-  Object.entries(calendar).forEach(([date, bills]) => {
-    bills.forEach(bill => {
-      billsWithDates.push({ date: new Date(date), ...bill });
+  if (Array.isArray(recurringBills)) {
+    recurringBills.forEach(bill => {
+      if (bill.type === 'income') return; // Skip income bills
+      
+      const startDate = new Date(bill.startDate);
+      let currentDate = new Date(startDate);
+      
+      // Generate all occurrences within the period
+      while (currentDate <= cutoffDate) {
+        if (currentDate >= today) {
+          billsWithDates.push({
+            date: new Date(currentDate),
+            merchant: bill.name,
+            amount: bill.amount,
+            daysUntilDue: Math.ceil((currentDate - today) / (1000 * 60 * 60 * 24))
+          });
+        }
+        currentDate = new Date(currentDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+      }
     });
-  });
+  }
   
   billsWithDates.sort((a, b) => a.date - b.date);
   const billsInPeriod = billsWithDates.filter(b => b.date <= cutoffDate);
