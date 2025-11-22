@@ -1474,7 +1474,7 @@
       ];
 
       const buttons = periods.map(p => `
-        <button onclick="changeTrendsPeriod(${p.months})" style="padding: 6px 14px; border: 1px solid ${trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
+        <button class="trends-period-btn" data-months="${p.months}" style="padding: 6px 14px; border: 1px solid ${trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
       `).join('');
 
       const periodLabel = periods.find(p => p.months === monthCount)?.label || 'Last 4 Months';
@@ -1495,7 +1495,7 @@
 
       container.innerHTML = `
         <div style="max-width: 900px; margin: 0 auto;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;" id="trendsButtonsContainer">
             ${buttons}
           </div>
           <div style="background: white; border: 1px solid #e5e5e7; border-radius: 12px; padding: 32px; text-align: center;">
@@ -1510,6 +1510,14 @@
           </div>
         </div>
       `;
+
+      // Attach event listeners to buttons
+      document.querySelectorAll('.trends-period-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const months = parseInt(this.dataset.months);
+          changeTrendsPeriod(months);
+        });
+      });
     }
 
     function displaySpendingTrends(trends) {
