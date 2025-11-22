@@ -424,6 +424,12 @@
               <button class="filter-btn" onclick="filterByDate('3months'); updateActiveFilter(this)">Last 3 Months</button>
               <button class="filter-btn" onclick="filterByDate('year'); updateActiveFilter(this)">This Year</button>
             </div>
+
+            <!-- Filter Row 3: Category -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+              <span style="font-size: 12px; font-weight: 600; color: #666; display: flex; align-items: center;">Category:</span>
+              <div id="categoryFilterButtons" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            </div>
             
             <!-- Filter Row 3: Sort & Select -->
             <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
@@ -829,10 +835,23 @@
       
       // Apply filters to the full transaction list (respects current filter state)
       applyFilters();
+      
+      // Update category filter buttons
+      const uniqueCategories = [...new Set(txns.map(t => t.category))].sort();
+      const categoryFilterContainer = document.getElementById('categoryFilterButtons');
+      if (categoryFilterContainer) {
+        categoryFilterContainer.innerHTML = `
+          <button class="filter-btn ${currentCategoryFilter === 'all' ? 'active' : ''}" onclick="filterByCategory('all'); updateActiveFilter(this)">All Categories</button>
+          ${uniqueCategories.map(cat => `
+            <button class="filter-btn ${currentCategoryFilter === cat ? 'active' : ''}" onclick="filterByCategory('${cat}'); updateActiveFilter(this)">${cat}</button>
+          `).join('')}
+        `;
+      }
     }
 
     let currentDateFilter = 'all';
     let currentTypeFilter = 'all';
+    let currentCategoryFilter = 'all';
     let allTransactions = [];
     let fullTransactionData = [];
 
@@ -843,6 +862,11 @@
 
     function filterByDate(period) {
       currentDateFilter = period;
+      applyFilters();
+    }
+
+    function filterByCategory(category) {
+      currentCategoryFilter = category;
       applyFilters();
     }
     
@@ -869,6 +893,9 @@
       let filtered = fullTransactionData.filter(t => {
         // Type filter
         if (currentTypeFilter !== 'all' && t.type !== currentTypeFilter) return false;
+        
+        // Category filter
+        if (currentCategoryFilter !== 'all' && t.category !== currentCategoryFilter) return false;
         
         // Date filter
         if (currentDateFilter !== 'all') {
