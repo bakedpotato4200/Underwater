@@ -42,6 +42,7 @@ const goalsFile = path.join(dataDir, 'goals.json');
 const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
 const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
 const recurringBillsFile = path.join(dataDir, 'recurring-bills.json');
+const bankBalanceFile = path.join(dataDir, 'bank-balance.json');
 
 // Load/Save functions
 function loadData(file) {
@@ -73,6 +74,7 @@ function getTransactions() {
 }
 let debts = loadData(debtsFile);
 let subscriptions = loadData(subscriptionsFile);
+let bankBalance = loadData(bankBalanceFile) || { balance: 0 };
 let goals = loadData(goalsFile);
 let exclusionRules = loadData(exclusionRulesFile);
 let learnedPatterns = loadData(learnedPatternsFile) || { merchants: {}, exclusions: {} };
@@ -911,6 +913,21 @@ app.delete('/api/recurring-bills/:id', (req, res) => {
   recurringBills = recurringBills.filter(b => b.id !== id);
   saveData(recurringBillsFile, recurringBills);
   res.json({ success: true });
+});
+
+// Bank balance endpoints
+app.get('/api/bank-balance', (req, res) => {
+  res.json(bankBalance);
+});
+
+app.post('/api/bank-balance', express.json(), (req, res) => {
+  const { balance } = req.body;
+  if (balance === undefined || balance === null) {
+    return res.status(400).json({ error: 'balance required' });
+  }
+  bankBalance = { balance: parseFloat(balance) };
+  saveData(bankBalanceFile, bankBalance);
+  res.json(bankBalance);
 });
 
 // Learning endpoints

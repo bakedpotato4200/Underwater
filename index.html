@@ -264,12 +264,17 @@
             <div class="stat-label">Health Score</div>
           </div>
         </div>
-        <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
           <button class="btn btn-primary" onclick="showAddTransactionModal()">Add Transaction</button>
           <button class="btn btn-secondary" onclick="showUploadModal()">Upload PDF</button>
           <button class="btn btn-secondary" onclick="showAddRecurringBillModal()">Manage Bills</button>
           <button class="btn btn-secondary" onclick="showAddGoalModal()">Set Goal</button>
           <button class="btn btn-secondary" onclick="showAddDebtModal()">Add Debt</button>
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: 12px; padding-left: 12px; border-left: 1px solid #e5e5e7;">
+            <label style="font-size: 12px; font-weight: 600; color: #666;">Bank Balance:</label>
+            <input type="number" id="bankBalanceInput" placeholder="0.00" step="0.01" style="width: 120px; padding: 8px 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            <button class="btn btn-secondary" onclick="saveBankBalance()" style="padding: 8px 12px; font-size: 12px;">Set</button>
+          </div>
         </div>
       </div>
 
@@ -587,37 +592,44 @@
 
   <!-- Recurring Bills Modal -->
   <div id="recurringBillModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">Manage Recurring Bills</div>
-      <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;" id="recurringBillsList">
-        <div class="loading">No recurring bills added</div>
+    <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header">Manage Recurring Transactions</div>
+      <div style="margin-bottom: 20px; background: #f0f3ff; padding: 12px; border-radius: 8px; border: 1px solid #0071e3;">
+        <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Current recurring transactions will show on your calendar</div>
+        <div id="recurringBillsStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+          <div style="padding: 8px; background: white; border-radius: 6px;"><span style="color: #666;">Monthly Total:</span> <span id="monthlyTotal" style="font-weight: 700; color: #0071e3;">$0</span></div>
+          <div style="padding: 8px; background: white; border-radius: 6px;"><span style="color: #666;">Next 30 Days:</span> <span id="nextDaysTotal" style="font-weight: 700; color: #0071e3;">$0</span></div>
+        </div>
+      </div>
+      <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7;" id="recurringBillsList">
+        <div class="loading">No recurring transactions added</div>
       </div>
       <div style="border-top: 1px solid #e5e5e7; padding-top: 20px; margin-top: 20px;">
-        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Add New Recurring Bill</h3>
+        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Add New Recurring Transaction</h3>
         <div class="form-group">
-          <label>Bill Name</label>
-          <input type="text" id="billName" placeholder="e.g., Netflix">
+          <label>Name (e.g., Rent, Netflix)</label>
+          <input type="text" id="billName" placeholder="e.g., Rent">
         </div>
         <div class="form-group">
           <label>Amount</label>
           <input type="number" id="billAmount" placeholder="0.00" step="0.01">
         </div>
         <div class="form-group">
-          <label>Frequency</label>
+          <label>How often</label>
           <select id="billFrequency">
             <option value="7">Weekly</option>
-            <option value="14">Bi-weekly</option>
+            <option value="14">Bi-weekly (every 2 weeks)</option>
             <option value="30">Monthly</option>
             <option value="365">Annually</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Start Date</label>
+          <label>First payment date</label>
           <input type="date" id="billStartDate">
         </div>
         <div class="action-buttons">
-          <button class="btn btn-primary" onclick="addRecurringBill()">Add Bill</button>
-          <button class="btn btn-secondary" onclick="closeModal('recurringBillModal')">Done</button>
+          <button class="btn btn-primary" onclick="addRecurringBill()" style="flex: 1;">Add Transaction</button>
+          <button class="btn btn-secondary" onclick="closeModal('recurringBillModal')" style="flex: 1;">Done</button>
         </div>
       </div>
     </div>
@@ -2561,26 +2573,75 @@
       displayRecurringBillsList();
     }
 
+    async function saveBankBalance() {
+      const balance = parseFloat(document.getElementById('bankBalanceInput').value);
+      if (isNaN(balance) || balance < 0) {
+        showToast('Please enter a valid balance', 'warning');
+        return;
+      }
+      try {
+        await fetch(API_URL + '/api/bank-balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ balance })
+        });
+        showToast('Bank balance updated!', 'success');
+        loadData();
+      } catch (e) {
+        showToast('Error saving balance: ' + e.message, 'error');
+      }
+    }
+
     async function displayRecurringBillsList() {
       try {
         const bills = await fetch(API_URL + '/api/recurring-bills').then(r => r.json());
         const list = document.getElementById('recurringBillsList');
         if (!bills.length) {
-          list.innerHTML = '<div class="loading">No recurring bills added</div>';
+          list.innerHTML = '<div class="loading">No recurring transactions added</div>';
+          document.getElementById('monthlyTotal').textContent = '$0';
+          document.getElementById('nextDaysTotal').textContent = '$0';
           return;
         }
-        list.innerHTML = bills.map(b => `
-          <div class="bill-item" style="margin-bottom: 10px;">
-            <div>
-              <div class="bill-name">${b.name}</div>
-              <div class="bill-date">${['Weekly', 'Bi-weekly', 'Monthly', 'Annually'][Math.log2(b.frequency/7)]} • Started ${b.startDate}</div>
+        
+        // Calculate totals
+        const today = new Date();
+        const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+        let monthlyCount = 0;
+        let nextDaysCount = 0;
+        
+        bills.forEach(b => {
+          const startDate = new Date(b.startDate);
+          // Count occurrences in next 30 days
+          let checkDate = new Date(today);
+          while (checkDate <= nextMonth) {
+            if (checkDate >= startDate && (checkDate - startDate) % (b.frequency * 24 * 60 * 60 * 1000) < 24 * 60 * 60 * 1000) {
+              nextDaysCount += b.amount;
+            }
+            checkDate.setDate(checkDate.getDate() + 1);
+          }
+          // Approximate monthly (30 days)
+          monthlyCount += (b.amount * 30) / b.frequency;
+        });
+        
+        document.getElementById('monthlyTotal').textContent = '$' + monthlyCount.toFixed(0);
+        document.getElementById('nextDaysTotal').textContent = '$' + nextDaysCount.toFixed(0);
+        
+        list.innerHTML = bills.map(b => {
+          const freqNames = {7: 'Weekly', 14: 'Bi-weekly', 30: 'Monthly', 365: 'Annually'};
+          const freqName = freqNames[b.frequency] || b.frequency + 'd';
+          return `
+            <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #0071e3; display: flex; justify-content: space-between; align-items: center;">
+              <div style="flex: 1;">
+                <div style="font-weight: 700; color: #000; margin-bottom: 4px;">${b.name}</div>
+                <div style="font-size: 12px; color: #86868b;">${freqName} starting ${b.startDate}</div>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <div style="font-weight: 700; font-size: 16px; color: #0071e3; min-width: 60px; text-align: right;">$${b.amount.toFixed(2)}</div>
+                <button style="background: #ff3b30; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 600;" onclick="deleteRecurringBill(${b.id})">Remove</button>
+              </div>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <div class="bill-amount">$${b.amount.toFixed(2)}</div>
-              <button class="btn btn-small" style="background: #ff3b30; color: white; padding: 6px 10px;" onclick="deleteRecurringBill(${b.id})">Delete</button>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       } catch (e) {
         showToast('Error loading bills: ' + e.message, 'error');
       }
