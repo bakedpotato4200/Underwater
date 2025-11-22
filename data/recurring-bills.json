@@ -20,13 +20,15 @@
     "name": "Paycheck ",
     "amount": 1500,
     "frequency": 14,
-    "startDate": "2025-11-22"
+    "startDate": "2025-11-22",
+    "type": "income"
   },
   {
     "id": 1763849156906,
     "name": "Paycheck ",
     "amount": 1509,
     "frequency": 14,
-    "startDate": "2025-06-06"
+    "startDate": "2025-06-06",
+    "type": "income"
   }
 ]
