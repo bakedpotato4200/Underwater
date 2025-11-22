@@ -1921,15 +1921,23 @@
           });
         }
         
-        // Find transactions with EXACT description match
-        const currentDesc = txn.description.toLowerCase().trim();
+        // Extract the core transaction description (everything after the dash or first meaningful part)
+        function getCoreTxnDescription(desc) {
+          // Pattern: "[Card/Bank Name] - [Core Description]" or just "[Core Description]"
+          const parts = desc.split(/\s*-\s*/);
+          const coreDesc = parts.length > 1 ? parts.slice(1).join(' - ') : parts[0];
+          return coreDesc.toLowerCase().trim();
+        }
+        
+        // Find transactions with matching core description
+        const currentCore = getCoreTxnDescription(txn.description);
         const matchingTxns = allTransactions
           .filter(t => {
             if (t.id === id) return false;
             
-            // Match only transactions with exact same description (case-insensitive)
-            const otherDesc = t.description.toLowerCase().trim();
-            return otherDesc === currentDesc;
+            // Match transactions with same core description
+            const otherCore = getCoreTxnDescription(t.description);
+            return otherCore === currentCore;
           })
           .sort((a, b) => {
             // Sort by date (most recent first)

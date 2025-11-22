@@ -129,7 +129,7 @@
     "id": 15,
     "date": "2025-10-24",
     "amount": 215,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "motorcycle payment - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -561,7 +561,7 @@
     "id": 63,
     "date": "2025-10-10",
     "amount": -50,
-    "category": "Other",
+    "category": "Transfer",
     "description": "ke cap one - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
