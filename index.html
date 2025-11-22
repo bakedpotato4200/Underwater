@@ -1553,11 +1553,12 @@
       document.querySelector('.menu-toggle').classList.toggle('sidebar-open');
     }
 
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function showUploadModal() { document.getElementById('uploadModal').classList.add('active'); }
     function showAddTransactionModal() { document.getElementById('transactionModal').classList.add('active'); }
     function showAddGoalModal() { document.getElementById('goalModal').classList.add('active'); }
     function showAddDebtModal() { document.getElementById('debtModal').classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
     function updateCategoryOptions() {
       const type = document.getElementById('txnType').value;
