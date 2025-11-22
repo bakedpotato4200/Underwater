@@ -261,27 +261,31 @@
     .velocity-bar { background: linear-gradient(180deg, var(--accent-primary) 0%, #00a8cc 100%); border-radius: 8px 8px 0 0; flex: 1; min-height: 24px; display: flex; align-items: flex-end; justify-content: center; color: #0a1428; font-size: 10px; font-weight: 700; animation: growBar 0.6s ease; transition: all 0.25s ease; box-shadow: 0 6px 16px rgba(0, 217, 255, 0.2); }
     .velocity-bar:hover { transform: scaleY(1.08); box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3); }
     
-    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 18px; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 18px; width: 100%; }
     .calendar-day { 
       background: transparent; 
-      padding: 12px 8px; 
-      border-radius: 10px; 
+      padding: 10px 6px; 
+      border-radius: 8px; 
       text-align: center; 
-      font-size: 11px; 
-      min-height: 80px; 
+      font-size: 10px; 
+      min-height: 70px; 
+      max-height: 80px; 
       display: flex; 
       flex-direction: column; 
+      align-items: center;
+      justify-content: center;
       border: none; 
       transition: all 0.2s ease;
       color: var(--text-primary);
       cursor: pointer;
+      overflow: hidden;
     }
-    .calendar-day:hover { background: rgba(0, 217, 255, 0.05); border-radius: 10px; transform: none; }
-    .calendar-day.other-month { opacity: 0.2; }
-    .calendar-day.has-bills { background: rgba(0, 217, 255, 0.08); }
-    .calendar-day-date { font-weight: 700; margin-bottom: 6px; color: var(--text-primary); font-size: 13px; }
-    .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; }
-    .weekday { text-align: center; font-weight: 600; color: var(--text-tertiary); font-size: 11px; letter-spacing: 0.3px; }
+    .calendar-day:hover { background: rgba(0, 217, 255, 0.05); }
+    .calendar-day.other-month { opacity: 0.15; }
+    .calendar-day.has-bills { background: rgba(0, 217, 255, 0.06); }
+    .calendar-day-date { font-weight: 700; margin-bottom: 4px; color: var(--text-primary); font-size: 12px; }
+    .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px; }
+    .weekday { text-align: center; font-weight: 600; color: var(--text-tertiary); font-size: 10px; letter-spacing: 0.3px; }
     
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.4); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); animation: fadeIn 0.25s ease-out; }
     .modal.active { display: flex; }
@@ -418,7 +422,7 @@
 
       <div id="trendsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📊 Category Spending Trends</h2><div id="trendsChart" style="margin-top: 20px;"><div class="loading">Loading...</div></div></div></div>
       
-      <div id="calendarContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📆 Bills Calendar</h2><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><button class="btn btn-small" onclick="previousMonth()">← Previous</button><div id="calendarMonth" style="font-weight: 700; font-size: 16px; min-width: 200px; text-align: center;">November 2025</div><button class="btn btn-small" onclick="nextMonth()">Next →</button></div><div id="calendarView" style="margin-top: 20px;"><div class="loading">Loading calendar...</div></div></div></div>
+      <div id="calendarContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>📆 Recurring Transactions Calendar</h2><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><button class="btn btn-small" onclick="previousMonth()">← Previous</button><div id="calendarMonth" style="font-weight: 700; font-size: 16px; min-width: 200px; text-align: center;">November 2025</div><button class="btn btn-small" onclick="nextMonth()">Next →</button></div><button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="openModal('addRecurringModal')">+ Add Recurring Transaction</button><div id="calendarView" style="margin-top: 20px; overflow-x: auto;"><div class="loading">Loading calendar...</div></div></div></div>
       
       <div id="insightsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>💡 Financial Insights</h2><div id="insightsList" style="margin-top: 20px;"><div style="color: var(--text-secondary); text-align: center; padding: 20px;">Financial insights will appear here</div></div></div></div>
       
@@ -432,7 +436,9 @@
 
   <div id="noteModal" class="modal"><div class="modal-content"><div class="modal-header">📝 Add Note</div><div class="form-group"><label>Note</label><textarea id="noteText" placeholder="Add a note..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px;"></textarea></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveNote()">Save</button><button class="btn btn-secondary" onclick="closeModal('noteModal')">Cancel</button></div></div></div>
 
-  <div id="dayBillsModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header">Bills for Today</div><div id="dayBillsContent" style="margin-bottom: 20px;"></div><div class="action-buttons"><button class="btn btn-primary" style="flex: 1;" onclick="closeModal('dayBillsModal')">Close</button></div></div></div>
+  <div id="dayBillsModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header">Transactions for this Day</div><div id="dayBillsContent" style="margin-bottom: 20px;"></div><div class="action-buttons"><button class="btn btn-primary" style="flex: 1;" onclick="closeModal('dayBillsModal')">Close</button></div></div></div>
+
+  <div id="addRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Add Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="recurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="recurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Every X Days</label><input type="number" id="recurringFrequency" placeholder="14" min="1"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveRecurringTransaction()">Add</button><button class="btn btn-secondary" onclick="closeModal('addRecurringModal')">Cancel</button></div></div></div>
 
   <div id="categoryTransactionsModal" class="modal"><div class="modal-content" style="max-width: 700px; max-height: 85vh;"><div class="modal-header">Category Transactions</div><div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;"><div class="loading">Loading...</div></div></div></div>
 
@@ -669,6 +675,19 @@
     }
     
     async function executeTransfer(ruleIndex) { try { await fetch(API_URL + '/api/automation/execute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ruleIndex }) }); showToast('Transfer executed!', 'success'); loadAutomation(); } catch (e) { showToast('Error executing transfer', 'error'); } }
+    
+    async function saveRecurringTransaction() {
+      const name = document.getElementById('recurringName').value;
+      const amount = parseFloat(document.getElementById('recurringAmount').value);
+      const type = document.getElementById('recurringType').value;
+      const frequency = parseInt(document.getElementById('recurringFrequency').value);
+      if (!name || !amount || !frequency) { showToast('Please fill in all fields', 'warning'); return; }
+      try {
+        const res = await fetch(API_URL + '/api/recurring-bills', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, amount, type, frequency, startDate: new Date().toISOString().split('T')[0] }) });
+        const data = await res.json();
+        if (data.id || data.message) { showToast('Recurring transaction added!', 'success'); document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('recurringFrequency').value = ''; closeModal('addRecurringModal'); loadCalendar(calendarCurrentYear, calendarCurrentMonth); }
+      } catch (e) { showToast('Error adding transaction: ' + e.message, 'error'); }
+    }
     
     function loadTrends() { const txRes = fetch(API_URL + '/api/transactions').then(r => r.json()).then(transactions => { loadSpendingTrends(transactions); document.getElementById('trendsChart').innerHTML = document.getElementById('spendingTrends').innerHTML; }).catch(e => console.error('Trends error:', e)); }
     
