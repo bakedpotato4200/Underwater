@@ -910,6 +910,7 @@
       
       menu.innerHTML = `
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id}); document.getElementById('transactionMenu').remove();">Change Category</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #ff3b30; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="deleteTransaction(${id}); document.getElementById('transactionMenu').remove();">Delete</button>
       `;
@@ -921,6 +922,39 @@
         if (m) m.remove();
         document.removeEventListener('click', closeMenu);
       });
+    }
+
+    function showCategoryModal(id) {
+      const categories = ['Income', 'Utilities', 'Food & Dining', 'Groceries', 'Transportation', 'Entertainment', 'Shopping', 'Health & Fitness', 'Transfer', 'Other'];
+      const modal = document.getElementById('categoryModal');
+      if (!modal) {
+        const newModal = document.createElement('div');
+        newModal.id = 'categoryModal';
+        newModal.className = 'modal active';
+        newModal.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header">Change Category</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0;">
+              ${categories.map(cat => `<button class="btn btn-secondary" onclick="updateTransactionCategory(${id}, '${cat}'); document.getElementById('categoryModal').remove();" style="text-align: center;">${cat}</button>`).join('')}
+            </div>
+            <button class="btn btn-secondary" onclick="document.getElementById('categoryModal').remove();" style="width: 100%; margin-top: 12px;">Cancel</button>
+          </div>
+        `;
+        document.body.appendChild(newModal);
+      }
+    }
+
+    async function updateTransactionCategory(id, category) {
+      try {
+        await fetch(API_URL + `/api/transactions/${id}/category`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category })
+        });
+        loadData();
+      } catch (e) {
+        alert('Failed to update category: ' + e.message);
+      }
     }
 
     function displayExclusionRules(rules) {

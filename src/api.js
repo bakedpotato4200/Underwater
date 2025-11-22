@@ -564,6 +564,17 @@ app.delete('/api/transactions/:id', express.json(), (req, res) => {
   }
 });
 
+app.post('/api/transactions/:id/category', express.json(), (req, res) => {
+  const txn = transactions.find(t => t.id == req.params.id);
+  if (txn) {
+    txn.category = req.body.category || txn.category;
+    saveData(transactionsFile, transactions);
+    res.json({ success: true, category: txn.category });
+  } else {
+    res.status(404).json({ error: 'Transaction not found' });
+  }
+});
+
 app.get('/api/spending-trends', (req, res) => {
   const trends = {};
   const months = {};
