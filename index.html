@@ -451,11 +451,11 @@
             </div>
           </div>
 
-          <!-- Anomalies & Alerts -->
+          <!-- Data Quality Check -->
           <div class="card full">
-            <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">⚠️ Spending Anomalies</h3>
-            <div id="anomaliesContainer" style="display: grid; gap: 10px;">
-              <div class="loading">Analyzing transactions...</div>
+            <h3 style="margin: 0 0 16px 0; color: #0071e3; font-size: 14px; font-weight: 600;">📋 Transaction Health</h3>
+            <div id="transactionHealthContainer" style="display: grid; gap: 10px;">
+              <div class="loading">Checking data...</div>
             </div>
           </div>
         </div>
@@ -1884,18 +1884,31 @@
         `).join('');
       }
       
-      // Anomalies
-      const anomaliesEl = document.getElementById('anomaliesContainer');
-      if (!insights.anomalies || insights.anomalies.length === 0) {
-        anomaliesEl.innerHTML = '<div style="padding: 12px; background: #f0fdf4; border: 1px solid #86efac; color: #16a34a; border-radius: 8px; text-align: center; font-size: 13px;">✓ No unusual spending detected</div>';
-      } else {
-        anomaliesEl.innerHTML = insights.anomalies.slice(0, 5).map(a => `
-          <div style="padding: 12px; background: #fff5f5; border-left: 3px solid #ff3b30; border-radius: 6px;">
-            <div style="font-weight: 600; color: #ff3b30; font-size: 12px; margin-bottom: 4px;">${a.description}</div>
-            <div style="font-size: 11px; color: #666;">$${Math.abs(a.amount).toFixed(2)} on ${a.date}</div>
-          </div>
-        `).join('');
+      // Transaction Health
+      const healthEl = document.getElementById('transactionHealthContainer');
+      const uncategorized = transactions.filter(t => !t.category || t.category.trim() === '').length;
+      const excluded = transactions.filter(t => t.excluded).length;
+      const total = transactions.length;
+      const categorizedPercent = Math.round(((total - uncategorized) / Math.max(total, 1)) * 100);
+      
+      let healthHtml = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
+      healthHtml += `<div style="background: ${categorizedPercent >= 95 ? '#f0fdf4' : categorizedPercent >= 80 ? '#fffbf0' : '#fff5f5'}; padding: 12px; border-radius: 8px; border-left: 3px solid ${categorizedPercent >= 95 ? '#34c759' : categorizedPercent >= 80 ? '#ff9500' : '#ff3b30'};">
+        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Categorized</div>
+        <div style="font-size: 18px; font-weight: 700; color: ${categorizedPercent >= 95 ? '#34c759' : categorizedPercent >= 80 ? '#ff9500' : '#ff3b30'};">${categorizedPercent}%</div>
+      </div>`;
+      healthHtml += `<div style="background: #f9fafb; padding: 12px; border-radius: 8px; border-left: 3px solid #0071e3;">
+        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">Transactions</div>
+        <div style="font-size: 18px; font-weight: 700; color: #0071e3;">${total}</div>
+      </div>`;
+      healthHtml += '</div>';
+      
+      if (uncategorized > 0) {
+        healthHtml += `<div style="padding: 12px; background: #fffbf0; border-radius: 8px; border-left: 3px solid #ff9500; font-size: 12px; color: #666;">
+          <strong>${uncategorized} transactions need categorization</strong> - visit Transactions tab to organize
+        </div>`;
       }
+      
+      healthEl.innerHTML = healthHtml;
     }
 
     function displayAnomalies(anomalies) {
