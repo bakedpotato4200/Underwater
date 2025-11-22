@@ -1085,27 +1085,48 @@
 
     async function bulkIgnoreTransactions() {
       const ids = Array.from(selectedTransactionIds);
+      console.log(`Excluding ${ids.length} transactions:`, ids);
       
-      if (ids.length === 0) return;
+      if (ids.length === 0) {
+        showToast('No transactions selected', 'warning');
+        return;
+      }
       if (!confirm(`Exclude ${ids.length} transactions from tracking?`)) return;
       
       try {
         showToast(`Excluding ${ids.length} transactions...`, 'info');
+        let successCount = 0;
+        let failCount = 0;
         
         for (const id of ids) {
-          const response = await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ learnRule: true })
-          });
-          if (!response.ok) throw new Error(`Failed to exclude transaction ${id}`);
+          try {
+            console.log(`Excluding transaction ${id}...`);
+            const response = await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, { 
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ learnRule: true })
+            });
+            const result = await response.json();
+            console.log(`Transaction ${id} result:`, result);
+            if (response.ok) {
+              successCount++;
+            } else {
+              failCount++;
+              console.error(`Failed to exclude transaction ${id}:`, result);
+            }
+          } catch (itemError) {
+            failCount++;
+            console.error(`Error excluding transaction ${id}:`, itemError);
+          }
         }
         
+        console.log(`Exclusion complete: ${successCount} succeeded, ${failCount} failed`);
         selectedTransactionIds.clear();
         await loadData();
         document.getElementById('selectAllTxns').checked = false;
-        showToast(`Successfully excluded ${ids.length} transactions`, 'success');
+        showToast(`Successfully excluded ${successCount} transactions`, 'success');
       } catch (e) {
+        console.error('Bulk exclude error:', e);
         showToast('Error excluding transactions: ' + e.message, 'error');
       }
     }
