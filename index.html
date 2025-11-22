@@ -1100,19 +1100,30 @@
         
         for (const id of ids) {
           try {
-            console.log(`Excluding transaction ${id}...`);
-            const response = await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, { 
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ learnRule: true })
-            });
-            const result = await response.json();
-            console.log(`Transaction ${id} result:`, result);
-            if (response.ok) {
-              successCount++;
+            // Find the transaction to check if it's already excluded
+            const txn = allTransactions.find(t => t.id == id);
+            const isAlreadyExcluded = txn && txn.excluded;
+            
+            console.log(`Excluding transaction ${id}... (currently excluded: ${isAlreadyExcluded})`);
+            
+            // Only toggle if it's NOT already excluded (to ensure it ends up excluded)
+            if (!isAlreadyExcluded) {
+              const response = await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ learnRule: true })
+              });
+              const result = await response.json();
+              console.log(`Transaction ${id} result:`, result);
+              if (response.ok && result.excluded) {
+                successCount++;
+              } else {
+                failCount++;
+                console.error(`Failed to exclude transaction ${id}:`, result);
+              }
             } else {
-              failCount++;
-              console.error(`Failed to exclude transaction ${id}:`, result);
+              console.log(`Transaction ${id} already excluded, skipping`);
+              successCount++;
             }
           } catch (itemError) {
             failCount++;
