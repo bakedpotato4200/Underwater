@@ -855,6 +855,7 @@
     let currentCategoryFilter = 'all';
     let allTransactions = [];
     let fullTransactionData = [];
+    let selectedTransactionIds = new Set(); // Persist selected transaction IDs
     
     // Load and save custom categories from localStorage
     function getCustomCategories() {
@@ -991,8 +992,9 @@
         
         const monthTransactions = months[monthKey];
         monthTransactions.forEach(t => {
+          const isSelected = selectedTransactionIds.has(t.id);
           fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
-            <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
+            <input type="checkbox" class="txn-checkbox" data-id="${t.id}" ${isSelected ? 'checked' : ''} onchange="updateCheckboxSelection(this)" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                 <div class="transaction-desc">${t.description}</div>
@@ -1027,42 +1029,62 @@
       return colors[category] || 'cat-other';
     }
 
+    function updateCheckboxSelection(checkbox) {
+      const id = parseInt(checkbox.dataset.id);
+      if (checkbox.checked) {
+        selectedTransactionIds.add(id);
+      } else {
+        selectedTransactionIds.delete(id);
+      }
+      updateBulkActionButtons();
+    }
+
     function updateBulkActionButtons() {
-      const checkboxes = document.querySelectorAll('.txn-checkbox:checked');
       const bulkActionsContainer = document.getElementById('bulkActionsContainer');
       const selectedCount = document.getElementById('selectedCount');
+      const selectAllCheckbox = document.getElementById('selectAllTxns');
       
-      if (checkboxes.length > 0) {
+      if (selectedTransactionIds.size > 0) {
         bulkActionsContainer.style.display = 'flex';
-        selectedCount.textContent = `${checkboxes.length} selected`;
+        selectedCount.textContent = `${selectedTransactionIds.size} selected`;
+        
+        // Check if all visible checkboxes are selected
+        const allCheckboxes = document.querySelectorAll('#fullTransactionsList .txn-checkbox');
+        const allVisible = Array.from(allCheckboxes).every(cb => selectedTransactionIds.has(parseInt(cb.dataset.id)));
+        selectAllCheckbox.checked = allVisible && allCheckboxes.length > 0;
       } else {
         bulkActionsContainer.style.display = 'none';
         selectedCount.textContent = '';
-        document.getElementById('selectAllTxns').checked = false;
+        selectAllCheckbox.checked = false;
       }
     }
 
     function toggleSelectAllTransactions() {
       const isChecked = document.getElementById('selectAllTxns').checked;
       const fullList = document.getElementById('fullTransactionsList');
+      const allCheckboxes = fullList.querySelectorAll('.txn-checkbox');
       
-      // Find all transaction items and their checkboxes
-      const transactionItems = fullList.querySelectorAll('.transaction-item');
-      console.log(`Toggling ${transactionItems.length} transaction checkboxes to ${isChecked}`);
+      console.log(`Toggling ${allCheckboxes.length} transaction checkboxes to ${isChecked}`);
       
-      transactionItems.forEach(item => {
-        const checkbox = item.querySelector('.txn-checkbox');
-        if (checkbox) {
-          checkbox.checked = isChecked;
-        }
-      });
+      if (isChecked) {
+        // Add all visible transaction IDs to selected set
+        allCheckboxes.forEach(cb => {
+          selectedTransactionIds.add(parseInt(cb.dataset.id));
+          cb.checked = true;
+        });
+      } else {
+        // Clear selected set
+        selectedTransactionIds.clear();
+        allCheckboxes.forEach(cb => {
+          cb.checked = false;
+        });
+      }
       
       updateBulkActionButtons();
     }
 
     async function bulkIgnoreTransactions() {
-      const checkboxes = document.querySelectorAll('.txn-checkbox:checked');
-      const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
+      const ids = Array.from(selectedTransactionIds);
       
       if (ids.length === 0) return;
       if (!confirm(`Exclude ${ids.length} transactions from tracking?`)) return;
@@ -1079,6 +1101,7 @@
           if (!response.ok) throw new Error(`Failed to exclude transaction ${id}`);
         }
         
+        selectedTransactionIds.clear();
         await loadData();
         document.getElementById('selectAllTxns').checked = false;
         showToast(`Successfully excluded ${ids.length} transactions`, 'success');
