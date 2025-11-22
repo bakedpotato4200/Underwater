@@ -592,46 +592,59 @@
 
   <!-- Recurring Bills Modal -->
   <div id="recurringBillModal" class="modal">
-    <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
-      <div class="modal-header">Manage Recurring Transactions</div>
-      <div style="margin-bottom: 20px; background: #f0f3ff; padding: 12px; border-radius: 8px; border: 1px solid #0071e3;">
-        <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Current recurring transactions will show on your calendar</div>
-        <div id="recurringBillsStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
-          <div style="padding: 8px; background: white; border-radius: 6px;"><span style="color: #666;">Monthly Total:</span> <span id="monthlyTotal" style="font-weight: 700; color: #0071e3;">$0</span></div>
-          <div style="padding: 8px; background: white; border-radius: 6px;"><span style="color: #666;">Next 30 Days:</span> <span id="nextDaysTotal" style="font-weight: 700; color: #0071e3;">$0</span></div>
+    <div class="modal-content" style="max-width: 500px; max-height: 85vh; overflow-y: auto;">
+      <div class="modal-header">Add Recurring Transaction</div>
+      
+      <!-- Quick Add Form - Top Priority -->
+      <div style="background: white; padding: 16px; border: 2px solid #0071e3; border-radius: 10px; margin-bottom: 16px;">
+        <div style="font-size: 13px; font-weight: 700; color: #000; margin-bottom: 12px;">Quick Add</div>
+        <div class="form-group">
+          <label>What are you paying for? (e.g., Rent, Netflix)</label>
+          <input type="text" id="billName" placeholder="e.g., Rent" style="width: 100%; padding: 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="number" id="billAmount" placeholder="0.00" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px;">
+          </div>
+          <div class="form-group">
+            <label>How often</label>
+            <select id="billFrequency" style="width: 100%; padding: 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px;">
+              <option value="7">Weekly</option>
+              <option value="14">Bi-weekly</option>
+              <option value="30" selected>Monthly</option>
+              <option value="365">Annually</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>When does it start?</label>
+          <input type="date" id="billStartDate" style="width: 100%; padding: 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px;">
+        </div>
+        <button class="btn btn-primary" onclick="addRecurringBill()" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700;">Add This Transaction</button>
+      </div>
+      
+      <!-- Your Recurring Transactions -->
+      <div style="margin-top: 16px;">
+        <div style="font-size: 12px; font-weight: 700; color: #666; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Your Recurring Transactions</div>
+        <div id="recurringBillsList" style="padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7; min-height: 100px;">
+          <div class="loading">No recurring transactions added yet</div>
         </div>
       </div>
-      <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7;" id="recurringBillsList">
-        <div class="loading">No recurring transactions added</div>
-      </div>
-      <div style="border-top: 1px solid #e5e5e7; padding-top: 20px; margin-top: 20px;">
-        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Add New Recurring Transaction</h3>
-        <div class="form-group">
-          <label>Name (e.g., Rent, Netflix)</label>
-          <input type="text" id="billName" placeholder="e.g., Rent">
+      
+      <!-- Summary -->
+      <div id="recurringBillsStats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e5e7;">
+        <div style="padding: 12px; background: #f0f3ff; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Monthly Total</div>
+          <div id="monthlyTotal" style="font-size: 18px; font-weight: 700; color: #0071e3;">$0</div>
         </div>
-        <div class="form-group">
-          <label>Amount</label>
-          <input type="number" id="billAmount" placeholder="0.00" step="0.01">
-        </div>
-        <div class="form-group">
-          <label>How often</label>
-          <select id="billFrequency">
-            <option value="7">Weekly</option>
-            <option value="14">Bi-weekly (every 2 weeks)</option>
-            <option value="30">Monthly</option>
-            <option value="365">Annually</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>First payment date</label>
-          <input type="date" id="billStartDate">
-        </div>
-        <div class="action-buttons">
-          <button class="btn btn-primary" onclick="addRecurringBill()" style="flex: 1;">Add Transaction</button>
-          <button class="btn btn-secondary" onclick="closeModal('recurringBillModal')" style="flex: 1;">Done</button>
+        <div style="padding: 12px; background: #f0f3ff; border-radius: 8px; text-align: center;">
+          <div style="font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px;">Next 30 Days</div>
+          <div id="nextDaysTotal" style="font-size: 18px; font-weight: 700; color: #0071e3;">$0</div>
         </div>
       </div>
+      
+      <button class="btn btn-secondary" onclick="closeModal('recurringBillModal')" style="width: 100%; margin-top: 16px; padding: 12px;">Close</button>
     </div>
   </div>
 
@@ -2666,15 +2679,15 @@
       const startDate = document.getElementById('billStartDate').value;
 
       if (!name) {
-        showToast('Please enter bill name', 'warning');
+        showToast('Enter what you\'re paying for', 'warning');
         return;
       }
       if (!amount || amount <= 0) {
-        showToast('Amount must be greater than 0', 'warning');
+        showToast('Enter an amount greater than 0', 'warning');
         return;
       }
       if (!startDate) {
-        showToast('Please select start date', 'warning');
+        showToast('Select a start date', 'warning');
         return;
       }
 
@@ -2684,12 +2697,15 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, amount, frequency, startDate })
         });
-        if (!res.ok) throw new Error('Failed to add bill');
+        if (!res.ok) throw new Error('Failed to add');
         
+        // Clear form
         document.getElementById('billName').value = '';
         document.getElementById('billAmount').value = '';
         document.getElementById('billFrequency').value = '30';
-        showToast('Recurring bill added successfully', 'success');
+        document.getElementById('billStartDate').valueAsDate = new Date();
+        
+        showToast('Added! It will appear on your calendar.', 'success');
         displayRecurringBillsList();
         loadData();
       } catch (e) {
