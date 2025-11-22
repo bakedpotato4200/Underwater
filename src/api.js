@@ -1135,8 +1135,8 @@ app.get('/api/debts', (req, res) => {
 });
 
 app.post('/api/debts', express.json(), (req, res) => {
-  const { name, currentBalance, originalBalance, interestRate, monthlyPayment } = req.body;
-  if (!name || currentBalance === undefined || monthlyPayment === undefined) {
+  const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment } = req.body;
+  if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   
@@ -1146,6 +1146,7 @@ app.post('/api/debts', express.json(), (req, res) => {
   const debt = {
     id: Date.now(),
     name,
+    type,
     currentBalance: parseFloat(currentBalance),
     originalBalance: parseFloat(originalBalance) || parseFloat(currentBalance),
     interestRate: parseFloat(interestRate) || 0,
