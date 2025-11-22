@@ -1923,12 +1923,20 @@
         
         // Function to extract merchant name from transaction description
         function extractMerchant(desc) {
-          // Look for text between "Purchase -" or "Purchase-" and the location/zip code
-          // Pattern: Purchase - MERCHANT_NAME NUMBER CITY STATE
-          const match = desc.match(/[Pp]urchase\s*-\s*([A-Za-z\s]+?)(?:\s+\d+\s+[A-Z]|$)/);
-          if (match && match[1]) {
-            // Return the merchant name, trimmed and lowercase
-            return match[1].trim().toLowerCase();
+          // For "Card Purchase - MERCHANT NAME LOCATIONCODE ZIP CITY STATE" format
+          // Extract just the merchant name (words before location codes like F3054)
+          const purchaseMatch = desc.match(/[Pp]urchase\s*-\s*(.+?)(?:\s+[A-Z]\d+\s+|$)/);
+          if (purchaseMatch && purchaseMatch[1]) {
+            const merchant = purchaseMatch[1].trim();
+            // Split by spaces and take words until we hit a single letter followed by digits
+            const parts = merchant.split(/\s+/);
+            const merchantName = [];
+            for (let part of parts) {
+              // Stop if we hit a location code (single letter + numbers like F3054)
+              if (/^[A-Z]\d+/.test(part)) break;
+              merchantName.push(part);
+            }
+            return merchantName.join(' ').toLowerCase();
           }
           
           // Fallback for other formats (like "Withdrawal from...", "Deposit from...")
