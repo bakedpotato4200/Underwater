@@ -1539,6 +1539,7 @@
 
     let trendsPeriod = 4;
     let trendsData = {};
+    let excludedAmountsData = {};
     let selectedSingleMonth = null;
 
     function changeTrendsPeriod(monthCount) {
@@ -1611,6 +1612,12 @@
 
       const data = Object.entries(totals).filter(([, val]) => val > 0).sort((a, b) => b[1] - a[1]);
       const total = data.reduce((sum, [, val]) => sum + val, 0);
+
+      // Calculate excluded amount for selected period
+      let excludedTotal = 0;
+      months.forEach(month => {
+        excludedTotal += excludedAmountsData[month] || 0;
+      });
 
       // Generate pie chart
       const radius = 80;
@@ -1695,6 +1702,16 @@
               </svg>
             </div>
             ${legendGrid}
+            ${excludedTotal > 0 ? `
+              <div style="margin-top: 20px; padding: 12px; background: #fff5f5; border: 1px solid #ffe5e5; border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                  <div style="width: 10px; height: 10px; background: #d5d5d7; border-radius: 2px;"></div>
+                  <span style="font-size: 11px; font-weight: 600; color: #000;">Excluded</span>
+                </div>
+                <div style="font-size: 13px; font-weight: 700; color: #ff3b30;">$${excludedTotal.toFixed(0)}</div>
+                <div style="font-size: 10px; color: #86868b; margin-top: 4px;">Marked as "Ignore" - Not included in spending</div>
+              </div>
+            ` : ''}
           </div>
         </div>
       `;
@@ -1821,8 +1838,15 @@
       openModal('categoryTransactionsModal');
     }
 
-    function displaySpendingTrends(trends) {
-      trendsData = trends;
+    function displaySpendingTrends(trendsResponse) {
+      // Handle both old format (plain object) and new format (with excluded amounts)
+      if (trendsResponse.trends) {
+        trendsData = trendsResponse.trends;
+        excludedAmountsData = trendsResponse.excludedAmounts || {};
+      } else {
+        trendsData = trendsResponse;
+        excludedAmountsData = {};
+      }
       displaySpendingTrendsPie(trendsPeriod);
     }
 

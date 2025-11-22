@@ -641,14 +641,24 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
 app.get('/api/spending-trends', (req, res) => {
   const trends = {};
   const months = {};
+  const excludedAmounts = {};
   
   transactions.forEach(t => {
-    if (t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
-      const date = new Date(t.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      if (!months[monthKey]) months[monthKey] = {};
-      if (!months[monthKey][t.category]) months[monthKey][t.category] = 0;
-      months[monthKey][t.category] += Math.abs(t.amount);
+    const date = new Date(t.date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    
+    if (!excludedAmounts[monthKey]) excludedAmounts[monthKey] = 0;
+    
+    if (t.type === 'expense' && t.category !== 'Transfer') {
+      if (t.excluded) {
+        // Track excluded amounts separately
+        excludedAmounts[monthKey] += Math.abs(t.amount);
+      } else {
+        // Include non-excluded expenses
+        if (!months[monthKey]) months[monthKey] = {};
+        if (!months[monthKey][t.category]) months[monthKey][t.category] = 0;
+        months[monthKey][t.category] += Math.abs(t.amount);
+      }
     }
   });
   
@@ -663,7 +673,7 @@ app.get('/api/spending-trends', (req, res) => {
     });
   });
   
-  res.json(trends);
+  res.json({ trends, excludedAmounts });
 });
 
 app.get('/api/bill-buffer', (req, res) => {
