@@ -1824,6 +1824,9 @@
     async function updateTransactionCategory(id, category) {
       try {
         const txn = allTransactions.find(t => t.id == id);
+        if (!txn) return;
+        
+        // Update the current transaction
         await fetch(API_URL + `/api/transactions/${id}/category`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1831,14 +1834,94 @@
         });
         
         // Learn from this categorization
-        if (txn && txn.description) {
+        if (txn.description) {
           await fetch(API_URL + `/api/learn-category`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ description: txn.description, category })
           });
         }
-        loadData();
+        
+        // Find other transactions with the same merchant/description
+        const merchantName = txn.description.split(' ')[0].toLowerCase(); // Get merchant name
+        const matchingTxns = allTransactions.filter(t => 
+          t.id !== id && 
+          t.description.toLowerCase().includes(merchantName) &&
+          t.category !== category &&
+          t.type === 'expense'
+        );
+        
+        // If matching transactions found, ask user for bulk update
+        if (matchingTxns.length > 0) {
+          const bulkModal = document.createElement('div');
+          bulkModal.className = 'modal active';
+          bulkModal.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; align-items: center; justify-content: center; backdrop-filter: blur(6px);';
+          
+          const totalAmount = matchingTxns.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+          
+          bulkModal.innerHTML = `
+            <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; width: 92%; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+              <div style="font-size: 22px; font-weight: 800; margin-bottom: 24px; color: #000; letter-spacing: -0.5px;">Smart Category Update</div>
+              <div style="margin-bottom: 20px; padding: 16px; background: #f0f3ff; border-radius: 12px; border-left: 4px solid #0071e3;">
+                <div style="font-weight: 600; color: #000; margin-bottom: 8px;">Found ${matchingTxns.length} similar ${matchingTxns.length === 1 ? 'transaction' : 'transactions'}</div>
+                <div style="font-size: 13px; color: #666; margin-bottom: 8px;">From <strong>${txn.description}</strong></div>
+                <div style="font-size: 13px; color: #666;">Total Amount: <strong>$${totalAmount.toFixed(2)}</strong></div>
+              </div>
+              <div style="margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                <div style="font-size: 12px; font-weight: 600; color: #000; margin-bottom: 8px;">Matching Transactions:</div>
+                ${matchingTxns.map(t => `
+                  <div style="font-size: 11px; color: #666; padding: 4px 0; display: flex; justify-content: space-between;">
+                    <span>${t.date} - ${t.description}</span>
+                    <span style="font-weight: 600;">$${Math.abs(t.amount).toFixed(2)}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="color: #666; font-size: 12px; margin-bottom: 20px;">
+                Update all to <strong>${category}</strong>?
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" id="bulkConfirmBtn" style="flex: 1;">Update All</button>
+                <button class="btn btn-secondary" id="bulkCancelBtn" style="flex: 1;">Just This One</button>
+              </div>
+            </div>
+          `;
+          
+          document.body.appendChild(bulkModal);
+          
+          // Handle bulk update confirm
+          document.getElementById('bulkConfirmBtn').addEventListener('click', async () => {
+            for (const match of matchingTxns) {
+              try {
+                await fetch(API_URL + `/api/transactions/${match.id}/category`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ category })
+                });
+              } catch (e) {
+                console.error('Failed to update transaction ' + match.id, e);
+              }
+            }
+            bulkModal.remove();
+            showToast(`Updated ${matchingTxns.length} matching transactions to ${category}`, 'success');
+            loadData();
+          });
+          
+          // Handle cancel
+          document.getElementById('bulkCancelBtn').addEventListener('click', () => {
+            bulkModal.remove();
+            loadData();
+          });
+          
+          // Click outside to close
+          bulkModal.addEventListener('click', (e) => {
+            if (e.target === bulkModal) {
+              bulkModal.remove();
+              loadData();
+            }
+          });
+        } else {
+          loadData();
+        }
       } catch (e) {
         alert('Failed to update category: ' + e.message);
       }
