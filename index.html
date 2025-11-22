@@ -243,8 +243,8 @@
   <div class="main-content">
     <div class="container">
       <div class="header" id="overviewHeader">
-        <h1>Budget Tracker</h1>
-        <p>AI-Powered Financial Intelligence</p>
+        <h1>💼 Dashboard</h1>
+        <p>Financial Overview & Money Management</p>
         <div class="stats">
           <div class="stat-card">
             <div class="stat-value" id="totalIncome">$0</div>
@@ -261,20 +261,6 @@
           <div class="stat-card">
             <div class="stat-value" id="financialScore">0</div>
             <div class="stat-label">Health Score</div>
-          </div>
-        </div>
-        <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-          <button class="btn btn-primary" onclick="showAddTransactionModal()">Add Transaction</button>
-          <button class="btn btn-secondary" onclick="showUploadModal()">Upload PDF</button>
-          <button class="btn btn-secondary" onclick="showAddRecurringBillModal()">Manage Bills</button>
-          <button class="btn btn-secondary" onclick="showAddGoalModal()">Set Goal</button>
-          <button class="btn btn-secondary" onclick="showAddDebtModal()">Add Debt</button>
-          <div style="display: flex; align-items: center; gap: 8px; margin-left: 12px; padding-left: 12px; border-left: 1px solid #e5e5e7;">
-            <label style="font-size: 12px; font-weight: 600; color: #666;">Bank Balance:</label>
-            <input type="number" id="bankBalanceInput" placeholder="0.00" step="0.01" style="width: 120px; padding: 8px 10px; border: 1px solid #d5d5d7; border-radius: 6px; font-size: 13px; font-weight: 600;">
-            <button class="btn btn-secondary" onclick="saveBankBalance()" style="padding: 8px 12px; font-size: 12px;">Set</button>
-            <span id="bankBalanceDisplay" style="font-size: 12px; font-weight: 600; color: #0071e3; min-width: 80px; text-align: center;">—</span>
-            <button class="btn btn-secondary" onclick="clearBankBalance()" style="padding: 8px 12px; font-size: 12px; background: #f0f0f0; color: #666;">Clear</button>
           </div>
         </div>
       </div>
@@ -337,15 +323,26 @@
           </div>
         </div>
 
-        <!-- Full Width: Quick Actions Bar -->
-        <div class="card full" style="background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%); border: 2px dashed #e0e6ff;">
-          <h2>⚙️ Quick Actions</h2>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
-            <button class="btn btn-primary" onclick="showAddTransactionModal()" style="flex: 1; min-width: 150px;">+ Add Transaction</button>
-            <button class="btn btn-secondary" onclick="showUploadModal()" style="flex: 1; min-width: 150px;">📄 Upload PDF</button>
-            <button class="btn btn-secondary" onclick="showAddRecurringBillModal()" style="flex: 1; min-width: 150px;">🔄 Manage Bills</button>
-            <button class="btn btn-secondary" onclick="showAddGoalModal()" style="flex: 1; min-width: 150px;">🎯 Set Goal</button>
-            <button class="btn btn-secondary" onclick="showAddDebtModal()" style="flex: 1; min-width: 150px;">📋 Add Debt</button>
+        <!-- Full Width: Quick Actions Bar + Bank Balance -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+          <div class="card full" style="background: linear-gradient(135deg, #0071e3 0%, #0077ed 100%); border: none; color: white;">
+            <h2 style="color: white; margin: 0 0 16px 0;">⚙️ Quick Actions</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <button class="btn btn-primary" onclick="showAddTransactionModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600; padding: 10px;">+ Add</button>
+              <button class="btn btn-secondary" onclick="showUploadModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600; padding: 10px;">📄 PDF</button>
+              <button class="btn btn-secondary" onclick="showAddRecurringBillModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600; padding: 10px;">🔄 Bills</button>
+              <button class="btn btn-secondary" onclick="showAddGoalModal()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600; padding: 10px;">🎯 Goals</button>
+            </div>
+          </div>
+
+          <div class="card full" style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid #86efac;">
+            <h2 style="margin: 0 0 16px 0; color: #15803d;">🏦 Bank Balance</h2>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="number" id="bankBalanceInput" placeholder="0.00" step="0.01" style="flex: 1; padding: 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 13px; font-weight: 600;">
+              <button class="btn btn-primary" onclick="saveBankBalance()" style="padding: 12px 20px;">Set</button>
+              <button class="btn btn-secondary" onclick="clearBankBalance()" style="padding: 12px 20px;">Clear</button>
+            </div>
+            <div style="margin-top: 12px; font-size: 12px; color: #666;">Current: <span id="bankBalanceDisplay" style="font-weight: 700; color: #0071e3;">—</span></div>
           </div>
         </div>
 
@@ -789,6 +786,8 @@
     }
 
     let currentBankBalance = 0;
+    let recurringBills = [];
+    let transactions = [];
 
     async function loadData() {
       try {
@@ -812,6 +811,8 @@
         
         // Store bank balance for calendar calculations
         currentBankBalance = bankBalanceData?.balance || 0;
+        recurringBills = recurringBills || [];
+        transactions = txns;
         
         // Update bank balance input if loaded
         if (bankBalanceData && bankBalanceData.balance) {
