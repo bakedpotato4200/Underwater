@@ -1038,5 +1038,14 @@
     "category": "Utilities",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense"
+  },
+  {
+    "id": 131,
+    "description": "Test",
+    "amount": -50,
+    "category": "Test",
+    "type": "expense",
+    "date": "2025-11-22",
+    "excluded": false
   }
 ]
