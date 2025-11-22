@@ -592,7 +592,7 @@
       }
       
       document.getElementById('dayBillsContent').innerHTML = content;
-      document.querySelector('.modal-header').textContent = `Bills for Day ${day}`;
+      document.getElementById('dayBillsModal').querySelector('.modal-header').textContent = `Bills for Day ${day}`;
       openModal('dayBillsModal');
     }
     
