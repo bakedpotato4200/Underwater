@@ -1977,13 +1977,13 @@
                 </div>
                 <div style="max-height: 280px; overflow-y: auto; background: white; border-radius: 8px; padding: 8px;">
                   ${matchingTxns.map((t, idx) => `
-                    <label style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='transparent'">
-                      <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3;" onchange="updateBulkCounter()">
+                    <label style="display: flex; align-items: flex-start; gap: 10px; padding: 8px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='transparent'">
+                      <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: #0071e3; margin-top: 2px; flex-shrink: 0;" onchange="updateBulkCounter()">
                       <div style="flex: 1; min-width: 0;">
-                        <div style="font-size: 12px; color: #000; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.date} - ${t.description}</div>
-                        <div style="font-size: 11px; color: #999; margin-top: 2px;">Was: ${t.category}</div>
+                        <div style="font-size: 12px; color: #000; font-weight: 500; word-wrap: break-word; white-space: normal; line-height: 1.4;">${t.date} - ${t.description}</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 4px;">Was: ${t.category}</div>
                       </div>
-                      <span style="font-weight: 600; color: #0071e3; font-size: 12px; flex-shrink: 0;">$${Math.abs(t.amount).toFixed(2)}</span>
+                      <span style="font-weight: 600; color: #0071e3; font-size: 12px; flex-shrink: 0; margin-top: 2px;">$${Math.abs(t.amount).toFixed(2)}</span>
                     </label>
                   `).join('')}
                 </div>
