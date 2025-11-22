@@ -823,6 +823,23 @@
     let currentCategoryTransactionId = null;
     const commonCategories = ['Food & Dining', 'Groceries', 'Shopping', 'Transportation', 'Entertainment', 'Utilities', 'Health & Fitness'];
     
+    const categoryColors = {
+      'Food & Dining': '#FF6B6B',
+      'Groceries': '#4ECDC4',
+      'Shopping': '#FFE66D',
+      'Transportation': '#95E1D3',
+      'Entertainment': '#A8E6CF',
+      'Utilities': '#FFD3B6',
+      'Health & Fitness': '#FF8B94',
+      'Income': '#34C759',
+      'Transfer': '#8E8E93',
+      'Other': '#A9A9A9'
+    };
+    
+    function getCategoryColor(category) {
+      return categoryColors[category] || categoryColors['Other'];
+    }
+    
     function openCategorySelector(transactionId) {
       currentCategoryTransactionId = transactionId;
       const txn = allTransactionsData.find(t => t.id === transactionId);
@@ -830,7 +847,7 @@
       document.getElementById('customCategory').value = txn.category || '';
       
       document.getElementById('quickCategoryButtons').innerHTML = commonCategories.map(cat => 
-        `<button onclick="assignTransactionCategory('${cat}')" class="btn" style="background: ${txn.category === cat ? 'var(--accent-primary)' : 'var(--bg-tertiary)'}; color: ${txn.category === cat ? '#ffffff' : 'var(--text-primary)'}; font-size: 12px; padding: 10px; border: none; cursor: pointer;">${cat}</button>`
+        `<button onclick="assignTransactionCategory('${cat}')" class="btn" style="background: ${txn.category === cat ? getCategoryColor(cat) : 'var(--bg-tertiary)'}; color: ${txn.category === cat ? '#ffffff' : 'var(--text-primary)'}; font-size: 12px; padding: 10px; border: none; cursor: pointer; font-weight: 500;">${cat}</button>`
       ).join('');
       
       openModal('categoryModal');
@@ -872,7 +889,7 @@
         return matchesSearch && matchesCategory && matchesStatus;
       });
       
-      const html = filtered.map(t => `<div class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative;"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</div><button onclick="openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer;">${t.category || 'No Category'}</button></div></div>`).join('');
+      const html = filtered.map(t => `<div class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative;"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</div><button onclick="openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">${t.category || 'No Category'}</button></div></div>`).join('');
       document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No matching transactions</div>';
     }
     
