@@ -1059,12 +1059,24 @@
       if (ids.length === 0) return;
       if (!confirm(`Exclude ${ids.length} transactions from tracking?`)) return;
       
-      for (const id of ids) {
-        await fetch(API_URL + `/api/transactions/${id}/exclude`, { method: 'PUT' });
+      try {
+        showToast(`Excluding ${ids.length} transactions...`, 'info');
+        
+        for (const id of ids) {
+          const response = await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ learnRule: true })
+          });
+          if (!response.ok) throw new Error(`Failed to exclude transaction ${id}`);
+        }
+        
+        await loadData();
+        document.getElementById('selectAllTxns').checked = false;
+        showToast(`Successfully excluded ${ids.length} transactions`, 'success');
+      } catch (e) {
+        showToast('Error excluding transactions: ' + e.message, 'error');
       }
-      
-      await loadTransactions();
-      document.getElementById('selectAllTxns').checked = false;
     }
 
     async function bulkDeleteTransactions() {
