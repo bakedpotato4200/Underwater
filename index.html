@@ -1539,13 +1539,20 @@
 
     let trendsPeriod = 4;
     let trendsData = {};
+    let selectedSingleMonth = null;
 
     function changeTrendsPeriod(monthCount) {
+      selectedSingleMonth = null;
       trendsPeriod = monthCount;
       displaySpendingTrendsPie(monthCount);
     }
 
-    function displaySpendingTrendsPie(monthCount) {
+    function selectSingleMonth(monthKey) {
+      selectedSingleMonth = monthKey;
+      displaySpendingTrendsPie(null, monthKey);
+    }
+
+    function displaySpendingTrendsPie(monthCount, singleMonth) {
       const trends = trendsData;
       const container = document.getElementById('trendsChart');
       if (!trends || Object.keys(trends).length === 0) {
@@ -1555,14 +1562,30 @@
 
       const allMonths = Object.keys(trends).sort();
       let months;
+      let periodLabel;
       
-      // For "This Month" (monthCount === 1), use today's date to determine current month
-      if (monthCount === 1) {
+      // If viewing a single month
+      if (singleMonth) {
+        months = [singleMonth];
+        const [year, month] = singleMonth.split('-');
+        periodLabel = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+      } else if (monthCount === 1) {
+        // For "This Month" (monthCount === 1), use today's date to determine current month
         const today = new Date();
         const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         months = allMonths.includes(currentMonthKey) ? [currentMonthKey] : [];
+        periodLabel = 'This Month';
       } else {
         months = allMonths.slice(-monthCount);
+        const periodDefs = [
+          { label: 'This Month', months: 1 },
+          { label: 'Last 2 Months', months: 2 },
+          { label: 'Last 3 Months', months: 3 },
+          { label: 'Last 4 Months', months: 4 },
+          { label: 'Last 6 Months', months: 6 },
+          { label: 'Last Year', months: 12 }
+        ];
+        periodLabel = periodDefs.find(p => p.months === monthCount)?.label || 'Last 4 Months';
       }
       
       const categories = Array.from(new Set(Object.values(trends).flatMap(m => Object.keys(m || {}))));
@@ -1626,10 +1649,19 @@
       ];
 
       const buttons = periods.map(p => `
-        <button class="trends-period-btn" data-months="${p.months}" style="padding: 6px 14px; border: 1px solid ${trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
+        <button class="trends-period-btn" data-months="${p.months}" style="padding: 6px 14px; border: 1px solid ${!singleMonth && trendsPeriod === p.months ? '#0071e3' : '#e5e5e7'}; background: ${!singleMonth && trendsPeriod === p.months ? '#0071e3' : '#f9fafb'}; color: ${!singleMonth && trendsPeriod === p.months ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">${p.label}</button>
       `).join('');
 
-      const periodLabel = periods.find(p => p.months === monthCount)?.label || 'Last 4 Months';
+      const monthSelector = `
+        <select id="monthSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: ${singleMonth ? '#0071e3' : '#f9fafb'}; color: ${singleMonth ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
+          <option value="" ${!singleMonth ? 'selected' : ''} style="color: #000; background: #fff;">View by Month</option>
+          ${allMonths.reverse().map(m => {
+            const [year, month] = m.split('-');
+            const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+            return `<option value="${m}" ${singleMonth === m ? 'selected' : ''} style="color: #000; background: #fff;">${monthName}</option>`;
+          }).join('')}
+        </select>
+      `;
 
       const legendGrid = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;">
         ${data.map(([cat, val]) => {
@@ -1647,8 +1679,10 @@
 
       container.innerHTML = `
         <div style="max-width: 900px; margin: 0 auto;">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;" id="trendsButtonsContainer">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 24px;" id="trendsButtonsContainer">
             ${buttons}
+            <div style="width: 1px; height: 24px; background: #e5e5e7;"></div>
+            ${monthSelector}
           </div>
           <div style="background: white; border: 1px solid #e5e5e7; border-radius: 12px; padding: 32px; text-align: center;">
             <div style="font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${periodLabel} Breakdown</div>
@@ -1671,11 +1705,23 @@
         });
       });
 
+      // Attach event listener to month selector
+      const monthSelector = document.getElementById('monthSelector');
+      if (monthSelector) {
+        monthSelector.addEventListener('change', function() {
+          if (this.value) {
+            selectSingleMonth(this.value);
+          } else {
+            changeTrendsPeriod(trendsPeriod);
+          }
+        });
+      }
+
       // Attach event listeners to category cards
       document.querySelectorAll('.trends-category-card').forEach(card => {
         card.addEventListener('click', function() {
           const category = this.dataset.category;
-          showCategoryTransactionsModal(category, trendsPeriod);
+          showCategoryTransactionsModal(category, trendsPeriod, singleMonth);
         });
         card.addEventListener('mouseenter', function() {
           this.style.background = '#f0f3ff';
@@ -1688,15 +1734,18 @@
       });
     }
 
-    function showCategoryTransactionsModal(category, monthCount) {
+    function showCategoryTransactionsModal(category, monthCount, singleMonth) {
       const txns = fullTransactionData || allTransactions || [];
       
-      // Get the month range based on monthCount
+      // Get the month range based on monthCount or singleMonth
       const allMonthKeys = Object.keys(trendsData).sort();
       let selectedMonths;
       
-      // For "This Month" (monthCount === 1), use today's date to determine current month
-      if (monthCount === 1) {
+      // If viewing a single month
+      if (singleMonth) {
+        selectedMonths = [singleMonth];
+      } else if (monthCount === 1) {
+        // For "This Month" (monthCount === 1), use today's date to determine current month
         const today = new Date();
         const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         selectedMonths = allMonthKeys.includes(currentMonthKey) ? [currentMonthKey] : [];
@@ -1756,7 +1805,7 @@
                 <span>${t.date}</span>
               </div>
             </div>
-            <button onclick="toggleExclude(${t.id}); setTimeout(() => showCategoryTransactionsModal('${category}', ${monthCount}), 600);" style="margin-left: 12px; padding: 6px 10px; border: 1px solid #d5d5d7; background: ${t.excluded ? '#e8f4e8' : '#fff0f0'}; color: ${t.excluded ? '#34c759' : '#ff3b30'}; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;">${t.excluded ? '✓ Included' : '✕ Exclude'}</button>
+            <button onclick="toggleExclude(${t.id}); setTimeout(() => showCategoryTransactionsModal('${category}', ${monthCount}, '${singleMonth}'), 600);" style="margin-left: 12px; padding: 6px 10px; border: 1px solid #d5d5d7; background: ${t.excluded ? '#e8f4e8' : '#fff0f0'}; color: ${t.excluded ? '#34c759' : '#ff3b30'}; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;">${t.excluded ? '✓ Included' : '✕ Exclude'}</button>
           </div>`;
         });
         
