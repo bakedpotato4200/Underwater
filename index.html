@@ -914,6 +914,7 @@
       const today = new Date(2025, 10, 21);
       const searchBox = document.getElementById('searchBox');
       const search = searchBox ? searchBox.value.toLowerCase().trim() : '';
+      const sortBy = document.getElementById('sortBy')?.value || 'date-desc';
       
       let filtered = fullTransactionData.filter(t => {
         // Type filter
@@ -951,7 +952,21 @@
         return;
       }
       
-      const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
+      // Apply sorting based on sortBy selection
+      let sorted = [...filtered];
+      if (sortBy === 'date-desc') {
+        sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (sortBy === 'date-asc') {
+        sorted.sort((a, b) => new Date(a.date) - new Date(b.date));
+      } else if (sortBy === 'amount-desc') {
+        sorted.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
+      } else if (sortBy === 'amount-asc') {
+        sorted.sort((a, b) => Math.abs(a.amount) - Math.abs(b.amount));
+      } else if (sortBy === 'category') {
+        sorted.sort((a, b) => a.category.localeCompare(b.category));
+      }
+      
+      // Group by month
       const months = {};
       sorted.forEach(t => {
         const date = new Date(t.date);
@@ -974,7 +989,7 @@
             <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
           </div>`;
         
-        const monthTransactions = [...months[monthKey]].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const monthTransactions = months[monthKey];
         monthTransactions.forEach(t => {
           fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
             <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
