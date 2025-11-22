@@ -6,7 +6,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 2,
@@ -15,7 +15,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 3,
@@ -24,7 +24,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 4,
@@ -33,7 +33,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 5,
@@ -42,7 +42,7 @@
     "category": "Transfer",
     "description": "car payment - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 6,
@@ -51,7 +51,7 @@
     "category": "Transfer",
     "description": "amex prime - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 7,
@@ -60,7 +60,7 @@
     "category": "Transfer",
     "description": "ke cap one - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 8,
@@ -69,7 +69,7 @@
     "category": "Transfer",
     "description": "Wells Fargo - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 9,
@@ -132,7 +132,7 @@
     "category": "Transfer",
     "description": "motorcycle payment - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 16,
@@ -159,7 +159,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 19,
@@ -168,7 +168,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 20,
@@ -204,7 +204,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 24,
@@ -339,7 +339,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 39,
@@ -384,7 +384,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 44,
@@ -546,7 +546,7 @@
     "category": "Transfer",
     "description": "car payment - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 62,
@@ -555,7 +555,7 @@
     "category": "Transfer",
     "description": "amex prime - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 63,
@@ -564,7 +564,7 @@
     "category": "Transfer",
     "description": "ke cap one - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 64,
@@ -573,7 +573,7 @@
     "category": "Transfer",
     "description": "Wells Fargo - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 65,
@@ -582,7 +582,7 @@
     "category": "Transfer",
     "description": "discover card - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 66,
@@ -843,7 +843,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 95,
@@ -1014,7 +1014,7 @@
     "category": "Transfer",
     "description": "motorcycle payment - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 114,
@@ -1023,7 +1023,7 @@
     "category": "Transfer",
     "description": "storage - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 115,
@@ -1032,7 +1032,7 @@
     "category": "Transfer",
     "description": "aroura - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 116,
@@ -1041,7 +1041,7 @@
     "category": "Transfer",
     "description": "phone bill - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 117,
@@ -1050,7 +1050,7 @@
     "category": "Transfer",
     "description": "trading view - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 118,
@@ -1059,7 +1059,7 @@
     "category": "Transfer",
     "description": "skool - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 119,
@@ -1068,7 +1068,7 @@
     "category": "Transfer",
     "description": "crunchy roll - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 120,
@@ -1194,7 +1194,7 @@
     "category": "Transfer",
     "description": "Deposit from Savings XXXXXXX0688",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 134,
@@ -1275,7 +1275,7 @@
     "category": "Transfer",
     "description": "Deposit from Savings XXXXXXX0688",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 143,
@@ -1284,7 +1284,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 144,
@@ -1293,7 +1293,7 @@
     "category": "Transfer",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 145,
@@ -1302,7 +1302,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 146,
@@ -1365,7 +1365,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 153,
@@ -1419,7 +1419,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 159,
@@ -1437,7 +1437,7 @@
     "category": "Transfer",
     "description": "storage - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 161,
@@ -1446,7 +1446,7 @@
     "category": "Transfer",
     "description": "aroura - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 162,
@@ -1455,7 +1455,7 @@
     "category": "Transfer",
     "description": "phone bill - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 163,
@@ -1464,7 +1464,7 @@
     "category": "Transfer",
     "description": "trading view - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 164,
@@ -1473,7 +1473,7 @@
     "category": "Transfer",
     "description": "skool - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 165,
@@ -1482,7 +1482,7 @@
     "category": "Transfer",
     "description": "crunchy roll - Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 166,
@@ -1491,7 +1491,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 167,
@@ -1509,7 +1509,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 169,
@@ -1518,7 +1518,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 170,
@@ -1608,7 +1608,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 180,
@@ -1617,7 +1617,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 181,
@@ -1626,7 +1626,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 182,
@@ -1635,7 +1635,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 183,
@@ -1644,7 +1644,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 184,
@@ -1653,7 +1653,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 185,
@@ -1716,7 +1716,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 192,
@@ -1770,7 +1770,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 198,
@@ -1860,7 +1860,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 208,
@@ -1869,7 +1869,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 209,
@@ -1878,7 +1878,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 210,
@@ -1887,7 +1887,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 211,
@@ -1896,7 +1896,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 212,
@@ -1995,7 +1995,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 223,
@@ -2139,7 +2139,7 @@
     "category": "Transfer",
     "description": "Withdrawal from PAYPAL to JACOB EMMER INST XFER",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 239,
@@ -2148,7 +2148,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 240,
@@ -2220,7 +2220,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 248,
@@ -2229,7 +2229,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 249,
@@ -2247,7 +2247,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 251,
@@ -2265,7 +2265,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 253,
@@ -2274,7 +2274,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 254,
@@ -2292,7 +2292,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 256,
@@ -2301,7 +2301,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 257,
@@ -2346,7 +2346,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 262,
@@ -2355,7 +2355,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 263,
@@ -2409,7 +2409,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 269,
@@ -2418,7 +2418,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 270,
@@ -2445,7 +2445,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 273,
@@ -2454,7 +2454,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 274,
@@ -2490,7 +2490,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 278,
@@ -2508,7 +2508,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 280,
@@ -2535,7 +2535,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 283,
@@ -2553,7 +2553,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 285,
@@ -2562,7 +2562,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 286,
@@ -2589,7 +2589,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 289,
@@ -2598,7 +2598,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 290,
@@ -2715,7 +2715,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 303,
@@ -2724,7 +2724,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 304,
@@ -2886,7 +2886,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 322,
@@ -2931,7 +2931,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 327,
@@ -3129,7 +3129,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 349,
@@ -3138,7 +3138,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 350,
@@ -3165,7 +3165,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 353,
@@ -3327,7 +3327,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 371,
@@ -3354,7 +3354,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 374,
@@ -3408,7 +3408,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 380,
@@ -3480,7 +3480,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 388,
@@ -3696,7 +3696,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 412,
@@ -3975,7 +3975,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 443,
@@ -4020,7 +4020,7 @@
     "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 448,
@@ -4038,7 +4038,7 @@
     "category": "Transfer",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 450,

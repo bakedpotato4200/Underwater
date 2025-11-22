@@ -423,9 +423,12 @@
                 <option value="year">This Year</option>
               </select>
               
-              <select id="categoryFilter" onchange="filterByCategory(this.value)" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer;">
-                <option value="all">All Categories</option>
-              </select>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <select id="categoryFilter" onchange="filterByCategory(this.value)" style="padding: 8px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer;">
+                  <option value="all">All Categories</option>
+                </select>
+                <button onclick="document.getElementById('categoryFilter').value = 'all'; filterByCategory('all')" style="padding: 6px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 12px; background: white; cursor: pointer; font-weight: 600; color: #0071e3; transition: all 0.2s;" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='white'">All</button>
+              </div>
             </div>
             
             <!-- Filter Row 3: Sort & Select -->
