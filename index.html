@@ -585,7 +585,9 @@
             const [startYear, startMonth, startDay] = b.startDate.split('-').map(Number);
             const startDate = new Date(startYear, startMonth - 1, startDay);
             const daysDiff = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
-            return daysDiff >= 0 && daysDiff % parseInt(b.frequency) === 0;
+            const matches = daysDiff >= 0 && daysDiff % parseInt(b.frequency) === 0;
+            if (i === 6 && month === 5) console.log(`Day ${i}: Bill ${b.name}, daysDiff=${daysDiff}, freq=${b.frequency}, matches=${matches}`);
+            return matches;
           });
           const dayIncome = dayBills.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
           const dayExpense = dayBills.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0);
@@ -638,8 +640,11 @@
     }
     
     function showDayDetails(day) {
+      console.log('showDayDetails called with day:', day);
+      console.log('calendarData:', calendarData);
       const data = calendarData[day];
-      if (!data) { console.log('No data for day:', day, calendarData); return; }
+      console.log('data for day:', data);
+      if (!data) { console.log('No data for day:', day); return; }
       
       let content = `<div style="display: grid; gap: 12px; margin-bottom: 20px;">`;
       content += `<div style="display: flex; justify-content: space-between; padding: 12px; background: var(--bg-tertiary); border-radius: 8px;"><span style="font-weight: 600; color: var(--text-secondary);">Starting Balance</span><span style="font-weight: 700; color: var(--text-primary);">$${data.startBalance.toFixed(2)}</span></div>`;
@@ -656,21 +661,23 @@
       content += `<div style="display: flex; justify-content: space-between; padding: 16px; background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%); border-radius: 8px; border: 2px solid ${endBalColor};"><span style="font-weight: 700; color: var(--text-primary); font-size: 14px;">Ending Balance</span><span style="font-weight: 800; color: ${endBalColor}; font-size: 18px;">$${data.endBalance.toFixed(2)}</span></div>`;
       content += `</div>`;
       
-      if (data.bills.length > 0) {
-        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px;"><div style="font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Transactions This Day:</div>`;
+      if (data.bills && data.bills.length > 0) {
+        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px;"><div style="font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Recurring Transactions This Day:</div>`;
         data.bills.forEach(b => {
           const isIncome = b.type === 'income';
-          content += `<div class="bill-item" style="background: ${isIncome ? 'linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%)' : 'linear-gradient(90deg, #fdf0f0 0%, #ffffff 100%)'}; border-left: 4px solid ${isIncome ? 'var(--accent-success)' : 'var(--accent-danger)'}; padding: 12px;"><div><div class="bill-name">${b.name}</div><div class="bill-date" style="font-size: 11px; color: var(--text-tertiary);">${b.frequency} day cycle</div></div><div class="bill-amount" style="color: ${isIncome ? 'var(--accent-success)' : 'var(--accent-danger)'}; font-weight: 700;">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
+          content += `<div class="bill-item" style="background: ${isIncome ? 'linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%)' : 'linear-gradient(90deg, #fdf0f0 0%, #ffffff 100%)'}; border-left: 4px solid ${isIncome ? 'var(--accent-success)' : 'var(--accent-danger)'}; padding: 12px;"><div><div class="bill-name">${b.name}</div><div class="bill-date" style="font-size: 11px; color: var(--text-tertiary);">Every ${b.frequency} days</div></div><div class="bill-amount" style="color: ${isIncome ? 'var(--accent-success)' : 'var(--accent-danger)'}; font-weight: 700;">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
         });
         content += `</div>`;
       } else {
-        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; text-align: center; color: var(--text-secondary);">No transactions this day</div>`;
+        content += `<div style="border-top: 1px solid var(--border-color); padding-top: 16px; text-align: center; color: var(--text-secondary);">No recurring transactions this day</div>`;
       }
       
+      console.log('Setting modal content');
       document.getElementById('dayBillsContent').innerHTML = content;
       const modal = document.getElementById('dayBillsModal');
       const header = modal.querySelector('.modal-header');
       if (header) header.textContent = `Day ${day} - Financial Overview`;
+      console.log('Opening modal');
       openModal('dayBillsModal');
     }
     
