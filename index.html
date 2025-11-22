@@ -1713,7 +1713,7 @@
       
       menu.innerHTML = `
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showNoteModal(${id}, '${currentNote.replace(/'/g, "\\'")}'); document.getElementById('transactionMenu').remove();">Add Note</button>
-        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id}); document.getElementById('transactionMenu').remove();">Change Category</button>
+        <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="showCategoryModal(${id});">Change Category</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #000; border-bottom: 1px solid #e5e5e7; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="toggleExclude(${id}); document.getElementById('transactionMenu').remove();">${isExcluded ? 'Include' : 'Exclude'}</button>
         <button style="display: block; width: 100%; padding: 12px 16px; text-align: left; border: none; background: none; cursor: pointer; font-size: 13px; color: #ff3b30; transition: background 0.15s;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='none'" onclick="deleteTransaction(${id}); document.getElementById('transactionMenu').remove();">Delete</button>
       `;
@@ -1729,36 +1729,38 @@
 
     function getSuggestedCategory(description) {
       const desc = description.toLowerCase();
+      let suggested = 'Other';
       
       // More specific patterns first to avoid conflicts
       // Transfer patterns - be specific to avoid matching deposits
-      if (desc.match(/transfer|xfer|from account|to account|internal|between accounts|move to|move from/i)) return 'Transfer';
+      if (desc.match(/transfer|xfer|from account|to account|internal|between accounts|move to|move from/i)) suggested = 'Transfer';
       
       // Income patterns - specific income indicators
-      if (desc.match(/salary|paycheck|income|bonus|interest earned|cash app|venmo|paypal|ach|wire|direct deposit/i)) return 'Income';
+      else if (desc.match(/salary|paycheck|income|bonus|interest earned|cash app|venmo|paypal|ach|wire|direct deposit/i)) suggested = 'Income';
       
       // Food & Dining - very specific restaurants/services
-      if (desc.match(/starbucks|coffee|cafe|restaurant|food delivery|uber eats|doordash|grubhub|pizza|burger|taco|chipotle|mcdonalds|subway|shake shack|chick fil|popeyes|panera|wingstop|chilis|applebees|olive garden|dominos|wendy|taco bell|kfc|in-n-out|chick-fil-a|sonic/i)) return 'Food & Dining';
+      else if (desc.match(/starbucks|coffee|cafe|restaurant|food delivery|uber eats|doordash|grubhub|pizza|burger|taco|chipotle|mcdonalds|subway|shake shack|chick fil|popeyes|panera|wingstop|chilis|applebees|olive garden|dominos|wendy|taco bell|kfc|in-n-out|chick-fil-a|sonic/i)) suggested = 'Food & Dining';
       
       // Groceries - specific grocery stores
-      if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super|target|instacart|sprouts|aldi|publix|winco|harris teeter|giant|ralphs|albertsons/i)) return 'Groceries';
+      else if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super|target|instacart|sprouts|aldi|publix|winco|harris teeter|giant|ralphs|albertsons/i)) suggested = 'Groceries';
       
       // Utilities - very specific utilities
-      if (desc.match(/electric|electricity|gas bill|water bill|internet|phone bill|utility|comcast|verizon|at&t|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt|cell phone|mobile|power company/i)) return 'Utilities';
+      else if (desc.match(/electric|electricity|gas bill|water bill|internet|phone bill|utility|comcast|verizon|at&t|wells fargo|chase|capital one|amex|discover|autopay|crcardpmt|cell phone|mobile|power company/i)) suggested = 'Utilities';
       
       // Entertainment - specific entertainment services
-      if (desc.match(/netflix|hulu|spotify|disney|prime video|subscription|gym membership|apple|xbox|playstation|microsoft|youtube premium|hbo|peacock|paramount|movie|cinema|theater/i)) return 'Entertainment';
+      else if (desc.match(/netflix|hulu|spotify|disney|prime video|subscription|gym membership|apple|xbox|playstation|microsoft|youtube premium|hbo|peacock|paramount|movie|cinema|theater/i)) suggested = 'Entertainment';
       
       // Transportation - specific gas/transit
-      if (desc.match(/shell|chevron|exxon|bp|fuel|parking|metro|transit|lyft|uber|carwash|gas station|parking garage|toll/i)) return 'Transportation';
+      else if (desc.match(/shell|chevron|exxon|bp|fuel|parking|metro|transit|lyft|uber|carwash|gas station|parking garage|toll/i)) suggested = 'Transportation';
       
       // Shopping - specific retailers
-      if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|h&m|forever 21|gap|old navy|tj maxx|ross|burlington|outlet|nike|adidas|mall|retail/i)) return 'Shopping';
+      else if (desc.match(/amazon|target|mall|clothing|shoes|fashion|best buy|store|walgreens|dollar general|h&m|forever 21|gap|old navy|tj maxx|ross|burlington|outlet|nike|adidas|mall|retail/i)) suggested = 'Shopping';
       
       // Health & Fitness - specific medical/health
-      if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|dentist|urgent care|clinic|health insurance|medical office|lab|vision|eye doctor/i)) return 'Health & Fitness';
+      else if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|dentist|urgent care|clinic|health insurance|medical office|lab|vision|eye doctor/i)) suggested = 'Health & Fitness';
       
-      return 'Other';
+      console.log(`Suggested category for "${description}": ${suggested}`);
+      return suggested;
     }
     
     function showCategoryModal(id) {
@@ -1771,6 +1773,8 @@
       
       const suggestedCat = getSuggestedCategory(txn.description);
       const categories = ['Income', 'Utilities', 'Food & Dining', 'Groceries', 'Transportation', 'Entertainment', 'Shopping', 'Health & Fitness', 'Transfer', 'Other'];
+      
+      console.log(`Modal opened for transaction ${id}: "${txn.description}", current: ${txn.category}, suggested: ${suggestedCat}`);
       
       // Remove any existing modal
       const oldModal = document.getElementById('categoryModal');
@@ -1787,10 +1791,18 @@
         <div style="font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #000; letter-spacing: -0.5px;">Select Category</div>
         <div style="font-size: 13px; color: #999; margin-bottom: 20px;">${txn.description}</div>`;
       
-      if (suggestedCat && suggestedCat !== txn.category) {
-        html += `<div style="margin-bottom: 16px; padding: 10px 14px; background: #e8f4f8; border: 1.5px solid #0071e3; border-radius: 10px; cursor: pointer; transition: all 0.2s;" class="suggested-cat" data-cat="${suggestedCat}">
-          <div style="font-size: 11px; color: #0071e3; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">✨ Suggested</div>
-          <div style="font-size: 14px; font-weight: 600; color: #0071e3;">${suggestedCat}</div>
+      // Always show suggestion, with different styling if it matches current category
+      if (suggestedCat) {
+        const isSameAsCurrent = suggestedCat === txn.category;
+        const suggestionStyle = isSameAsCurrent 
+          ? 'background: #e8f4e8; border: 1.5px solid #34c759;' 
+          : 'background: #e8f4f8; border: 1.5px solid #0071e3;';
+        const suggestionLabel = isSameAsCurrent ? '✓ Already Correct' : '✨ Suggested';
+        const suggestionColor = isSameAsCurrent ? '#34c759' : '#0071e3';
+        
+        html += `<div style="margin-bottom: 16px; padding: 10px 14px; ${suggestionStyle} border-radius: 10px; cursor: pointer; transition: all 0.2s;" class="suggested-cat" data-cat="${suggestedCat}">
+          <div style="font-size: 11px; color: ${suggestionColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">${suggestionLabel}</div>
+          <div style="font-size: 14px; font-weight: 600; color: ${suggestionColor};">${suggestedCat}</div>
         </div>`;
       }
       
