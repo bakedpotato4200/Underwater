@@ -637,6 +637,15 @@
     </div>
   </div>
 
+  <!-- Day Bills Modal -->
+  <div id="dayBillsModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header" id="dayBillsHeader">Bills for Today</div>
+      <div id="dayBillsContent" style="margin-bottom: 20px;"></div>
+      <button class="btn btn-secondary" onclick="closeModal('dayBillsModal')" style="width: 100%;">Close</button>
+    </div>
+  </div>
+
   <script>
     const API_URL = window.location.origin;
     
@@ -1200,7 +1209,57 @@
       `).join('');
     }
 
+    let calendarData = {};
+
+    function showDayBills(dateStr, bills, balanceAfter) {
+      const date = new Date(dateStr);
+      const dateFormatted = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      
+      document.getElementById('dayBillsHeader').textContent = `Bills for ${dateFormatted}`;
+      
+      const currentBalance = parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
+      let totalBills = 0;
+      
+      let html = '';
+      if (bills.length === 0) {
+        html = '<div style="text-align: center; padding: 20px; color: #86868b;">No bills due on this day</div>';
+      } else {
+        bills.forEach(bill => {
+          totalBills += bill.amount;
+          html += `
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ff3b30;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <div style="font-weight: 600; color: #000;">${bill.merchant}</div>
+                <div style="font-weight: 700; color: #ff3b30; font-size: 14px;">$${bill.amount.toFixed(2)}</div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `
+          <div style="background: #f0f3ff; padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid #0071e3;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #666;">Current Balance:</span>
+              <span style="font-weight: 600;">$${currentBalance.toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #666;">Total Bills:</span>
+              <span style="font-weight: 600; color: #ff3b30;">-$${totalBills.toFixed(2)}</span>
+            </div>
+            <div style="border-top: 1px solid #0071e3; padding-top: 8px; display: flex; justify-content: space-between;">
+              <span style="font-weight: 700; color: #000;">Remaining:</span>
+              <span style="font-weight: 700; font-size: 16px; color: ${(currentBalance - totalBills) >= 0 ? '#34c759' : '#ff3b30'};">$${(currentBalance - totalBills).toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+      }
+      
+      document.getElementById('dayBillsContent').innerHTML = html;
+      openModal('dayBillsModal');
+    }
+
     function displayCalendar(calendar) {
+      calendarData = calendar;
       const container = document.getElementById('billCalendar');
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -1252,12 +1311,9 @@
           
           const totalBillAmount = bills.reduce((sum, b) => sum + b.amount, 0);
           const dayStyle = isToday ? 'background: #0071e3; color: white; font-weight: 700;' : '';
+          const billsJson = JSON.stringify(bills).replace(/"/g, '&quot;');
           
-          // Create tooltip with bill details
-          const billList = bills.map(b => `${b.merchant}: $${b.amount.toFixed(2)}`).join(' | ');
-          const tooltip = hasBills ? `title="Bills: ${billList}${bills.length > 0 ? '\nBalance after: $' + balanceAfterBills.toFixed(0) : ''}"` : '';
-          
-          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" style="${dayStyle}" ${tooltip}>
+          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" style="${dayStyle}${hasBills ? 'cursor: pointer;' : ''}" onclick="${hasBills ? `showDayBills('${dateStr}', ${billsJson}, ${balanceAfterBills.toFixed(2)})` : ''}" title="${hasBills ? 'Click to see bills' : ''}">
             <div class="calendar-day-date">${d}</div>
             <div style="font-size: 11px; font-weight: 700; color: ${hasBills && !isToday ? '#ff3b30' : isToday ? 'white' : '#0071e3'};">
               ${hasBills ? `$${totalBillAmount.toFixed(0)}` : ''}
