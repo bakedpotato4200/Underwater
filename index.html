@@ -642,6 +642,19 @@
     </div>
   </div>
 
+  <!-- Category Transactions Modal -->
+  <div id="categoryTransactionsModal" class="modal">
+    <div class="modal-content" style="max-width: 700px; max-height: 85vh;">
+      <div class="modal-header" id="categoryModalTitle">Category Transactions</div>
+      <div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;">
+        <div class="loading">Loading transactions...</div>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="closeModal('categoryTransactionsModal')" style="flex: 1;">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_URL = window.location.origin;
     
@@ -1525,10 +1538,7 @@
       document.querySelectorAll('.trends-category-card').forEach(card => {
         card.addEventListener('click', function() {
           const category = this.dataset.category;
-          switchTab('transactions');
-          setTimeout(() => {
-            filterTransactionsByCategory(category);
-          }, 100);
+          showCategoryTransactionsModal(category, trendsPeriod);
         });
         card.addEventListener('mouseenter', function() {
           this.style.background = '#f0f3ff';
@@ -1541,19 +1551,25 @@
       });
     }
 
-    function filterTransactionsByCategory(category) {
-      window.categoryFilter = category;
+    function showCategoryTransactionsModal(category, monthCount) {
       const txns = fullTransactionData || allTransactions || [];
       
-      const filtered = txns.filter(t => 
-        t.category === category && !t.excluded
-      );
+      // Get the month range based on monthCount
+      const allMonthKeys = Object.keys(trendsData).sort();
+      const selectedMonths = allMonthKeys.slice(-monthCount);
       
-      const fullList = document.getElementById('fullTransactionsList');
-      if (!fullList) return;
+      // Filter transactions by category and month range
+      const filtered = txns.filter(t => {
+        if (t.category !== category || t.excluded) return false;
+        const date = new Date(t.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        return selectedMonths.includes(monthKey);
+      });
       
       if (!filtered.length) {
-        fullList.innerHTML = '<div class="loading">No transactions found for ' + category + '</div>';
+        document.getElementById('categoryModalTitle').textContent = `${category} Transactions`;
+        document.getElementById('categoryTransactionsList').innerHTML = `<div class="loading">No transactions found for ${category} in the selected period</div>`;
+        openModal('categoryTransactionsModal');
         return;
       }
       
@@ -1567,44 +1583,42 @@
       });
 
       const sortedMonths = Object.keys(months).sort().reverse();
-      let fullHtml = '';
+      let html = '';
       
       sortedMonths.forEach(monthKey => {
         const [year, month] = monthKey.split('-');
         const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
         const monthTotal = months[monthKey].reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
         
-        fullHtml += `<div style="margin-bottom: 16px;">
+        html += `<div style="margin-bottom: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
             <div>${monthName}</div>
             <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
           </div>`;
         
         months[monthKey].forEach(t => {
-          fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
-            <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
+          html += `<div style="padding: 12px; border-bottom: 1px solid #e5e5e7; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; background: white; border-radius: 6px;">
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                <div class="transaction-desc">${t.description}</div>
-                <div class="transaction-amount ${t.type}" style="margin-left: 8px;">
+                <div style="font-weight: 600; color: #000;">${t.description}</div>
+                <div style="font-weight: 700; color: ${t.amount < 0 ? '#ff3b30' : '#34c759'}; margin-left: 8px;">
                   ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
                 </div>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div><span class="cat-badge ${getCategoryColor(t.category)}">${t.category}</span></div>
-                <div class="transaction-date">${t.date}</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #999;">
+                <span class="cat-badge ${getCategoryColor(t.category)}" style="font-size: 11px; padding: 4px 8px;">${t.category}</span>
+                <span>${t.date}</span>
               </div>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-left: 12px;">
-              <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
-            </div>
-          </li>`;
+          </div>`;
         });
         
-        fullHtml += '</div>';
+        html += '</div>';
       });
       
-      fullList.innerHTML = fullHtml;
+      document.getElementById('categoryModalTitle').textContent = `${category} Transactions`;
+      document.getElementById('categoryTransactionsList').innerHTML = html;
+      openModal('categoryTransactionsModal');
     }
 
     function displaySpendingTrends(trends) {
