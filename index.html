@@ -1399,41 +1399,59 @@
     function displaySpendingTrends(trends) {
       const container = document.getElementById('trendsChart');
       if (!trends || Object.keys(trends).length === 0) {
-        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px; grid-column: 1/-1;">No trend data available</div>';
+        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No trend data available</div>';
         return;
       }
 
       const months = Object.keys(trends).sort().slice(-4);
-      const categories = new Set();
-      months.forEach(m => Object.keys(trends[m] || {}).forEach(cat => categories.add(cat)));
-
-      if (categories.size === 0) {
-        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px; grid-column: 1/-1;">No spending data available</div>';
+      const categories = Array.from(new Set(Object.values(trends).flatMap(m => Object.keys(m || {}))));
+      
+      if (categories.length === 0) {
+        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px;">No spending data available</div>';
         return;
       }
 
-      let html = '';
-      categories.forEach(cat => {
-        const data = months.map(m => trends[m][cat] || 0);
-        const maxVal = Math.max(...data, 100);
-        const bars = data.map((v, i) => {
-          const monthLabel = months[i].slice(5);
-          return `<div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-            <div style="width: 100%; height: ${Math.max((v / maxVal) * 100, 10)}px; background: linear-gradient(180deg, #0071e3 0%, #0055b3 100%); border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
-            <div style="font-size: 9px; color: #86868b; text-align: center;">${monthLabel}</div>
-            <div style="font-size: 8px; color: #0071e3; font-weight: 600;">$${v.toFixed(0)}</div>
-          </div>`;
-        }).join('');
-        const avg = (data.reduce((a,b) => a+b,0) / data.length).toFixed(0);
-        html += `
-          <div style="background: white; border: 1px solid #e5e5e7; padding: 12px; border-radius: 8px;">
-            <div style="font-weight: 600; color: #000; margin-bottom: 12px; font-size: 13px;">${cat}</div>
-            <div style="display: flex; align-items: flex-end; justify-content: space-around; height: 120px; gap: 6px;">${bars}</div>
-            <div style="font-size: 11px; color: #86868b; margin-top: 8px; text-align: center;">Avg: $${avg}</div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
+      const colors = {
+        'Income': '#34c759', 'Utilities': '#ff9500', 'Food & Dining': '#ff3b30',
+        'Groceries': '#30b0c0', 'Transportation': '#5856d6', 'Entertainment': '#af52de',
+        'Shopping': '#ff2d55', 'Health & Fitness': '#00c7be', 'Transfer': '#a2845d', 'Other': '#86868b', 'Rent': '#0071e3'
+      };
+
+      const monthTotals = months.map(m => Object.values(trends[m] || {}).reduce((a,b) => a+b, 0));
+      const maxTotal = Math.max(...monthTotals, 100);
+      
+      const barHeight = 200;
+      const bars = months.map((month, idx) => {
+        const monthData = trends[month] || {};
+        const total = monthTotals[idx];
+        const monthLabel = month.slice(5);
+        let stackHtml = '';
+        let offset = 0;
+        
+        categories.forEach(cat => {
+          const value = monthData[cat] || 0;
+          const percent = (value / maxTotal) * 100;
+          const color = colors[cat] || '#0071e3';
+          if (value > 0) {
+            const height = (percent / 100) * barHeight;
+            stackHtml += `<div style="height: ${height}px; background: ${color}; border-radius: ${offset === 0 ? '4px 4px 0 0' : '0'}; position: relative; transition: opacity 0.2s;" title="${cat}: $${value.toFixed(0)}" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"></div>`;
+            offset += percent;
+          }
+        });
+        
+        return `<div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+          <div style="width: 100%; display: flex; flex-direction: column; height: ${barHeight}px; border-radius: 4px; overflow: hidden; border: 1px solid #e5e5e7; background: #f9fafb;">${stackHtml}</div>
+          <div style="font-size: 12px; color: #000; font-weight: 600; margin-top: 8px;">${monthLabel}</div>
+          <div style="font-size: 11px; color: #86868b;">$${total.toFixed(0)}</div>
+        </div>`;
+      }).join('');
+
+      const legend = categories.map(cat => `<div style="display: flex; align-items: center; gap: 6px; font-size: 12px;"><div style="width: 12px; height: 12px; background: ${colors[cat] || '#0071e3'}; border-radius: 2px;"></div><span>${cat}</span></div>`).join('');
+
+      container.innerHTML = `
+        <div style="display: flex; align-items: flex-end; justify-content: space-around; height: ${barHeight + 80}px; gap: 12px; margin-bottom: 16px;">${bars}</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e5e7;">${legend}</div>
+      `;
     }
 
     let currentBufferDays = 30;
