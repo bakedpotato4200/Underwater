@@ -218,21 +218,46 @@ function calculateSpendingVelocity() {
 
 function detectAnomalies() {
   if (transactions.length < 3) return [];
-  const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer');
-  if (expenses.length < 3) return [];
+  const anomalies = [];
   
-  const amounts = expenses.map(t => Math.abs(t.amount)).sort((a, b) => a - b);
-  const median = amounts[Math.floor(amounts.length / 2)];
-  const q3 = amounts[Math.floor(amounts.length * 0.75)];
-  const iqr = q3 - (amounts[Math.floor(amounts.length * 0.25)] || q3);
-  const upperBound = q3 + (iqr * 1.5);
+  // Category-based anomalies
+  const categories = {};
+  transactions.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer').forEach(t => {
+    if (!categories[t.category]) categories[t.category] = [];
+    categories[t.category].push(Math.abs(t.amount));
+  });
   
-  return expenses.filter(t => Math.abs(t.amount) > upperBound * 1.2).slice(-3);
+  // Z-score based outlier detection per category
+  Object.entries(categories).forEach(([cat, amounts]) => {
+    if (amounts.length < 3) return;
+    const mean = amounts.reduce((a, b) => a + b) / amounts.length;
+    const stdDev = Math.sqrt(amounts.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / amounts.length);
+    
+    transactions.filter(t => t.category === cat && t.type === 'expense' && !t.excluded).forEach(t => {
+      const zScore = stdDev > 0 ? Math.abs((Math.abs(t.amount) - mean) / stdDev) : 0;
+      if (zScore > 2.5) anomalies.push({...t, zScore, reason: 'Category outlier'});
+    });
+  });
+  
+  // Spike detection: compare to last 7 day average
+  const last7Days = transactions.filter(t => {
+    const d = new Date(t.date);
+    return (new Date() - d) / (1000 * 60 * 60 * 24) <= 7 && t.type === 'expense' && !t.excluded;
+  });
+  const avg7 = last7Days.length > 0 ? last7Days.reduce((s, t) => s + Math.abs(t.amount), 0) / last7Days.length : 0;
+  
+  last7Days.forEach(t => {
+    if (Math.abs(t.amount) > avg7 * 3 && avg7 > 0) {
+      anomalies.push({...t, reason: 'Spending spike', ratio: (Math.abs(t.amount) / avg7).toFixed(1)});
+    }
+  });
+  
+  return anomalies.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)).slice(0, 5);
 }
 
 function getSmartRecommendations() {
   const recs = [];
-  const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded);
+  const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer');
   const categories = {};
   
   expenses.forEach(t => {
@@ -241,32 +266,71 @@ function getSmartRecommendations() {
     }
   });
   
+  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = expenses.reduce((s, t) => s + Math.abs(t.amount), 0);
+  const savingsRate = totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
+  
+  // 1. Spending optimization per category
   const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
   if (sorted.length > 0) {
-    const topCategory = sorted[0];
-    recs.push({ title: `Cut ${topCategory[0]}`, desc: `Reduce ${topCategory[0].toLowerCase()} by 10% and save $${(topCategory[1] * 0.1).toFixed(2)}/month` });
+    const topCat = sorted[0];
+    const percent = ((topCat[1] / totalExpense) * 100).toFixed(0);
+    const savings = (topCat[1] * 0.15).toFixed(2);
+    recs.push({ 
+      title: `Optimize ${topCat[0]}`, 
+      desc: `${topCat[0]} is ${percent}% of spending ($${topCat[1].toFixed(0)}). Cut 15% and save $${savings} monthly` 
+    });
   }
   
+  // 2. Recurring bills audit
   const recurring = detectRecurring().filter(r => r.isRecurring);
   if (recurring.length > 0) {
-    const totalRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
-    recs.push({ title: 'Audit Subscriptions', desc: `You pay $${totalRecurring.toFixed(0)}/year in recurring charges. Cancel unused ones?` });
+    const yearlyRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
+    const potentialSavings = yearlyRecurring * 0.2;
+    recs.push({ 
+      title: 'Audit Recurring Bills', 
+      desc: `${recurring.length} recurring bills cost $${yearlyRecurring.toFixed(0)}/year. Eliminate 20% could save $${potentialSavings.toFixed(0)}` 
+    });
   }
   
-  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const savings = totalIncome - totalExpense;
-  
-  if (savings > 0) {
-    recs.push({ title: 'Set Savings Goal', desc: `You save $${savings.toFixed(2)}/month. Create a goal to reach $${(savings * 12).toFixed(0)} this year` });
+  // 3. Savings strategy
+  if (savingsRate > 0) {
+    const monthlySavings = totalIncome - totalExpense;
+    const yearEnd = monthlySavings * 12;
+    if (monthlySavings > 500) {
+      recs.push({ 
+        title: '50/30/20 Rule', 
+        desc: `Allocate: 50% needs, 30% wants, 20% savings. You save ${(savingsRate*100).toFixed(0)}% – excellent track record` 
+      });
+    } else {
+      recs.push({ 
+        title: `Boost Savings to ${(yearEnd * 1.5).toFixed(0)}/year`, 
+        desc: `Target 20% savings rate. Current: ${(savingsRate*100).toFixed(0)}% ($${monthlySavings.toFixed(0)}/mo). Increase by ${((yearEnd * 0.2 - monthlySavings) / 10 * 12).toFixed(0)}%` 
+      });
+    }
   }
   
-  if (sorted.length > 1 && sorted[1][0] === 'Food & Dining') {
-    const foodAmount = sorted[1][1];
-    recs.push({ title: 'Optimize Food', desc: `Food spending: $${foodAmount.toFixed(2)}. Meal prep to reduce by 15%?` });
+  // 4. Category-specific insights
+  if (sorted.length > 1) {
+    const foodIdx = sorted.findIndex(([cat]) => cat === 'Food & Dining');
+    if (foodIdx !== -1 && sorted[foodIdx][1] > totalExpense * 0.12) {
+      recs.push({ 
+        title: 'Meal Planning', 
+        desc: `Food & Dining: $${sorted[foodIdx][1].toFixed(0)}/month. Meal prep 2x/week saves 10-20%` 
+      });
+    }
   }
   
-  return recs.slice(0, 4);
+  // 5. Spending trend warning
+  const velocity = calculateSpendingVelocity();
+  if (velocity.trend === 'increasing') {
+    recs.push({ 
+      title: `Reverse ${velocity.trendPercent}% Spending Rise`, 
+      desc: `Monthly spend up ${velocity.trendPercent}%. Set category budgets to lock spending at current baseline` 
+    });
+  }
+  
+  return recs.slice(0, 5);
 }
 
 function generateAlerts() {
@@ -607,21 +671,47 @@ app.get('/api/insights', (req, res) => {
   const velocity = calculateSpendingVelocity();
   const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1) : 0;
+  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
   const debtTotal = debts.reduce((s, d) => s + d.balance, 0);
-  const debtRatio = totalIncome > 0 ? (debtTotal / totalIncome).toFixed(1) : 0;
+  const debtRatio = totalIncome > 0 ? (debtTotal / totalIncome) : 0;
   const anomalies = detectAnomalies();
   
-  let score = 50;
-  if (savingsRate > 20) score += 25;
-  if (savingsRate > 10) score += 15;
-  if (velocity.trend === 'decreasing') score += 15;
-  if (debtRatio < 1) score += 10;
-  if (anomalies.length === 0) score += 5;
+  // Advanced Financial Health Score
+  let score = 40;
+  
+  // Savings rate scoring (0-30 points)
+  if (savingsRate >= 30) score += 30;
+  else if (savingsRate >= 20) score += 25;
+  else if (savingsRate >= 15) score += 20;
+  else if (savingsRate >= 10) score += 15;
+  else if (savingsRate >= 5) score += 10;
+  else if (savingsRate > 0) score += 5;
+  
+  // Spending trend (0-20 points)
+  if (velocity.trend === 'decreasing') score += 20;
+  else if (velocity.trend === 'stable') score += 10;
+  
+  // Debt management (0-20 points)
+  if (debtRatio === 0) score += 20;
+  else if (debtRatio < 0.5) score += 15;
+  else if (debtRatio < 1) score += 10;
+  else if (debtRatio < 2) score += 5;
+  
+  // Expense stability (0-15 points)
+  if (anomalies.length === 0) score += 15;
+  else if (anomalies.length <= 2) score += 10;
+  else if (anomalies.length <= 4) score += 5;
+  
+  // Recurring bill management (0-15 points)
+  const recurringMonthly = recurring.filter(r => r.isRecurring).reduce((s, r) => s + r.avgAmount, 0);
+  const recurringPercent = totalIncome > 0 ? (recurringMonthly / totalIncome) * 100 : 0;
+  if (recurringPercent < 20) score += 15;
+  else if (recurringPercent < 30) score += 10;
+  else if (recurringPercent < 40) score += 5;
   
   res.json({
-    financialScore: Math.min(100, score),
-    savingsRate,
+    financialScore: Math.min(100, Math.round(score)),
+    savingsRate: savingsRate.toFixed(1),
     debtRatio,
     recurringTransactions: recurring,
     velocity,
