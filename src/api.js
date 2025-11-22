@@ -165,6 +165,19 @@ function generateBillCalendar(months = 3) {
       const dateStr = date.toISOString().split('T')[0];
       calendar[dateStr] = [];
 
+      // Add income transactions
+      transactions.forEach(t => {
+        if (t.type === 'income' && t.date === dateStr && !t.excluded) {
+          calendar[dateStr].push({
+            merchant: t.description,
+            amount: t.amount,
+            category: t.category || 'Income',
+            type: 'income',
+            daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24))
+          });
+        }
+      });
+
       recurring.forEach(bill => {
         const lastDate = new Date(bill.lastTransaction);
         const nextDate = new Date(lastDate.getTime() + bill.avgInterval * 24 * 60 * 60 * 1000);
@@ -174,6 +187,7 @@ function generateBillCalendar(months = 3) {
             merchant: bill.merchant,
             amount: bill.avgAmount,
             category: bill.category,
+            type: 'expense',
             daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
             frequency: bill.avgInterval
           });
@@ -191,6 +205,7 @@ function generateBillCalendar(months = 3) {
               calendar[dateStr].push({
                 merchant: bill.name,
                 amount: bill.amount,
+                type: 'expense',
                 daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
                 frequency: bill.frequency
               });

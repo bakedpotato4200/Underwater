@@ -1363,44 +1363,80 @@
 
     let calendarData = {};
 
-    function showDayBills(dateStr, bills, balanceAfter) {
+    function showDayBills(dateStr, items, balanceAfter) {
       const date = new Date(dateStr);
       const dateFormatted = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
       
-      document.getElementById('dayBillsHeader').textContent = `Bills for ${dateFormatted}`;
+      document.getElementById('dayBillsHeader').textContent = `Details for ${dateFormatted}`;
       
       const currentBalance = currentBankBalance > 0 ? currentBankBalance : parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
-      let totalBills = 0;
+      let totalIncome = 0;
+      let totalExpenses = 0;
       
       let html = '';
-      if (bills.length === 0) {
-        html = '<div style="text-align: center; padding: 20px; color: #86868b;">No bills due on this day</div>';
+      if (items.length === 0) {
+        html = '<div style="text-align: center; padding: 20px; color: #86868b;">No transactions on this day</div>';
       } else {
-        bills.forEach(bill => {
-          totalBills += bill.amount;
-          html += `
-            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ff3b30;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <div style="font-weight: 600; color: #000;">${bill.merchant}</div>
-                <div style="font-weight: 700; color: #ff3b30; font-size: 14px;">$${bill.amount.toFixed(2)}</div>
-              </div>
-            </div>
-          `;
-        });
+        // Separate income and expenses
+        const income = items.filter(i => i.type === 'income');
+        const expenses = items.filter(i => i.type !== 'income');
         
+        // Show income
+        if (income.length > 0) {
+          html += '<div style="margin-bottom: 12px;"><div style="font-weight: 700; color: #34c759; margin-bottom: 8px; font-size: 12px; text-transform: uppercase;">Income</div>';
+          income.forEach(inc => {
+            totalIncome += inc.amount;
+            html += `
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #34c759;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="font-weight: 600; color: #000;">${inc.merchant}</div>
+                  <div style="font-weight: 700; color: #34c759; font-size: 14px;">+$${inc.amount.toFixed(2)}</div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+        
+        // Show expenses
+        if (expenses.length > 0) {
+          html += '<div style="margin-bottom: 12px;"><div style="font-weight: 700; color: #ff3b30; margin-bottom: 8px; font-size: 12px; text-transform: uppercase;">Expenses</div>';
+          expenses.forEach(exp => {
+            totalExpenses += exp.amount;
+            html += `
+              <div style="background: #fef2f2; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ff3b30;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="font-weight: 600; color: #000;">${exp.merchant}</div>
+                  <div style="font-weight: 700; color: #ff3b30; font-size: 14px;">-$${exp.amount.toFixed(2)}</div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+        
+        // Summary
         html += `
           <div style="background: #f0f3ff; padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid #0071e3;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #666;">Current Balance:</span>
+              <span style="color: #666;">Starting Balance:</span>
               <span style="font-weight: 600;">$${currentBalance.toFixed(2)}</span>
             </div>
+            ${totalIncome > 0 ? `
             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-              <span style="color: #666;">Total Bills:</span>
-              <span style="font-weight: 600; color: #ff3b30;">-$${totalBills.toFixed(2)}</span>
+              <span style="color: #34c759;">+ Income:</span>
+              <span style="font-weight: 600; color: #34c759;">+$${totalIncome.toFixed(2)}</span>
             </div>
+            ` : ''}
+            ${totalExpenses > 0 ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #ff3b30;">- Expenses:</span>
+              <span style="font-weight: 600; color: #ff3b30;">-$${totalExpenses.toFixed(2)}</span>
+            </div>
+            ` : ''}
             <div style="border-top: 1px solid #0071e3; padding-top: 8px; display: flex; justify-content: space-between;">
-              <span style="font-weight: 700; color: #000;">Remaining:</span>
-              <span style="font-weight: 700; font-size: 16px; color: ${(currentBalance - totalBills) >= 0 ? '#34c759' : '#ff3b30'};">$${(currentBalance - totalBills).toFixed(2)}</span>
+              <span style="font-weight: 700; color: #000;">Ending Balance:</span>
+              <span style="font-weight: 700; font-size: 16px; color: ${balanceAfter >= 0 ? '#34c759' : '#ff3b30'};">$${balanceAfter.toFixed(2)}</span>
             </div>
           </div>
         `;
@@ -1421,17 +1457,23 @@
       
       let html = '<div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar">';
       
-      // Calculate balances after bills for date ranges
+      // Calculate balances after income and bills for date ranges
       const getBalanceAfter = (days) => {
-        let totalBills = 0;
+        let balance = currentBalance;
         const checkDate = new Date(today);
         for (let i = 0; i < days; i++) {
           const checkStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-          const dayBills = calendar[checkStr] || [];
-          dayBills.forEach(b => totalBills += b.amount);
+          const dayItems = calendar[checkStr] || [];
+          dayItems.forEach(item => {
+            if (item.type === 'income') {
+              balance += item.amount; // Add income
+            } else {
+              balance -= item.amount; // Subtract expenses
+            }
+          });
           checkDate.setDate(checkDate.getDate() + 1);
         }
-        return Math.max(currentBalance - totalBills, 0);
+        return balance;
       };
       
       for (let m = 0; m < 3; m++) {
@@ -1447,30 +1489,53 @@
         
         for (let d = 1; d <= lastDay; d++) {
           const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const bills = calendar[dateStr] || [];
-          const hasBills = bills.length > 0;
+          const items = calendar[dateStr] || [];
+          const hasItems = items.length > 0;
           const isToday = dateStr === todayStr;
           
-          // Calculate balance after bills on this day
-          let balanceAfterBills = currentBalance;
+          // Calculate balance after income and bills on this day
+          let balanceAfterItems = currentBalance;
           const checkDate = new Date(today);
           while (checkDate <= new Date(dateStr)) {
             const checkStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-            const dayBills = calendar[checkStr] || [];
-            dayBills.forEach(b => balanceAfterBills -= b.amount);
+            const dayItems = calendar[checkStr] || [];
+            dayItems.forEach(item => {
+              if (item.type === 'income') {
+                balanceAfterItems += item.amount;
+              } else {
+                balanceAfterItems -= item.amount;
+              }
+            });
             checkDate.setDate(checkDate.getDate() + 1);
           }
           
-          const totalBillAmount = bills.reduce((sum, b) => sum + b.amount, 0);
+          // Calculate expenses and income for display
+          const totalExpenses = items.filter(i => i.type !== 'income').reduce((sum, i) => sum + i.amount, 0);
+          const totalIncome = items.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0);
           const dayStyle = isToday ? 'background: #0071e3; color: white; font-weight: 700;' : '';
-          const billsJson = JSON.stringify(bills).replace(/"/g, '&quot;');
+          const itemsJson = JSON.stringify(items).replace(/"/g, '&quot;');
           
-          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" style="${dayStyle}${hasBills ? 'cursor: pointer;' : ''}" onclick="${hasBills ? `showDayBills('${dateStr}', ${billsJson}, ${balanceAfterBills.toFixed(2)})` : ''}" title="${hasBills ? 'Click to see bills' : ''}">
+          let displayAmount = '';
+          let displayColor = '';
+          if (hasItems) {
+            if (totalIncome > 0 && totalExpenses === 0) {
+              displayAmount = `+$${totalIncome.toFixed(0)}`;
+              displayColor = '#34c759';
+            } else if (totalExpenses > 0 && totalIncome === 0) {
+              displayAmount = `-$${totalExpenses.toFixed(0)}`;
+              displayColor = '#ff3b30';
+            } else if (totalIncome > 0 && totalExpenses > 0) {
+              displayAmount = `+$${totalIncome.toFixed(0)}<br>-$${totalExpenses.toFixed(0)}`;
+              displayColor = totalIncome >= totalExpenses ? '#34c759' : '#ff3b30';
+            }
+          }
+          
+          html += `<div class="calendar-day ${hasItems ? 'has-bills' : ''}" style="${dayStyle}${hasItems ? 'cursor: pointer;' : ''}" onclick="${hasItems ? `showDayBills('${dateStr}', ${itemsJson}, ${balanceAfterItems.toFixed(2)})` : ''}" title="${hasItems ? 'Click to see details' : ''}">
             <div class="calendar-day-date">${d}</div>
-            <div style="font-size: 11px; font-weight: 700; color: ${hasBills && !isToday ? '#ff3b30' : isToday ? 'white' : '#0071e3'};">
-              ${hasBills ? `$${totalBillAmount.toFixed(0)}` : ''}
+            <div style="font-size: 11px; font-weight: 700; color: ${displayColor || (isToday ? 'white' : '#0071e3')};">
+              ${displayAmount}
             </div>
-            ${hasBills ? `<div style="font-size: 9px; margin-top: 2px; color: ${isToday ? '#e8e8e8' : '#666'};">After: $${balanceAfterBills.toFixed(0)}</div>` : ''}
+            ${hasItems ? `<div style="font-size: 9px; margin-top: 2px; color: ${isToday ? '#e8e8e8' : '#666'};">After: $${balanceAfterItems.toFixed(0)}</div>` : ''}
           </div>`;
         }
       }
