@@ -807,6 +807,38 @@ app.post('/api/subscriptions', express.json(), (req, res) => {
 });
 
 app.get('/api/subscriptions', (req, res) => res.json(subscriptions));
+
+// Learning endpoints
+app.post('/api/learn-category', express.json(), (req, res) => {
+  const { description, category } = req.body;
+  if (!description || !category) {
+    return res.status(400).json({ error: 'description and category required' });
+  }
+  
+  // Extract merchant name (first few words or unique identifier)
+  const merchant = description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+  learnedPatterns.merchants = learnedPatterns.merchants || {};
+  learnedPatterns.merchants[merchant] = category;
+  saveData(learnedPatternsFile, learnedPatterns);
+  
+  res.json({ success: true, learned: { merchant, category } });
+});
+
+app.post('/api/learn-exclusion', express.json(), (req, res) => {
+  const { description } = req.body;
+  if (!description) {
+    return res.status(400).json({ error: 'description required' });
+  }
+  
+  // Extract merchant name for exclusion pattern
+  const merchant = description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+  learnedPatterns.exclusions = learnedPatterns.exclusions || {};
+  learnedPatterns.exclusions[merchant] = true;
+  saveData(learnedPatternsFile, learnedPatterns);
+  
+  res.json({ success: true, learned: { merchant } });
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));

@@ -1048,11 +1048,23 @@
 
     async function toggleExclude(id) {
       try {
+        const txn = allTransactions.find(t => t.id == id);
+        const currentlyExcluded = txn ? txn.excluded : false;
+        
         await fetch(API_URL + `/api/transactions/${id}/toggle-exclude`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ learnRule: true })
         });
+        
+        // Learn exclusion pattern when excluding a transaction
+        if (txn && txn.description && !currentlyExcluded) {
+          await fetch(API_URL + `/api/learn-exclusion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: txn.description })
+          });
+        }
         loadData();
       } catch (e) {
         alert('Failed to exclude: ' + e.message);
@@ -1178,11 +1190,21 @@
 
     async function updateTransactionCategory(id, category) {
       try {
+        const txn = allTransactions.find(t => t.id == id);
         await fetch(API_URL + `/api/transactions/${id}/category`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ category })
         });
+        
+        // Learn from this categorization
+        if (txn && txn.description) {
+          await fetch(API_URL + `/api/learn-category`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: txn.description, category })
+          });
+        }
         loadData();
       } catch (e) {
         alert('Failed to update category: ' + e.message);
