@@ -31,6 +31,7 @@ const debtsFile = path.join(dataDir, 'debts.json');
 const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
 const goalsFile = path.join(dataDir, 'goals.json');
 const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
+const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
 
 // Load/Save functions
 function loadData(file) {
@@ -58,6 +59,7 @@ let debts = loadData(debtsFile);
 let subscriptions = loadData(subscriptionsFile);
 let goals = loadData(goalsFile);
 let exclusionRules = loadData(exclusionRulesFile);
+let learnedPatterns = loadData(learnedPatternsFile) || { merchants: {}, exclusions: {} };
 
 function shouldExcludeByRule(txn) {
   if (!Array.isArray(exclusionRules)) return false;
@@ -84,6 +86,13 @@ console.log(`Loaded ${transactions.length} transactions, ${debts.length} debts, 
 
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
+  
+  // Check learned patterns first (highest priority)
+  for (const [pattern, category] of Object.entries(learnedPatterns.merchants || {})) {
+    if (desc.includes(pattern.toLowerCase())) return category;
+  }
+  
+  // Fall back to hardcoded patterns
   if (desc.match(/transfer|from account|to account|xfer|move|deposit to|acct|internal|between accounts/i)) return 'Transfer';
   if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|inola|sinclair/)) return 'Food & Dining';
   if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super/)) return 'Groceries';
