@@ -843,23 +843,19 @@
       });
       
       fullList.innerHTML = fullHtml;
-      
-      // Initialize filters after transactions load
-      setTimeout(() => filterTransactions(), 100);
     }
 
     let currentDateFilter = 'all';
     let currentTypeFilter = 'all';
-    let currentSortBy = 'date-desc';
 
     function filterByType(type) {
       currentTypeFilter = type;
-      filterTransactions();
+      applyFilters();
     }
 
     function filterByDate(period) {
       currentDateFilter = period;
-      filterTransactions();
+      applyFilters();
     }
     
     function updateActiveFilter(btn) {
@@ -873,55 +869,53 @@
     }
 
     function filterTransactions() {
-      const search = document.getElementById('searchBox').value.toLowerCase().trim();
+      applyFilters();
+    }
+
+    function applyFilters() {
       const today = new Date(2025, 10, 21);
-      
+      const search = document.getElementById('searchBox') ? document.getElementById('searchBox').value.toLowerCase() : '';
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
       
       items.forEach(item => {
-        let show = true;
+        const type = item.getAttribute('data-type') || '';
+        const dateStr = item.getAttribute('data-date') || '';
+        const text = item.textContent.toLowerCase();
         
-        // Type filter
-        const type = item.getAttribute('data-type');
+        // Apply type filter
         if (currentTypeFilter !== 'all' && type !== currentTypeFilter) {
-          show = false;
+          item.style.display = 'none';
+          return;
         }
         
-        // Date filter - only apply if not "all"
-        if (show && currentDateFilter !== 'all') {
-          const dateStr = item.getAttribute('data-date');
-          if (dateStr) {
-            try {
-              const parts = dateStr.split('-');
-              if (parts.length === 3) {
-                const y = parseInt(parts[0]);
-                const m = parseInt(parts[1]);
-                const d = parseInt(parts[2]);
-                const txnDate = new Date(y, m - 1, d);
-                const daysDiff = Math.floor((today - txnDate) / (1000 * 60 * 60 * 24));
-                
-                if (currentDateFilter === 'month') {
-                  show = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
-                } else if (currentDateFilter === '30days') {
-                  show = daysDiff >= 0 && daysDiff <= 30;
-                } else if (currentDateFilter === '3months') {
-                  show = daysDiff >= 0 && daysDiff <= 90;
-                } else if (currentDateFilter === 'year') {
-                  show = txnDate.getFullYear() === today.getFullYear();
-                }
-              }
-            } catch (e) {
-              show = true;
-            }
+        // Apply date filter
+        if (currentDateFilter !== 'all' && dateStr) {
+          const [y, m, d] = dateStr.split('-');
+          const txnDate = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+          const days = Math.floor((today - txnDate) / (86400000));
+          
+          if (currentDateFilter === 'month' && (txnDate.getMonth() !== today.getMonth() || txnDate.getFullYear() !== today.getFullYear())) {
+            item.style.display = 'none';
+            return;
+          } else if (currentDateFilter === '30days' && (days < 0 || days > 30)) {
+            item.style.display = 'none';
+            return;
+          } else if (currentDateFilter === '3months' && (days < 0 || days > 90)) {
+            item.style.display = 'none';
+            return;
+          } else if (currentDateFilter === 'year' && txnDate.getFullYear() !== today.getFullYear()) {
+            item.style.display = 'none';
+            return;
           }
         }
         
-        // Search filter
-        if (show && search) {
-          show = item.textContent.toLowerCase().includes(search);
+        // Apply search filter
+        if (search && !text.includes(search)) {
+          item.style.display = 'none';
+          return;
         }
         
-        item.style.display = show ? 'flex' : 'none';
+        item.style.display = 'flex';
       });
     }
     
