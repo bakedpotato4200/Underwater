@@ -449,7 +449,19 @@
       
       <div id="automationContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>⚙️ Automation Hub</h2><div id="automationHub" style="margin-top: 20px;"><div class="loading">Loading automation...</div></div></div></div>
       
-      <div id="transactionsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>🔍 All Transactions</h2><div style="margin-top: 20px;"><input type="text" id="transactionSearch" class="search-box" placeholder="Search transactions..." onkeyup="filterTransactions()"><div id="allTransactionsList" style="display: grid; gap: 0;"><div class="loading">Loading transactions...</div></div></div></div></div>
+      <div id="transactionsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>🔍 All Transactions</h2><div style="margin-top: 20px;">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+          <input type="text" id="transactionSearch" class="search-box" placeholder="Search transactions..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px; margin: 0;">
+          <select id="categoryFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 13px;" onchange="filterTransactions()">
+            <option value="">All Categories</option>
+          </select>
+          <select id="statusFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 13px;" onchange="filterTransactions()">
+            <option value="all">All Transactions</option>
+            <option value="included">Included Only</option>
+            <option value="excluded">Excluded Only</option>
+          </select>
+        </div>
+        <div id="allTransactionsList" style="display: grid; gap: 0;"><div class="loading">Loading transactions...</div></div></div></div></div>
     </div>
   </div>
 
@@ -775,9 +787,36 @@
     
     function loadTrends() { const txRes = fetch(API_URL + '/api/transactions').then(r => r.json()).then(transactions => { loadSpendingTrends(transactions); document.getElementById('trendsChart').innerHTML = document.getElementById('spendingTrends').innerHTML; }).catch(e => console.error('Trends error:', e)); }
     
-    function loadAllTransactions() { const txRes = fetch(API_URL + '/api/transactions').then(r => r.json()).then(transactions => { const html = transactions.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}$${t.amount.toFixed(2)}</div></div>`).join(''); document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No transactions</div>'; }).catch(e => console.error('Transactions error:', e)); }
+    let allTransactionsData = [];
     
-    function filterTransactions() { const search = document.getElementById('transactionSearch').value.toLowerCase(); document.querySelectorAll('#allTransactionsList .transaction-item').forEach(el => { el.style.display = el.textContent.toLowerCase().includes(search) ? 'flex' : 'none'; }); }
+    async function loadAllTransactions() {
+      try {
+        const txRes = await fetch(API_URL + '/api/transactions');
+        allTransactionsData = await txRes.json();
+        
+        const categories = [...new Set(allTransactionsData.map(t => t.category))].filter(Boolean).sort();
+        const categorySelect = document.getElementById('categoryFilter');
+        categorySelect.innerHTML = '<option value="">All Categories</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        
+        filterTransactions();
+      } catch (e) { console.error('Transactions error:', e); }
+    }
+    
+    function filterTransactions() {
+      const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
+      const categoryFilter = document.getElementById('categoryFilter').value;
+      const statusFilter = document.getElementById('statusFilter').value;
+      
+      let filtered = allTransactionsData.filter(t => {
+        const matchesSearch = t.description.toLowerCase().includes(searchTerm) || t.category.toLowerCase().includes(searchTerm);
+        const matchesCategory = !categoryFilter || t.category === categoryFilter;
+        const matchesStatus = statusFilter === 'all' || (statusFilter === 'included' && !t.excluded) || (statusFilter === 'excluded' && t.excluded);
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+      
+      const html = filtered.map(t => `<div class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1};"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</div></div>`).join('');
+      document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No matching transactions</div>';
+    }
     
     function saveNote() { showToast('Note saved!', 'success'); closeModal('noteModal'); document.getElementById('noteText').value = ''; }
     
