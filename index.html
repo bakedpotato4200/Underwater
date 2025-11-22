@@ -791,15 +791,21 @@
     
     async function loadAllTransactions() {
       try {
+        console.log('Loading transactions from:', API_URL + '/api/transactions');
         const txRes = await fetch(API_URL + '/api/transactions');
+        if (!txRes.ok) throw new Error(`HTTP ${txRes.status}`);
         allTransactionsData = await txRes.json();
+        console.log('Loaded', allTransactionsData.length, 'transactions');
         
         const categories = [...new Set(allTransactionsData.map(t => t.category))].filter(Boolean).sort();
         const categorySelect = document.getElementById('categoryFilter');
         categorySelect.innerHTML = '<option value="">All Categories</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
         
         filterTransactions();
-      } catch (e) { console.error('Transactions error:', e); }
+      } catch (e) { 
+        console.error('Transactions error:', e);
+        document.getElementById('allTransactionsList').innerHTML = '<div class="loading">Error loading transactions: ' + e.message + '</div>';
+      }
     }
     
     function filterTransactions() {
