@@ -374,9 +374,14 @@
       <div id="insights" class="tab-content" style="display: none;">
         <div class="dashboard">
           <div class="card full">
-            <h2>Exclusion Rules</h2>
-            <div id="exclusionRulesContainer">
-              <div class="loading">Loading exclusion rules...</div>
+            <h2 style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="document.getElementById('exclusionRulesContent').style.display = document.getElementById('exclusionRulesContent').style.display === 'none' ? 'block' : 'none'; this.querySelector('span').textContent = document.getElementById('exclusionRulesContent').style.display === 'none' ? '▶' : '▼';">
+              Exclusion Rules
+              <span style="font-size: 16px; transition: transform 0.2s;">▼</span>
+            </h2>
+            <div id="exclusionRulesContent">
+              <div id="exclusionRulesContainer">
+                <div class="loading">Loading exclusion rules...</div>
+              </div>
             </div>
           </div>
 
@@ -427,10 +432,13 @@
         </div>
 
         <div class="card full">
-          <h2>All Transactions</h2>
+          <h2 style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="document.getElementById('transactionToolbar').style.display = document.getElementById('transactionToolbar').style.display === 'none' ? 'block' : 'none'; this.querySelector('span').textContent = document.getElementById('transactionToolbar').style.display === 'none' ? '▶' : '▼';">
+            All Transactions
+            <span style="font-size: 16px; transition: transform 0.2s;">▼</span>
+          </h2>
           
           <!-- Toolbar -->
-          <div style="background: #f9fafb; padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #e5e5e7;">
+          <div id="transactionToolbar" style="background: #f9fafb; padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #e5e5e7;">
             <!-- Search Bar -->
             <div style="margin-bottom: 14px;">
               <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search transactions..." onkeyup="filterTransactions()" style="width: 100%; padding: 10px 12px; border: 1.5px solid #d5d5d7; border-radius: 8px; font-size: 13px; background: white;">
