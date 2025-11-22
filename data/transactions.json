@@ -1326,7 +1326,7 @@
     "id": 148,
     "date": "2025-10-31",
     "amount": 0.04,
-    "category": "Other",
+    "category": "Income",
     "description": "Paid",
     "type": "income",
     "excluded": false
