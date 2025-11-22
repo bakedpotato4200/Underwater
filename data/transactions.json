@@ -183,7 +183,7 @@
     "id": 21,
     "date": "2025-10-31",
     "amount": 0.01,
-    "category": "Other",
+    "category": "Income",
     "description": "Paid",
     "type": "income",
     "excluded": false
