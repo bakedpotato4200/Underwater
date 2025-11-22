@@ -1873,22 +1873,27 @@
               <div style="margin-bottom: 20px; padding: 16px; background: #f0f3ff; border-radius: 12px; border-left: 4px solid #0071e3;">
                 <div style="font-weight: 600; color: #000; margin-bottom: 8px;">Found ${matchingTxns.length} similar ${matchingTxns.length === 1 ? 'transaction' : 'transactions'}</div>
                 <div style="font-size: 13px; color: #666; margin-bottom: 8px;">From <strong>${txn.description}</strong></div>
-                <div style="font-size: 13px; color: #666;">Total Amount: <strong>$${totalAmount.toFixed(2)}</strong></div>
+                <div style="font-size: 13px; color: #666; margin-bottom: 12px;">Total Amount: <strong>$${totalAmount.toFixed(2)}</strong></div>
+                <div style="font-size: 12px; color: #0071e3; cursor: pointer; font-weight: 600;" id="selectAllToggle" onclick="document.querySelectorAll('.txn-checkbox').forEach(cb => cb.checked = !cb.checked); updateBulkCounter();">Select/Deselect All</div>
               </div>
-              <div style="margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 8px; max-height: 200px; overflow-y: auto;">
-                <div style="font-size: 12px; font-weight: 600; color: #000; margin-bottom: 8px;">Matching Transactions:</div>
-                ${matchingTxns.map(t => `
-                  <div style="font-size: 11px; color: #666; padding: 4px 0; display: flex; justify-content: space-between;">
-                    <span>${t.date} - ${t.description}</span>
-                    <span style="font-weight: 600;">$${Math.abs(t.amount).toFixed(2)}</span>
-                  </div>
+              <div style="margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 8px; max-height: 250px; overflow-y: auto;">
+                <div style="font-size: 12px; font-weight: 600; color: #000; margin-bottom: 12px;">Check transactions to update:</div>
+                ${matchingTxns.map((t, idx) => `
+                  <label style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 6px; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#e8e8eb'" onmouseout="this.style.background='transparent'">
+                    <input type="checkbox" class="txn-checkbox" data-id="${t.id}" checked style="width: 16px; height: 16px; cursor: pointer;" onchange="updateBulkCounter()">
+                    <div style="flex: 1;">
+                      <div style="font-size: 11px; color: #000; font-weight: 500;">${t.date} - ${t.description}</div>
+                      <div style="font-size: 10px; color: #999; margin-top: 2px;">Current: ${t.category}</div>
+                    </div>
+                    <span style="font-weight: 600; color: #0071e3; font-size: 12px;">$${Math.abs(t.amount).toFixed(2)}</span>
+                  </label>
                 `).join('')}
               </div>
               <div style="color: #666; font-size: 12px; margin-bottom: 20px;">
-                Update all to <strong>${category}</strong>?
+                Update selected to <strong>${category}</strong>?
               </div>
               <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" id="bulkConfirmBtn" style="flex: 1;">Update All</button>
+                <button class="btn btn-primary" id="bulkConfirmBtn" style="flex: 1;">Update Selected</button>
                 <button class="btn btn-secondary" id="bulkCancelBtn" style="flex: 1;">Just This One</button>
               </div>
             </div>
@@ -1896,9 +1901,21 @@
           
           document.body.appendChild(bulkModal);
           
+          // Update counter when checkboxes change
+          window.updateBulkCounter = function() {
+            const checked = bulkModal.querySelectorAll('.txn-checkbox:checked').length;
+            document.getElementById('bulkConfirmBtn').textContent = `Update Selected (${checked})`;
+          };
+          
+          // Initialize counter
+          updateBulkCounter();
+          
           // Handle bulk update confirm
           document.getElementById('bulkConfirmBtn').addEventListener('click', async () => {
-            for (const match of matchingTxns) {
+            const checkedIds = Array.from(bulkModal.querySelectorAll('.txn-checkbox:checked')).map(cb => cb.dataset.id);
+            const selectedTxns = matchingTxns.filter(t => checkedIds.includes(String(t.id)));
+            
+            for (const match of selectedTxns) {
               try {
                 await fetch(API_URL + `/api/transactions/${match.id}/category`, {
                   method: 'POST',
@@ -1910,7 +1927,7 @@
               }
             }
             bulkModal.remove();
-            showToast(`Updated ${matchingTxns.length} matching transactions to ${category}`, 'success');
+            showToast(`Updated ${selectedTxns.length} matching transactions to ${category}`, 'success');
             loadData();
           });
           

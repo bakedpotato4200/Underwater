@@ -1281,7 +1281,7 @@
     "id": 143,
     "date": "2025-10-31",
     "amount": -303.86,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
