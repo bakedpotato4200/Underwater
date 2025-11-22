@@ -261,26 +261,27 @@
     .velocity-bar { background: linear-gradient(180deg, var(--accent-primary) 0%, #00a8cc 100%); border-radius: 8px 8px 0 0; flex: 1; min-height: 24px; display: flex; align-items: flex-end; justify-content: center; color: #0a1428; font-size: 10px; font-weight: 700; animation: growBar 0.6s ease; transition: all 0.25s ease; box-shadow: 0 6px 16px rgba(0, 217, 255, 0.2); }
     .velocity-bar:hover { transform: scaleY(1.08); box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3); }
     
-    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 18px; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 18px; }
     .calendar-day { 
-      background: var(--bg-primary); 
-      padding: 14px 10px; 
-      border-radius: 12px; 
+      background: transparent; 
+      padding: 12px 8px; 
+      border-radius: 10px; 
       text-align: center; 
       font-size: 11px; 
-      min-height: 90px; 
+      min-height: 80px; 
       display: flex; 
       flex-direction: column; 
-      border: 1px solid var(--border-color); 
-      transition: all 0.25s ease;
+      border: none; 
+      transition: all 0.2s ease;
       color: var(--text-primary);
+      cursor: pointer;
     }
-    .calendar-day:hover { border-color: var(--accent-primary); box-shadow: 0 8px 20px rgba(0, 217, 255, 0.15); transform: translateY(-2px); }
-    .calendar-day.other-month { opacity: 0.25; }
-    .calendar-day.has-bills { background: linear-gradient(135deg, rgba(0, 217, 255, 0.13) 0%, rgba(212, 165, 116, 0.07) 100%); border-color: var(--accent-primary); box-shadow: 0 8px 20px rgba(0, 217, 255, 0.2); }
-    .calendar-day-date { font-weight: 800; margin-bottom: 6px; color: var(--accent-primary); }
-    .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 10px; }
-    .weekday { text-align: center; font-weight: 700; color: var(--accent-primary); font-size: 12px; letter-spacing: 0.5px; }
+    .calendar-day:hover { background: rgba(0, 217, 255, 0.05); border-radius: 10px; transform: none; }
+    .calendar-day.other-month { opacity: 0.2; }
+    .calendar-day.has-bills { background: rgba(0, 217, 255, 0.08); }
+    .calendar-day-date { font-weight: 700; margin-bottom: 6px; color: var(--text-primary); font-size: 13px; }
+    .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; }
+    .weekday { text-align: center; font-weight: 600; color: var(--text-tertiary); font-size: 11px; letter-spacing: 0.3px; }
     
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.4); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); animation: fadeIn 0.25s ease-out; }
     .modal.active { display: flex; }
