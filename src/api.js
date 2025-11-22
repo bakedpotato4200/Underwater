@@ -535,7 +535,10 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
   }
 });
 
-app.get('/api/transactions', (req, res) => res.json(transactions));
+app.get('/api/transactions', (req, res) => {
+  const fresh = getTransactions();
+  res.json(fresh);
+});
 app.post('/api/transactions', express.json(), (req, res) => {
   const newTransaction = { id: Math.max(...transactions.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0], excluded: false };
   transactions.push(newTransaction);
@@ -645,11 +648,12 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
 });
 
 app.get('/api/spending-trends', (req, res) => {
+  const fresh = getTransactions();
   const trends = {};
   const months = {};
   const excludedAmounts = {};
   
-  transactions.forEach(t => {
+  fresh.forEach(t => {
     const date = new Date(t.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     
