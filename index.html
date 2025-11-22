@@ -721,9 +721,11 @@
       }, duration);
     }
 
+    let currentBankBalance = 0;
+
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, recurringBills] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, recurringBills, bankBalanceData] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -736,8 +738,18 @@
           fetch(API_URL + '/api/alerts').then(r => r.json()),
           fetch(API_URL + '/api/spending-trends').then(r => r.json()),
           fetch(API_URL + '/api/exclusion-rules').then(r => r.json()),
-          fetch(API_URL + '/api/recurring-bills').then(r => r.json())
+          fetch(API_URL + '/api/recurring-bills').then(r => r.json()),
+          fetch(API_URL + '/api/bank-balance').then(r => r.json())
         ]);
+        
+        // Store bank balance for calendar calculations
+        currentBankBalance = bankBalanceData?.balance || 0;
+        
+        // Update bank balance input if loaded
+        if (bankBalanceData && bankBalanceData.balance) {
+          const input = document.getElementById('bankBalanceInput');
+          if (input) input.value = bankBalanceData.balance;
+        }
 
         displayTransactions(txns);
         document.getElementById('totalIncome').textContent = '$' + summary.totalIncome.toLocaleString('en-US', {maximumFractionDigits: 0});
@@ -1344,7 +1356,7 @@
       
       document.getElementById('dayBillsHeader').textContent = `Bills for ${dateFormatted}`;
       
-      const currentBalance = parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
+      const currentBalance = currentBankBalance > 0 ? currentBankBalance : parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
       let totalBills = 0;
       
       let html = '';
@@ -1391,8 +1403,8 @@
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       
-      // Calculate current balance from the header
-      const currentBalance = parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
+      // Use bank balance if set, otherwise use header balance
+      const currentBalance = currentBankBalance > 0 ? currentBankBalance : parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
       
       let html = '<div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar">';
       
