@@ -874,6 +874,7 @@
       const sortBy = document.getElementById('sortBy').value;
       currentSortBy = sortBy;
       const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const allItems = Array.from(document.querySelectorAll('#fullTransactionsList .transaction-item'));
       
       // Get all transaction data from items still in DOM
@@ -885,14 +886,23 @@
         category: item.getAttribute('data-category'),
         text: item.textContent.toLowerCase()
       })).filter(t => {
-        const itemDate = new Date(t.dateStr);
+        const [year, month, day] = t.dateStr.split('-');
+        const itemDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         let showDate = false;
         
-        if (currentDateFilter === 'all') showDate = true;
-        else if (currentDateFilter === 'month') showDate = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
-        else if (currentDateFilter === '30days') showDate = (now - itemDate) / (1000*60*60*24) <= 30;
-        else if (currentDateFilter === '3months') showDate = (now - itemDate) / (1000*60*60*24) <= 90;
-        else if (currentDateFilter === 'year') showDate = itemDate.getFullYear() === now.getFullYear();
+        if (currentDateFilter === 'all') {
+          showDate = true;
+        } else if (currentDateFilter === 'month') {
+          showDate = itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
+        } else if (currentDateFilter === '30days') {
+          const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
+          showDate = daysDiff >= 0 && daysDiff <= 30;
+        } else if (currentDateFilter === '3months') {
+          const daysDiff = Math.floor((today - itemDate) / (1000 * 60 * 60 * 24));
+          showDate = daysDiff >= 0 && daysDiff <= 90;
+        } else if (currentDateFilter === 'year') {
+          showDate = itemDate.getFullYear() === today.getFullYear();
+        }
         
         const showType = currentTypeFilter === 'all' || t.type === currentTypeFilter;
         const showSearch = search === '' || t.text.includes(search);
