@@ -582,7 +582,8 @@
           const currentDate = new Date(year, month, i);
           const dayBills = calendarBills.filter(b => {
             if (!b.startDate || !b.frequency) return false;
-            const startDate = new Date(b.startDate);
+            const [startYear, startMonth, startDay] = b.startDate.split('-').map(Number);
+            const startDate = new Date(startYear, startMonth - 1, startDay);
             const daysDiff = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
             return daysDiff >= 0 && daysDiff % parseInt(b.frequency) === 0;
           });
