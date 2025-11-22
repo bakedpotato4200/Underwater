@@ -243,7 +243,7 @@
 
   <div class="main-content">
     <div class="container">
-      <div class="header">
+      <div class="header" id="overviewHeader">
         <h1>Budget Tracker</h1>
         <p>AI-Powered Financial Intelligence</p>
         <div class="stats">
@@ -2390,6 +2390,12 @@
       document.querySelectorAll('.nav-tabs button').forEach(el => el.classList.remove('active'));
       document.getElementById(tab).style.display = 'block';
       event.target.classList.add('active');
+      
+      // Show header only on overview tab
+      const header = document.getElementById('overviewHeader');
+      if (header) {
+        header.style.display = tab === 'overview' ? 'block' : 'none';
+      }
     }
 
     function toggleSidebar() {
