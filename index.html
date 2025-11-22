@@ -765,7 +765,6 @@
       fullTransactionData = txns;
       allTransactions = txns;
       const list = document.getElementById('transactionsList');
-      const fullList = document.getElementById('fullTransactionsList');
       
       // Update transaction page stats if container exists
       const txnCount = document.getElementById('txnTotalCount');
@@ -807,7 +806,7 @@
       
       if (!txns.length) {
         list.innerHTML = '<li class="loading">No transactions</li>';
-        fullList.innerHTML = '<div class="loading">No transactions</div>';
+        document.getElementById('fullTransactionsList').innerHTML = '<div class="loading">No transactions</div>';
         return;
       }
       
@@ -829,56 +828,9 @@
         </li>
       `).join('');
       list.innerHTML = html;
-
-      const months = {};
-      sorted.forEach(t => {
-        const date = new Date(t.date);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        if (!months[monthKey]) months[monthKey] = [];
-        months[monthKey].push(t);
-      });
-
-      const sortedMonths = Object.keys(months).sort().reverse();
-      let fullHtml = '';
       
-      sortedMonths.forEach(monthKey => {
-        const [year, month] = monthKey.split('-');
-        const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-        const monthTotal = months[monthKey].reduce((sum, t) => sum + (t.type === 'expense' ? -Math.abs(t.amount) : t.amount), 0);
-        
-        fullHtml += `<div style="margin-bottom: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f7; border-radius: 6px; margin-bottom: 8px; font-weight: 600; color: #000;">
-            <div>${monthName}</div>
-            <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
-          </div>`;
-        
-        // Sort transactions within month by date descending (newest first)
-        const monthTransactions = [...months[monthKey]].sort((a, b) => new Date(b.date) - new Date(a.date));
-        monthTransactions.forEach(t => {
-          fullHtml += `<li class="transaction-item" data-date="${t.date}" data-type="${t.type}" data-amount="${t.amount}" data-category="${t.category}" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
-            <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
-            <div style="flex: 1;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                <div class="transaction-desc">${t.description}</div>
-                <div class="transaction-amount ${t.type}" style="margin-left: 8px;">
-                  ${t.amount > 0 ? '+' : ''}$${Math.abs(t.amount).toFixed(2)}
-                </div>
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div><span class="cat-badge ${getCategoryColor(t.category)}">${t.category}</span></div>
-                <div class="transaction-date">${t.date}</div>
-              </div>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-left: 12px;">
-              <button class="btn btn-small" style="background: #e5e5e7; color: #000; font-weight: 600; font-size: 16px; padding: 6px 8px; cursor: pointer; position: relative;" onclick="showTransactionMenu(event, ${t.id}, '${(t.note || '').replace(/'/g, "\\'")}', ${t.excluded})">⋯</button>
-            </div>
-          </li>`;
-        });
-        
-        fullHtml += '</div>';
-      });
-      
-      fullList.innerHTML = fullHtml;
+      // Apply filters to the full transaction list (respects current filter state)
+      applyFilters();
     }
 
     let currentDateFilter = 'all';
