@@ -12,6 +12,7 @@ Underwater is a personal finance management application that helps users track t
 - Dark/light mode toggle
 - Responsive design with smooth animations
 - All modals and interactions working
+- Calendar day details display working perfectly on mobile
 
 **Features Completed**:
 - ✅ Dashboard with income/expenses/balance/health score
@@ -19,7 +20,9 @@ Underwater is a personal finance management application that helps users track t
 - ✅ Upcoming Bills tracking
 - ✅ Spending Trends visualization
 - ✅ Transaction history with filtering
-- ✅ Calendar view with bill dates
+- ✅ Calendar view with bill dates - **now with clickable day details**
+- ✅ Day details showing running balance calculations → income → expenses → ending balance
+- ✅ Recurring transaction list by day (Paycheck, Rent, etc.)
 - ✅ Automation Hub for transfer rules
 - ✅ AI-powered PDF statement processing
 - ✅ Transaction categorization and exclusion rules
@@ -182,6 +185,14 @@ Preferred communication style: Simple, everyday language.
 ```
 
 ## Recent Changes
+
+- **Nov 22, 2025**: Calendar day details feature completed
+  - Fixed calendar date click handling to show transaction breakdown
+  - Displays: Starting Balance → Income → Expenses → Ending Balance
+  - Shows all recurring transactions for selected day with color coding
+  - Inline card display (not modal) for better mobile compatibility
+  - "Back to Calendar" button for easy navigation
+  - Fully tested and working on mobile devices
 
 - **Nov 22, 2025**: Complete UI rebuild with premium underwater theme
   - Fixed broken CSS that was causing display glitches
