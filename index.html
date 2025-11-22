@@ -551,6 +551,50 @@
 
   <script>
     const API_URL = window.location.origin;
+    
+    // Toast notification system
+    function showToast(message, type = 'info', duration = 3000) {
+      const id = 'toast-' + Date.now();
+      const toast = document.createElement('div');
+      toast.id = id;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        animation: slideIn 0.3s ease-out;
+      `;
+      
+      if (type === 'success') {
+        toast.style.background = '#d4edda';
+        toast.style.color = '#155724';
+        toast.style.border = '1px solid #a6d6aa';
+      } else if (type === 'error') {
+        toast.style.background = '#f8d7da';
+        toast.style.color = '#842029';
+        toast.style.border = '1px solid #f5c2c7';
+      } else if (type === 'warning') {
+        toast.style.background = '#fff3cd';
+        toast.style.color = '#664d03';
+        toast.style.border = '1px solid #ffecb5';
+      } else {
+        toast.style.background = '#d1ecf1';
+        toast.style.color = '#0c5460';
+        toast.style.border = '1px solid #bee5eb';
+      }
+      
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, duration);
+    }
 
     async function loadData() {
       try {
@@ -591,6 +635,7 @@
         displayAnomalies(insights.anomalies);
       } catch (e) {
         console.error('Error loading data:', e);
+        showToast('Failed to load data. Please refresh.', 'error');
       }
     }
 
@@ -1330,67 +1375,125 @@
         document.getElementById('pdfFile').value = '';
         loadData();
       } catch (e) {
-        alert('Error: ' + e.message);
+        showToast('Upload failed: ' + e.message, 'error');
       }
     }
 
     async function addTransaction() {
       const type = document.getElementById('txnType').value;
+      const desc = document.getElementById('txnDesc').value.trim();
+      const amount = parseFloat(document.getElementById('txnAmount').value);
+      
+      // Validation
+      if (!desc) {
+        showToast('Please enter a description', 'warning');
+        return;
+      }
+      if (!amount || amount <= 0) {
+        showToast('Amount must be greater than 0', 'warning');
+        return;
+      }
+      
       const txn = {
-        description: document.getElementById('txnDesc').value,
-        amount: parseFloat(document.getElementById('txnAmount').value),
+        description: desc,
+        amount: amount,
         category: type === 'transfer' ? 'Transfer' : document.getElementById('txnCategory').value,
         type: type === 'transfer' ? 'expense' : type
       };
-      if (!txn.description || !txn.amount) { alert('Fill all fields'); return; }
+      
       if (txn.type === 'expense' && txn.category !== 'Transfer') txn.amount = -txn.amount;
       if (txn.category === 'Transfer') txn.amount = -Math.abs(txn.amount);
+      
       try {
-        await fetch(API_URL + '/api/transactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(txn) });
+        const res = await fetch(API_URL + '/api/transactions', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify(txn) 
+        });
+        if (!res.ok) throw new Error('Failed to add transaction');
+        
         closeModal('transactionModal');
         document.getElementById('txnDesc').value = '';
         document.getElementById('txnAmount').value = '';
+        showToast('Transaction added successfully', 'success');
         loadData();
       } catch (e) {
-        alert('Failed: ' + e.message);
+        showToast('Error: ' + e.message, 'error');
       }
     }
 
     async function addGoal() {
-      const goal = {
-        name: document.getElementById('goalName').value,
-        target: parseFloat(document.getElementById('goalAmount').value),
-        date: document.getElementById('goalDate').value,
-        current: 0
-      };
-      if (!goal.name || !goal.target) { alert('Fill all fields'); return; }
+      const name = document.getElementById('goalName').value.trim();
+      const target = parseFloat(document.getElementById('goalAmount').value);
+      const date = document.getElementById('goalDate').value;
+      
+      // Validation
+      if (!name) {
+        showToast('Please enter a goal name', 'warning');
+        return;
+      }
+      if (!target || target <= 0) {
+        showToast('Goal amount must be greater than 0', 'warning');
+        return;
+      }
+      if (!date) {
+        showToast('Please select a target date', 'warning');
+        return;
+      }
+      
+      const goal = { name, target, date, current: 0 };
+      
       try {
-        await fetch(API_URL + '/api/goals', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(goal) });
+        const res = await fetch(API_URL + '/api/goals', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify(goal) 
+        });
+        if (!res.ok) throw new Error('Failed to add goal');
+        
         closeModal('goalModal');
         document.getElementById('goalName').value = '';
         document.getElementById('goalAmount').value = '';
+        showToast('Goal created successfully', 'success');
         loadData();
       } catch (e) {
-        alert('Failed: ' + e.message);
+        showToast('Error: ' + e.message, 'error');
       }
     }
 
     async function addDebt() {
-      const debt = {
-        name: document.getElementById('debtName').value,
-        balance: parseFloat(document.getElementById('debtBalance').value),
-        interestRate: parseFloat(document.getElementById('debtRate').value),
-        minPayment: parseFloat(document.getElementById('debtMinPayment').value)
-      };
-      if (!debt.name || !debt.balance) { alert('Fill all fields'); return; }
+      const name = document.getElementById('debtName').value.trim();
+      const balance = parseFloat(document.getElementById('debtBalance').value);
+      const interestRate = parseFloat(document.getElementById('debtRate').value) || 0;
+      const minPayment = parseFloat(document.getElementById('debtMinPayment').value) || 50;
+      
+      // Validation
+      if (!name) {
+        showToast('Please enter debt name', 'warning');
+        return;
+      }
+      if (!balance || balance <= 0) {
+        showToast('Balance must be greater than 0', 'warning');
+        return;
+      }
+      
+      const debt = { name, balance, interestRate, minPayment };
+      
       try {
-        await fetch(API_URL + '/api/debts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(debt) });
+        const res = await fetch(API_URL + '/api/debts', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify(debt) 
+        });
+        if (!res.ok) throw new Error('Failed to add debt');
+        
         closeModal('debtModal');
         document.getElementById('debtName').value = '';
         document.getElementById('debtBalance').value = '';
+        showToast('Debt added successfully', 'success');
         loadData();
       } catch (e) {
-        alert('Failed: ' + e.message);
+        showToast('Error: ' + e.message, 'error');
       }
     }
 

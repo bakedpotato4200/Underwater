@@ -15,6 +15,15 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Cache control - prevent stale data in iframe
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
