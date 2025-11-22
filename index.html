@@ -1403,21 +1403,33 @@
         return;
       }
 
-      const months = Object.keys(trends).sort().slice(-6);
+      const months = Object.keys(trends).sort().slice(-4);
       const categories = new Set();
-      months.forEach(m => Object.keys(trends[m]).forEach(cat => categories.add(cat)));
+      months.forEach(m => Object.keys(trends[m] || {}).forEach(cat => categories.add(cat)));
+
+      if (categories.size === 0) {
+        container.innerHTML = '<div style="color: #86868b; text-align: center; padding: 20px; grid-column: 1/-1;">No spending data available</div>';
+        return;
+      }
 
       let html = '';
       categories.forEach(cat => {
         const data = months.map(m => trends[m][cat] || 0);
-        const maxVal = Math.max(...data, 1);
-        const bars = data.map((v, i) => `<div style="height: ${(v / maxVal) * 100}px; background: #0071e3; border-radius: 4px; flex: 1; margin: 0 2px;"></div>`).join('');
-        const labels = months.map(m => m.slice(5)).join(', ');
+        const maxVal = Math.max(...data, 100);
+        const bars = data.map((v, i) => {
+          const monthLabel = months[i].slice(5);
+          return `<div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+            <div style="width: 100%; height: ${Math.max((v / maxVal) * 100, 10)}px; background: linear-gradient(180deg, #0071e3 0%, #0055b3 100%); border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+            <div style="font-size: 9px; color: #86868b; text-align: center;">${monthLabel}</div>
+            <div style="font-size: 8px; color: #0071e3; font-weight: 600;">$${v.toFixed(0)}</div>
+          </div>`;
+        }).join('');
+        const avg = (data.reduce((a,b) => a+b,0) / data.length).toFixed(0);
         html += `
           <div style="background: white; border: 1px solid #e5e5e7; padding: 12px; border-radius: 8px;">
-            <div style="font-weight: 600; color: #000; margin-bottom: 8px; font-size: 13px;">${cat}</div>
-            <div style="display: flex; align-items: flex-end; height: 60px; gap: 4px;">${bars}</div>
-            <div style="font-size: 10px; color: #86868b; margin-top: 6px;">Avg: $${(data.reduce((a,b) => a+b,0) / data.length).toFixed(0)}</div>
+            <div style="font-weight: 600; color: #000; margin-bottom: 12px; font-size: 13px;">${cat}</div>
+            <div style="display: flex; align-items: flex-end; justify-content: space-around; height: 120px; gap: 6px;">${bars}</div>
+            <div style="font-size: 11px; color: #86868b; margin-top: 8px; text-align: center;">Avg: $${avg}</div>
           </div>
         `;
       });
