@@ -1554,7 +1554,16 @@
       }
 
       const allMonths = Object.keys(trends).sort();
-      const months = allMonths.slice(-monthCount);
+      let months;
+      
+      // For "This Month" (monthCount === 1), use today's date to determine current month
+      if (monthCount === 1) {
+        const today = new Date();
+        const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        months = allMonths.includes(currentMonthKey) ? [currentMonthKey] : [];
+      } else {
+        months = allMonths.slice(-monthCount);
+      }
       
       const categories = Array.from(new Set(Object.values(trends).flatMap(m => Object.keys(m || {}))));
       
@@ -1684,7 +1693,16 @@
       
       // Get the month range based on monthCount
       const allMonthKeys = Object.keys(trendsData).sort();
-      const selectedMonths = allMonthKeys.slice(-monthCount);
+      let selectedMonths;
+      
+      // For "This Month" (monthCount === 1), use today's date to determine current month
+      if (monthCount === 1) {
+        const today = new Date();
+        const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        selectedMonths = allMonthKeys.includes(currentMonthKey) ? [currentMonthKey] : [];
+      } else {
+        selectedMonths = allMonthKeys.slice(-monthCount);
+      }
       
       // Filter transactions by category and month range
       const filtered = txns.filter(t => {
