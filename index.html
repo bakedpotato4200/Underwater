@@ -1739,7 +1739,7 @@
       else if (desc.match(/salary|paycheck|income|bonus|interest earned|cash app|venmo|paypal|ach|wire|direct deposit/i)) suggested = 'Income';
       
       // Food & Dining - very specific restaurants/services
-      else if (desc.match(/starbucks|coffee|cafe|restaurant|food delivery|uber eats|doordash|grubhub|pizza|burger|taco|chipotle|mcdonalds|subway|shake shack|chick fil|popeyes|panera|wingstop|chilis|applebees|olive garden|dominos|wendy|taco bell|kfc|in-n-out|chick-fil-a|sonic/i)) suggested = 'Food & Dining';
+      else if (desc.match(/starbucks|coffee|cafe|restaurant|food delivery|uber eats|doordash|grubhub|pizza|burger|taco|chipotle|mcdonald|subway|shake shack|chick fil|popeyes|panera|wingstop|chilis|applebees|olive garden|dominos|wendy|taco bell|kfc|in-n-out|chick-fil-a|sonic|ihop|braums|quiktrip|qt\s|quick trip/i)) suggested = 'Food & Dining';
       
       // Groceries - specific grocery stores
       else if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super|target|instacart|sprouts|aldi|publix|winco|harris teeter|giant|ralphs|albertsons/i)) suggested = 'Groceries';
@@ -1947,10 +1947,8 @@
             return otherMerchant === currentMerchant;
           })
           .sort((a, b) => {
-            // Sort by similarity score (highest first)
-            const simA = calculateSimilarity(txn.description, a.description);
-            const simB = calculateSimilarity(txn.description, b.description);
-            return simB - simA;
+            // Sort by date (most recent first)
+            return new Date(b.date) - new Date(a.date);
           });
         
         // If matching transactions found, ask user for bulk update
