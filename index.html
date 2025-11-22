@@ -1950,7 +1950,7 @@
             
             // Calculate similarity score based on entire description
             const similarity = calculateSimilarity(txn.description, t.description);
-            return similarity > 0.35; // Match if 35%+ keyword overlap (more accurate with more words)
+            return similarity > 0.50; // Match if 50%+ keyword overlap - only show truly similar transactions
           })
           .sort((a, b) => {
             // Sort by similarity score (highest first)
