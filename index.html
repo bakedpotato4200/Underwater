@@ -616,7 +616,7 @@
           const hasBills = calendarData[i].bills.length > 0;
           const endBal = calendarData[i].endBalance;
           const balColor = endBal >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-          calendarHtml += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" data-day="${i}" style="cursor: pointer; position: relative;"><div class="calendar-day-date" style="font-weight: 700;">${i}</div><div style="font-size: 10px; color: ${balColor}; font-weight: 600; margin-top: 4px;">$${endBal.toFixed(0)}</div>${hasBills ? '<div style="font-size: 8px; color: var(--accent-gold); margin-top: 2px;">●●●</div>' : ''}</div>`;
+          calendarHtml += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" onclick="showDayDetails(${i})" style="cursor: pointer; position: relative;"><div class="calendar-day-date" style="font-weight: 700;">${i}</div><div style="font-size: 10px; color: ${balColor}; font-weight: 600; margin-top: 4px;">$${endBal.toFixed(0)}</div>${hasBills ? '<div style="font-size: 8px; color: var(--accent-gold); margin-top: 2px;">●●●</div>' : ''}</div>`;
         }
         
         for (let i = 1; i <= nextDays; i++) {
@@ -625,15 +625,6 @@
         
         calendarHtml += '</div>';
         document.getElementById('calendarView').innerHTML = calendarHtml;
-        
-        // Add click handlers to calendar days
-        setTimeout(() => {
-          document.querySelectorAll('.calendar-day[data-day]').forEach(el => {
-            el.addEventListener('click', function() {
-              showDayDetails(parseInt(this.getAttribute('data-day')));
-            });
-          });
-        }, 100);
       } catch (e) { console.error('Calendar error:', e); document.getElementById('calendarView').innerHTML = '<div style="color: red; padding: 20px;">Error loading calendar: ' + e.message + '</div>'; }
     }
     
@@ -650,35 +641,48 @@
     }
     
     function showDayDetails(day) {
-      const data = calendarData[day];
-      if (!data) return;
-      
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
-      
-      let html = `<div style="margin-bottom: 16px;"><h3 style="color: var(--text-primary); margin-bottom: 12px;">📅 ${dateStr}</h3>`;
-      html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">`;
-      html += `<div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);"><div style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">Starting Balance</div><div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">$${data.startBalance.toFixed(2)}</div></div>`;
-      html += `<div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px; border: 2px solid #34c759;"><div style="color: #34c759; font-size: 12px; margin-bottom: 4px;">+ Income</div><div style="font-size: 18px; font-weight: 700; color: #34c759;">$${data.income.toFixed(2)}</div></div>`;
-      html += `<div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px; border: 2px solid #ff3b30;"><div style="color: #ff3b30; font-size: 12px; margin-bottom: 4px;">- Expenses</div><div style="font-size: 18px; font-weight: 700; color: #ff3b30;">$${data.expense.toFixed(2)}</div></div>`;
-      const endColor = data.endBalance >= 0 ? '#34c759' : '#ff3b30';
-      html += `<div style="padding: 16px; background: var(--bg-secondary); border-radius: 8px; border: 2px solid ${endColor};"><div style="color: ${endColor}; font-size: 12px; margin-bottom: 4px;">Ending Balance</div><div style="font-size: 18px; font-weight: 700; color: ${endColor};">$${data.endBalance.toFixed(2)}</div></div>`;
-      html += `</div></div>`;
-      
-      if (data.bills && data.bills.length > 0) {
-        html += `<div style="margin-top: 16px;"><h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 14px;">Recurring Transactions on this Day:</h4>`;
-        data.bills.forEach(b => {
-          const isIncome = b.type === 'income';
-          const color = isIncome ? '#34c759' : '#ff3b30';
-          html += `<div style="padding: 12px; margin-bottom: 8px; background: var(--bg-secondary); border-left: 4px solid ${color}; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;"><div style="color: var(--text-primary); font-weight: 600;">${b.name}</div><div style="color: ${color}; font-weight: 700; font-size: 16px;">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
-        });
-        html += `</div>`;
-      } else {
-        html += `<div style="margin-top: 16px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; color: var(--text-secondary); text-align: center;">No recurring transactions on this day</div>`;
+      try {
+        const data = calendarData[day];
+        if (!data) {
+          alert('No data found for day ' + day);
+          return;
+        }
+        
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
+        
+        let html = `<div style="margin-bottom: 16px;"><h3 style="color: var(--text-primary); margin-bottom: 12px;">📅 ${dateStr}</h3>`;
+        html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">`;
+        html += `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);"><div style="color: var(--text-secondary); font-size: 11px;">Starting Balance</div><div style="font-size: 16px; font-weight: 700; color: var(--text-primary);">$${data.startBalance.toFixed(2)}</div></div>`;
+        html += `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 2px solid #34c759;"><div style="color: #34c759; font-size: 11px;">+ Income</div><div style="font-size: 16px; font-weight: 700; color: #34c759;">$${data.income.toFixed(2)}</div></div>`;
+        html += `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 2px solid #ff3b30;"><div style="color: #ff3b30; font-size: 11px;">- Expenses</div><div style="font-size: 16px; font-weight: 700; color: #ff3b30;">$${data.expense.toFixed(2)}</div></div>`;
+        const endColor = data.endBalance >= 0 ? '#34c759' : '#ff3b30';
+        html += `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 2px solid ${endColor};"><div style="color: ${endColor}; font-size: 11px;">Ending Balance</div><div style="font-size: 16px; font-weight: 700; color: ${endColor};">$${data.endBalance.toFixed(2)}</div></div>`;
+        html += `</div></div>`;
+        
+        if (data.bills && data.bills.length > 0) {
+          html += `<div style="margin-top: 12px;"><h4 style="color: var(--text-primary); margin-bottom: 8px; font-size: 13px;">Recurring Transactions:</h4>`;
+          data.bills.forEach(b => {
+            const isIncome = b.type === 'income';
+            const color = isIncome ? '#34c759' : '#ff3b30';
+            html += `<div style="padding: 10px; margin-bottom: 6px; background: var(--bg-secondary); border-left: 4px solid ${color}; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;"><div style="color: var(--text-primary); font-weight: 600; font-size: 13px;">${b.name}</div><div style="color: ${color}; font-weight: 700; font-size: 14px;">${isIncome ? '+' : '-'}$${b.amount.toFixed(2)}</div></div>`;
+          });
+          html += `</div>`;
+        } else {
+          html += `<div style="margin-top: 12px; padding: 10px; background: var(--bg-secondary); border-radius: 6px; color: var(--text-secondary); text-align: center; font-size: 13px;">No recurring transactions</div>`;
+        }
+        
+        const contentDiv = document.getElementById('dayDetailsContent');
+        const viewDiv = document.getElementById('dayDetailsView');
+        if (contentDiv && viewDiv) {
+          contentDiv.innerHTML = html;
+          viewDiv.style.display = 'block';
+        } else {
+          alert('Details container not found');
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
       }
-      
-      document.getElementById('dayDetailsContent').innerHTML = html;
-      document.getElementById('dayDetailsView').style.display = 'block';
     }
     
     function closeDayDetails() {
