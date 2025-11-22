@@ -380,7 +380,18 @@
 
         <div class="card full">
           <h2>All Transactions</h2>
-          <input type="text" class="search-box" id="searchBox" placeholder="Search by description, date, or amount..." onkeyup="filterTransactions()">
+          <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by description, date, or amount..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="selectAllTxns" onchange="toggleSelectAllTransactions()" style="cursor: pointer; width: 18px; height: 18px;">
+              <span style="font-size: 13px; color: #000;">Select All</span>
+            </label>
+          </div>
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;" id="bulkActionsContainer" style="display: none;">
+            <button class="btn btn-secondary" id="bulkIgnoreBtn" onclick="bulkIgnoreTransactions()" style="display: none;">Ignore Selected</button>
+            <button class="btn" style="background: #ff3b30; color: white;" id="bulkDeleteBtn" onclick="bulkDeleteTransactions()" style="display: none;">Delete Selected</button>
+            <span id="selectedCount" style="font-size: 13px; color: #86868b; align-self: center;"></span>
+          </div>
           <div id="fullTransactionsList" style="max-height: 600px; overflow-y: auto;">
             <div class="loading">No transactions</div>
           </div>
@@ -664,6 +675,7 @@
         const monthTransactions = [...months[monthKey]].sort((a, b) => new Date(b.date) - new Date(a.date));
         monthTransactions.forEach(t => {
           fullHtml += `<li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
+            <input type="checkbox" class="txn-checkbox" data-id="${t.id}" onchange="updateBulkActionButtons()" style="cursor: pointer; width: 18px; height: 18px; margin-right: 8px; flex-shrink: 0;">
             <div style="flex: 1;">
               <div class="transaction-date">${t.date}</div>
               <div class="transaction-desc">${t.description}</div>
@@ -690,6 +702,64 @@
       items.forEach(item => {
         item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
       });
+    }
+
+    function updateBulkActionButtons() {
+      const checkboxes = document.querySelectorAll('.txn-checkbox:checked');
+      const bulkActionsContainer = document.getElementById('bulkActionsContainer');
+      const selectedCount = document.getElementById('selectedCount');
+      const bulkIgnoreBtn = document.getElementById('bulkIgnoreBtn');
+      const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+      
+      if (checkboxes.length > 0) {
+        bulkActionsContainer.style.display = 'flex';
+        bulkIgnoreBtn.style.display = 'block';
+        bulkDeleteBtn.style.display = 'block';
+        selectedCount.textContent = `${checkboxes.length} selected`;
+      } else {
+        bulkActionsContainer.style.display = 'none';
+        bulkIgnoreBtn.style.display = 'none';
+        bulkDeleteBtn.style.display = 'none';
+        selectedCount.textContent = '';
+        document.getElementById('selectAllTxns').checked = false;
+      }
+    }
+
+    function toggleSelectAllTransactions() {
+      const isChecked = document.getElementById('selectAllTxns').checked;
+      const checkboxes = document.querySelectorAll('.txn-checkbox');
+      checkboxes.forEach(cb => cb.checked = isChecked);
+      updateBulkActionButtons();
+    }
+
+    async function bulkIgnoreTransactions() {
+      const checkboxes = document.querySelectorAll('.txn-checkbox:checked');
+      const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
+      
+      if (ids.length === 0) return;
+      if (!confirm(`Exclude ${ids.length} transactions from tracking?`)) return;
+      
+      for (const id of ids) {
+        await fetch(API_URL + `/api/transactions/${id}/exclude`, { method: 'PUT' });
+      }
+      
+      await loadTransactions();
+      document.getElementById('selectAllTxns').checked = false;
+    }
+
+    async function bulkDeleteTransactions() {
+      const checkboxes = document.querySelectorAll('.txn-checkbox:checked');
+      const ids = Array.from(checkboxes).map(cb => cb.dataset.id);
+      
+      if (ids.length === 0) return;
+      if (!confirm(`Permanently delete ${ids.length} transactions? This cannot be undone.`)) return;
+      
+      for (const id of ids) {
+        await fetch(API_URL + `/api/transactions/${id}`, { method: 'DELETE' });
+      }
+      
+      await loadTransactions();
+      document.getElementById('selectAllTxns').checked = false;
     }
 
     function displayCategories(cats) {

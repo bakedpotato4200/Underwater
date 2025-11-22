@@ -834,7 +834,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 94,
@@ -843,7 +843,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 95,
@@ -852,7 +852,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 96,
@@ -897,7 +897,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 101,
@@ -906,7 +906,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 102,
@@ -915,7 +915,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 103,
@@ -942,7 +942,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 106,
@@ -951,7 +951,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 107,
@@ -960,7 +960,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 108,
@@ -969,7 +969,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 109,
@@ -1221,7 +1221,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 137,
@@ -1266,7 +1266,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 142,
@@ -1374,7 +1374,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 154,
@@ -1383,7 +1383,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 155,
@@ -1428,7 +1428,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 160,
@@ -1626,7 +1626,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 182,
@@ -1635,7 +1635,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 183,
@@ -1662,7 +1662,7 @@
     "category": "Other",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 186,
@@ -1698,7 +1698,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 190,
@@ -1779,7 +1779,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 199,
@@ -1851,7 +1851,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 207,
@@ -1884,7 +1884,7 @@
     "id": 210,
     "date": "2025-09-03",
     "amount": -1150,
-    "category": "Other",
+    "category": "Rent",
     "description": "Withdrawal from LynCo, Inc. RESIDENT",
     "type": "expense",
     "excluded": false
@@ -1896,7 +1896,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 212,
@@ -1905,7 +1905,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 213,
@@ -1923,7 +1923,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 215,
@@ -1932,7 +1932,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 216,
@@ -1941,7 +1941,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 217,
@@ -1950,7 +1950,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 218,
@@ -1959,7 +1959,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 219,
@@ -1968,7 +1968,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 220,
@@ -1977,7 +1977,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 221,
@@ -1986,7 +1986,7 @@
     "category": "Other",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 222,
@@ -2031,7 +2031,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 227,
@@ -2040,7 +2040,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 228,
@@ -2085,7 +2085,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 233,
@@ -2094,7 +2094,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 234,
@@ -2103,7 +2103,7 @@
     "category": "Other",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 235,
@@ -2121,7 +2121,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 237,
@@ -2130,7 +2130,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 238,
@@ -2193,7 +2193,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 245,
@@ -2202,7 +2202,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 246,
@@ -2211,7 +2211,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 247,
@@ -2220,7 +2220,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 248,
@@ -2229,7 +2229,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 249,
@@ -2265,7 +2265,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 253,
@@ -2274,7 +2274,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 254,
@@ -2283,7 +2283,7 @@
     "category": "Income",
     "description": "Deposit from Savings XXXXXXX0688",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 255,
@@ -2328,7 +2328,7 @@
     "category": "Other",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 260,
@@ -2481,7 +2481,7 @@
     "category": "Income",
     "description": "Deposit from Spending XXXXXXX7828",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 277,
@@ -2499,7 +2499,7 @@
     "category": "Income",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 279,
@@ -2517,7 +2517,7 @@
     "category": "Other",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
-    "excluded": false
+    "excluded": true
   },
   {
     "id": 281,
