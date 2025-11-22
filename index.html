@@ -316,13 +316,30 @@
     .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--accent-primary); transition: all 0.25s ease; }
     .insight-box:hover { border-color: var(--accent-primary); box-shadow: 0 6px 16px rgba(0, 217, 255, 0.12); transform: translateY(-2px); }
     
+    @media (max-width: 1024px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 768px) {
       .sidebar { width: 240px; }
       .menu-toggle.sidebar-open { left: 260px; }
       .dashboard { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .header { padding: 32px 24px; }
-      .card { padding: 24px; }
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .header { padding: 24px 16px; }
+      .header h1 { font-size: 28px; }
+      .header p { font-size: 13px; }
+      .stat-card { padding: 20px 16px; }
+      .stat-value { font-size: 24px; }
+      .stat-label { font-size: 10px; }
+      .card { padding: 20px 16px; }
+      .main-content { padding: 12px; }
+      .container { max-width: 100%; }
+    }
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: 1fr; gap: 10px; }
+      .header { padding: 16px 12px; margin-bottom: 16px; }
+      .header h1 { font-size: 24px; margin-bottom: 4px; }
+      .stat-card { padding: 16px 12px; }
+      .stat-value { font-size: 20px; }
     }
   </style>
 </head>
@@ -347,12 +364,12 @@
   <div class="main-content">
     <div class="container">
       <div class="header" id="overviewHeader">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-          <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
+          <div style="flex: 1; min-width: 0;">
             <h1>💼 Dashboard</h1>
             <p>Financial Overview & Money Management</p>
           </div>
-          <button onclick="toggleDarkMode()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+          <button onclick="toggleDarkMode()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0;">
             <span id="themeIcon">🌙</span>
           </button>
         </div>
