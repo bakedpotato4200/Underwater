@@ -964,14 +964,30 @@
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       
+      // Calculate current balance from the header
+      const currentBalance = parseFloat(document.getElementById('netBalance').textContent.replace(/[$,]/g, '') || 0);
+      
       let html = '<div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar">';
+      
+      // Calculate balances after bills for date ranges
+      const getBalanceAfter = (days) => {
+        let totalBills = 0;
+        const checkDate = new Date(today);
+        for (let i = 0; i < days; i++) {
+          const checkStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+          const dayBills = calendar[checkStr] || [];
+          dayBills.forEach(b => totalBills += b.amount);
+          checkDate.setDate(checkDate.getDate() + 1);
+        }
+        return Math.max(currentBalance - totalBills, 0);
+      };
       
       for (let m = 0; m < 3; m++) {
         const date = new Date(today.getFullYear(), today.getMonth() + m, 1);
         const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
         const firstDay = date.getDay();
         
-        html += `<h3 style="grid-column: 1/-1; margin: ${m > 0 ? '12px 0 8px' : '0 0 8px'}; font-size: 13px; font-weight: 600;">${date.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>`;
+        html += `<h3 style="grid-column: 1/-1; margin: ${m > 0 ? '12px 0 8px' : '0 0 8px'}; font-size: 13px; font-weight: 700;">${date.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>`;
         
         for (let i = 0; i < firstDay; i++) {
           html += '<div class="calendar-day other-month"></div>';
@@ -982,16 +998,64 @@
           const bills = calendar[dateStr] || [];
           const hasBills = bills.length > 0;
           const isToday = dateStr === todayStr;
-          const dayStyle = isToday ? 'background: #0071e3; color: white; font-weight: 600; border-radius: 4px;' : '';
-          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" style="${dayStyle}">
+          
+          // Calculate balance after bills on this day
+          let balanceAfterBills = currentBalance;
+          const checkDate = new Date(today);
+          while (checkDate <= new Date(dateStr)) {
+            const checkStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+            const dayBills = calendar[checkStr] || [];
+            dayBills.forEach(b => balanceAfterBills -= b.amount);
+            checkDate.setDate(checkDate.getDate() + 1);
+          }
+          
+          const totalBillAmount = bills.reduce((sum, b) => sum + b.amount, 0);
+          const dayStyle = isToday ? 'background: #0071e3; color: white; font-weight: 700;' : '';
+          
+          // Create tooltip with bill details
+          const billList = bills.map(b => `${b.merchant}: $${b.amount.toFixed(2)}`).join(' | ');
+          const tooltip = hasBills ? `title="Bills: ${billList}${bills.length > 0 ? '\nBalance after: $' + balanceAfterBills.toFixed(0) : ''}"` : '';
+          
+          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" style="${dayStyle}" ${tooltip}>
             <div class="calendar-day-date">${d}</div>
-            ${bills.map(b => `<div style="font-size: 9px; margin-top: 2px;">${isToday ? '●' : '$'}${isToday ? '' : b.amount.toFixed(0)}</div>`).join('')}
+            <div style="font-size: 11px; font-weight: 700; color: ${hasBills && !isToday ? '#ff3b30' : isToday ? 'white' : '#0071e3'};">
+              ${hasBills ? `$${totalBillAmount.toFixed(0)}` : ''}
+            </div>
+            ${hasBills ? `<div style="font-size: 9px; margin-top: 2px; color: ${isToday ? '#e8e8e8' : '#666'};">After: $${balanceAfterBills.toFixed(0)}</div>` : ''}
           </div>`;
         }
       }
       
       html += '</div>';
       container.innerHTML = html;
+      
+      // Add balance projection below calendar
+      const projectionHtml = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e5e7;">
+          <div style="text-align: center;">
+            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">7 Days</div>
+            <div style="font-size: 18px; font-weight: 800; color: #34c759;">$${getBalanceAfter(7).toFixed(0)}</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">14 Days</div>
+            <div style="font-size: 18px; font-weight: 800; color: #34c759;">$${getBalanceAfter(14).toFixed(0)}</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">30 Days</div>
+            <div style="font-size: 18px; font-weight: 800; color: #34c759;">$${getBalanceAfter(30).toFixed(0)}</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">60 Days</div>
+            <div style="font-size: 18px; font-weight: 800; color: ${getBalanceAfter(60) > 0 ? '#34c759' : '#ff3b30'};">$${getBalanceAfter(60).toFixed(0)}</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 12px; color: #999; font-weight: 600; margin-bottom: 6px;">90 Days</div>
+            <div style="font-size: 18px; font-weight: 800; color: ${getBalanceAfter(90) > 0 ? '#34c759' : '#ff3b30'};">$${getBalanceAfter(90).toFixed(0)}</div>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML += projectionHtml;
     }
 
     function displayCashFlow(cashflow) {
