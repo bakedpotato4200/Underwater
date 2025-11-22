@@ -384,10 +384,6 @@
       <div id="transactions" class="tab-content" style="display: none;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px;">
           <div class="stat-card">
-            <div class="stat-value" id="txnTotalCount">0</div>
-            <div class="stat-label">Total Txns</div>
-          </div>
-          <div class="stat-card">
             <div class="stat-value" id="txnTotalIncome">$0</div>
             <div class="stat-label">Income</div>
           </div>
@@ -767,14 +763,13 @@
       const list = document.getElementById('transactionsList');
       
       // Update transaction page stats if container exists
-      const txnCount = document.getElementById('txnTotalCount');
-      if (txnCount) {
+      const txnIncome = document.getElementById('txnTotalIncome');
+      if (txnIncome) {
         const activeTransactions = txns.filter(t => !t.excluded);
         const totalIncome = activeTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
         const totalExpenses = Math.abs(activeTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0));
         const netBalance = totalIncome - totalExpenses;
         
-        document.getElementById('txnTotalCount').textContent = activeTransactions.length;
         document.getElementById('txnTotalIncome').textContent = '$' + totalIncome.toLocaleString('en-US', {maximumFractionDigits: 0});
         document.getElementById('txnTotalExpenses').textContent = '$' + totalExpenses.toLocaleString('en-US', {maximumFractionDigits: 0});
         document.getElementById('txnNetBalance').textContent = (netBalance >= 0 ? '+' : '') + '$' + netBalance.toLocaleString('en-US', {maximumFractionDigits: 0});
