@@ -238,8 +238,8 @@
           </div>
         </div>
         <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn btn-primary" onclick="showUploadModal()">Upload Statement</button>
           <button class="btn btn-primary" onclick="showAddTransactionModal()">Add Transaction</button>
+          <button class="btn btn-secondary" onclick="showUploadModal()">Upload PDF</button>
           <button class="btn btn-secondary" onclick="showAddGoalModal()">Set Goal</button>
           <button class="btn btn-secondary" onclick="showAddDebtModal()">Add Debt</button>
         </div>
@@ -554,7 +554,9 @@
         return;
       }
       
-      const html = txns.slice(-30).map(t => `
+      // Sort by date descending (newest first)
+      const sorted = [...txns].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const html = sorted.slice(0, 30).map(t => `
         <li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}">
           <div style="flex: 1;">
             <div class="transaction-date">${t.date}</div>
@@ -572,7 +574,7 @@
       list.innerHTML = html;
 
       const months = {};
-      txns.forEach(t => {
+      sorted.forEach(t => {
         const date = new Date(t.date);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         if (!months[monthKey]) months[monthKey] = [];
@@ -593,7 +595,9 @@
             <div style="font-size: 14px;">${monthTotal >= 0 ? '+' : ''}$${Math.abs(monthTotal).toFixed(2)}</div>
           </div>`;
         
-        months[monthKey].forEach(t => {
+        // Sort transactions within month by date descending (newest first)
+        const monthTransactions = [...months[monthKey]].sort((a, b) => new Date(b.date) - new Date(a.date));
+        monthTransactions.forEach(t => {
           fullHtml += `<li class="transaction-item" style="opacity: ${t.excluded ? 0.5 : 1}; ${t.excluded ? 'text-decoration: line-through; color: #86868b;' : ''}; margin-bottom: 6px;">
             <div style="flex: 1;">
               <div class="transaction-date">${t.date}</div>

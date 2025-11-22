@@ -1861,5 +1861,671 @@
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
+  },
+  {
+    "id": 208,
+    "date": "2025-09-02",
+    "amount": -83.79,
+    "category": "Other",
+    "description": "Withdrawal from AEP PUBLIC SERVI BILL PAY",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 209,
+    "date": "2025-09-03",
+    "amount": -156.3,
+    "category": "Utilities",
+    "description": "Withdrawal from Harley-Davidson RETRY PYMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 210,
+    "date": "2025-09-03",
+    "amount": -1150,
+    "category": "Other",
+    "description": "Withdrawal from LynCo, Inc. RESIDENT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 211,
+    "date": "2025-09-04",
+    "amount": -153,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 212,
+    "date": "2025-09-04",
+    "amount": -3,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 213,
+    "date": "2025-09-04",
+    "amount": -35.99,
+    "category": "Utilities",
+    "description": "Withdrawal from CAPITAL ONE MOBILE PMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 214,
+    "date": "2025-09-05",
+    "amount": -213,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 215,
+    "date": "2025-09-05",
+    "amount": -24,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 216,
+    "date": "2025-09-13",
+    "amount": 85,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 217,
+    "date": "2025-09-13",
+    "amount": 205,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 218,
+    "date": "2025-09-13",
+    "amount": 100,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 219,
+    "date": "2025-09-13",
+    "amount": 50,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 220,
+    "date": "2025-09-13",
+    "amount": 70,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 221,
+    "date": "2025-09-13",
+    "amount": -70,
+    "category": "Other",
+    "description": "Withdrawal to Savings XXXXXXX0688",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 222,
+    "date": "2025-09-15",
+    "amount": -204.21,
+    "category": "Other",
+    "description": "Withdrawal from Acceptance CAC",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 223,
+    "date": "2025-09-15",
+    "amount": -47,
+    "category": "Utilities",
+    "description": "Withdrawal from DISCOVER E-PAYMENT BPF_DSS_0_0915115505.txt",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 224,
+    "date": "2025-09-19",
+    "amount": -17.34,
+    "category": "Utilities",
+    "description": "Withdrawal from CRUNCH FIT RETRY PYMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 225,
+    "date": "2025-09-22",
+    "amount": -47,
+    "category": "Other",
+    "description": "Withdrawal from WF Card AUTO PAY",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 226,
+    "date": "2025-09-23",
+    "amount": -40,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 227,
+    "date": "2025-09-23",
+    "amount": -135.23,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 228,
+    "date": "2025-09-26",
+    "amount": 156.35,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 229,
+    "date": "2025-09-29",
+    "amount": -156.3,
+    "category": "Utilities",
+    "description": "Withdrawal from Harley-Davidson Autopay",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 230,
+    "date": "2025-09-30",
+    "amount": 0.02,
+    "category": "Other",
+    "description": "Paid",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 231,
+    "date": "2025-09-01",
+    "amount": -18.7,
+    "category": "Utilities",
+    "description": "Card Purchase - APEX TRADER FUNDING BOYD TX",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 232,
+    "date": "2025-09-04",
+    "amount": 153,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 233,
+    "date": "2025-09-04",
+    "amount": 3,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 234,
+    "date": "2025-09-04",
+    "amount": -156,
+    "category": "Other",
+    "description": "Withdrawal to Savings XXXXXXX0688",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 235,
+    "date": "2025-09-04",
+    "amount": 21.67,
+    "category": "Income",
+    "description": "Check Deposit (Mobile)",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 236,
+    "date": "2025-09-05",
+    "amount": 213,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 237,
+    "date": "2025-09-05",
+    "amount": 24,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 238,
+    "date": "2025-09-05",
+    "amount": -6.52,
+    "category": "Utilities",
+    "description": "Card Purchase - MAVERIK 5307 BIXBY, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 239,
+    "date": "2025-09-05",
+    "amount": -21.67,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 240,
+    "date": "2025-09-06",
+    "amount": -212.83,
+    "category": "Utilities",
+    "description": "Card Purchase - ARMSTRONG BIXBY BIXBY OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 241,
+    "date": "2025-09-10",
+    "amount": -8.34,
+    "category": "Utilities",
+    "description": "Card Purchase - MURPHY7561ATWAL BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 242,
+    "date": "2025-09-12",
+    "amount": 1662.83,
+    "category": "Income",
+    "description": "Deposit from 8819 GDB STAFFIN PAYROLL",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 243,
+    "date": "2025-09-12",
+    "amount": -5.26,
+    "category": "Utilities",
+    "description": "Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 244,
+    "date": "2025-09-13",
+    "amount": -85,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 245,
+    "date": "2025-09-13",
+    "amount": -205,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 246,
+    "date": "2025-09-13",
+    "amount": -100,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 247,
+    "date": "2025-09-13",
+    "amount": -50,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 248,
+    "date": "2025-09-13",
+    "amount": -70,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 249,
+    "date": "2025-09-13",
+    "amount": -200,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 250,
+    "date": "2025-09-13",
+    "amount": -5.26,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 251,
+    "date": "2025-09-15",
+    "amount": -901,
+    "category": "Utilities",
+    "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 252,
+    "date": "2025-09-23",
+    "amount": 40,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 253,
+    "date": "2025-09-23",
+    "amount": 135.23,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 254,
+    "date": "2025-09-23",
+    "amount": 0.68,
+    "category": "Income",
+    "description": "Deposit from Savings XXXXXXX0688",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 255,
+    "date": "2025-09-23",
+    "amount": 4.02,
+    "category": "Income",
+    "description": "Card Money Received - FS160512AQV400AQS599FM880584AQF500 via CASH APP*JACOB EMMER*C",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 256,
+    "date": "2025-09-25",
+    "amount": -140,
+    "category": "Utilities",
+    "description": "Card Purchase - APEXTRADERFUNDING AUSTIN TX",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 257,
+    "date": "2025-09-25",
+    "amount": -37.4,
+    "category": "Utilities",
+    "description": "Card Purchase - APEXTRADERFUNDING AUSTIN TX",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 258,
+    "date": "2025-09-26",
+    "amount": 1707.37,
+    "category": "Income",
+    "description": "Deposit from 8819 GDB STAFFIN PAYROLL",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 259,
+    "date": "2025-09-26",
+    "amount": -156.35,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 260,
+    "date": "2025-09-27",
+    "amount": -3.13,
+    "category": "Food & Dining",
+    "description": "Card Purchase - FAMILY DOLLAR INOLA, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 261,
+    "date": "2025-09-27",
+    "amount": -22.62,
+    "category": "Groceries",
+    "description": "Card Purchase - WM SUPERCENTER #4637 BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 262,
+    "date": "2025-09-27",
+    "amount": -170,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 263,
+    "date": "2025-09-27",
+    "amount": -110,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 264,
+    "date": "2025-09-27",
+    "amount": -835,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 265,
+    "date": "2025-09-27",
+    "amount": -25.88,
+    "category": "Utilities",
+    "description": "Card Purchase - STAXX BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 266,
+    "date": "2025-09-27",
+    "amount": -123.27,
+    "category": "Food & Dining",
+    "description": "Card Purchase - WINCO FOODS #156 WINCO TULSA, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 267,
+    "date": "2025-09-27",
+    "amount": -17.61,
+    "category": "Groceries",
+    "description": "Card Purchase - WM SUPERCENTER #472 BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 268,
+    "date": "2025-09-28",
+    "amount": -20.01,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - MURPHY7561ATWAL BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 269,
+    "date": "2025-09-28",
+    "amount": -12.46,
+    "category": "Utilities",
+    "description": "Card Purchase - B B LIQUOR WHSE BA BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 270,
+    "date": "2025-09-29",
+    "amount": -12.26,
+    "category": "Utilities",
+    "description": "Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 271,
+    "date": "2025-09-30",
+    "amount": -32.9,
+    "category": "Groceries",
+    "description": "Card Purchase - WM SUPERCENTER #4637 BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 272,
+    "date": "2025-09-30",
+    "amount": -29.65,
+    "category": "Utilities",
+    "description": "Card Purchase - DOLLAR-GENERAL # DG 00 BROKEN ARROW, OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 273,
+    "date": "2025-09-30",
+    "amount": -37.4,
+    "category": "Utilities",
+    "description": "Card Purchase - APEX TRADER FUNDING BOYD TX",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 274,
+    "date": "2025-09-02",
+    "amount": -74,
+    "category": "Utilities",
+    "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 275,
+    "date": "2025-09-02",
+    "amount": -156.76,
+    "category": "Transfer",
+    "description": "Withdrawal from PAYPAL to JACOB EMMER INST XFER",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 276,
+    "date": "2025-09-04",
+    "amount": 156,
+    "category": "Income",
+    "description": "Deposit from Spending XXXXXXX7828",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 277,
+    "date": "2025-09-05",
+    "amount": -590.81,
+    "category": "Utilities",
+    "description": "Withdrawal from AMEX EPAYMENT RETRY PYMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 278,
+    "date": "2025-09-13",
+    "amount": 70,
+    "category": "Income",
+    "description": "Deposit from Bills XXXXXXX5600",
+    "type": "income",
+    "excluded": false
+  },
+  {
+    "id": 279,
+    "date": "2025-09-15",
+    "amount": -70,
+    "category": "Utilities",
+    "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 280,
+    "date": "2025-09-23",
+    "amount": -0.68,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 281,
+    "date": "2025-09-30",
+    "amount": 0.22,
+    "category": "Other",
+    "description": "Paid",
+    "type": "income",
+    "excluded": false
   }
 ]
