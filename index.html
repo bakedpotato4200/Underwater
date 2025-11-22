@@ -834,12 +834,14 @@
       applyFilters();
       
       // Update category filter dropdown
-      const uniqueCategories = [...new Set(txns.map(t => t.category))].sort();
+      const uniqueCategories = [...new Set(txns.map(t => t.category).filter(cat => cat && cat.trim()))].sort();
+      const hasUncategorized = txns.some(t => !t.category || !t.category.trim());
       const categoryFilterSelect = document.getElementById('categoryFilter');
       if (categoryFilterSelect) {
         const currentValue = categoryFilterSelect.value;
         categoryFilterSelect.innerHTML = `
           <option value="all">All Categories</option>
+          ${hasUncategorized ? '<option value="uncategorized">⚠️ Needs Categorization</option>' : ''}
           ${uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
         `;
         categoryFilterSelect.value = currentValue;
@@ -906,7 +908,15 @@
         if (currentTypeFilter !== 'all' && t.type !== currentTypeFilter) return false;
         
         // Category filter
-        if (currentCategoryFilter !== 'all' && t.category !== currentCategoryFilter) return false;
+        if (currentCategoryFilter !== 'all') {
+          if (currentCategoryFilter === 'uncategorized') {
+            // Show transactions with no category or empty category
+            if (t.category && t.category.trim()) return false;
+          } else {
+            // Show transactions matching the selected category
+            if (t.category !== currentCategoryFilter) return false;
+          }
+        }
         
         // Date filter
         if (currentDateFilter !== 'all') {
