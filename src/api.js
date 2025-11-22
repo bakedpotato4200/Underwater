@@ -901,6 +901,27 @@ app.post('/api/learn-exclusion', express.json(), (req, res) => {
   res.json({ success: true, learned: { merchant } });
 });
 
+// Deduplication endpoint
+app.post('/api/deduplicate-transactions', express.json(), (req, res) => {
+  const seen = new Map();
+  let removed = 0;
+  const deduplicated = [];
+  
+  transactions.forEach(t => {
+    const key = `${t.date}-${Math.abs(t.amount)}-${t.description.trim()}`;
+    if (!seen.has(key)) {
+      seen.set(key, true);
+      deduplicated.push(t);
+    } else {
+      removed++;
+    }
+  });
+  
+  transactions = deduplicated;
+  saveData(transactionsFile, transactions);
+  res.json({ success: true, removed, remaining: transactions.length });
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
