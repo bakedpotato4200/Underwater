@@ -435,7 +435,7 @@
     "id": 49,
     "date": "2025-10-08",
     "amount": -222.83,
-    "category": "Utilities",
+    "category": "Bills",
     "description": "Card Purchase - ARMSTRONG BANK MUSKOGE MUSKOGEE OK",
     "type": "expense",
     "excluded": false
@@ -516,7 +516,7 @@
     "id": 58,
     "date": "2025-10-09",
     "amount": -0.99,
-    "category": "Utilities",
+    "category": "Subscriptions",
     "description": "Digital Card Purchase - FS SUPERCELLSTORE FSPRG COM CA",
     "type": "expense",
     "excluded": false
@@ -525,7 +525,7 @@
     "id": 59,
     "date": "2025-10-09",
     "amount": -41.99,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - WENDY S 13349 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -543,7 +543,7 @@
     "id": 61,
     "date": "2025-10-10",
     "amount": -205,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "car payment - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -552,7 +552,7 @@
     "id": 62,
     "date": "2025-10-10",
     "amount": -70,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "amex prime - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -570,7 +570,7 @@
     "id": 64,
     "date": "2025-10-10",
     "amount": -50,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "Wells Fargo - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -579,7 +579,7 @@
     "id": 65,
     "date": "2025-10-10",
     "amount": -40,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "discover card - Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
@@ -615,7 +615,7 @@
     "id": 69,
     "date": "2025-10-10",
     "amount": -2.07,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - 045 BRAUMS STORE BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -696,7 +696,7 @@
     "id": 78,
     "date": "2025-10-12",
     "amount": -111.55,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - BRUNOS ITALIAN RISTORA BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -732,7 +732,7 @@
     "id": 82,
     "date": "2025-10-14",
     "amount": -5.83,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - 045 BRAUMS STORE BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -1020,7 +1020,7 @@
     "id": 114,
     "date": "2025-10-24",
     "amount": -75,
-    "category": "Other",
+    "category": "Transfer",
     "description": "storage - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1029,7 +1029,7 @@
     "id": 115,
     "date": "2025-10-24",
     "amount": -65,
-    "category": "Income",
+    "category": "Transfer",
     "description": "aroura - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1038,7 +1038,7 @@
     "id": 116,
     "date": "2025-10-24",
     "amount": -55,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "phone bill - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1047,7 +1047,7 @@
     "id": 117,
     "date": "2025-10-24",
     "amount": -27,
-    "category": "Other",
+    "category": "Transfer",
     "description": "trading view - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1056,7 +1056,7 @@
     "id": 118,
     "date": "2025-10-24",
     "amount": -22,
-    "category": "Other",
+    "category": "Transfer",
     "description": "skool - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1065,7 +1065,7 @@
     "id": 119,
     "date": "2025-10-24",
     "amount": -7.99,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "crunchy roll - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1137,7 +1137,7 @@
     "id": 127,
     "date": "2025-10-26",
     "amount": -10.58,
-    "category": "Utilities",
+    "category": "Shopping",
     "description": "Card Purchase - HOBBY LOBBY 03 TULSA OK",
     "type": "expense",
     "excluded": false
@@ -2982,7 +2982,7 @@
     "id": 332,
     "date": "2025-07-19",
     "amount": -12.64,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - 045 BRAUMS STORE BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -3153,7 +3153,7 @@
     "id": 351,
     "date": "2025-07-23",
     "amount": -2.81,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - 045 BRAUMS STORE BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -3189,7 +3189,7 @@
     "id": 355,
     "date": "2025-07-24",
     "amount": -58.73,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - BRUNOS ITALIAN RISTORA BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -3288,7 +3288,7 @@
     "id": 366,
     "date": "2025-07-30",
     "amount": -25.77,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - 045 BRAUMS STORE BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
