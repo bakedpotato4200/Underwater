@@ -1956,10 +1956,31 @@
       });
     }
 
-    function getSuggestedCategory(description) {
+    let learnedPatternsCache = null;
+    
+    async function getSuggestedCategory(description) {
       const desc = description.toLowerCase();
       let suggested = 'Other';
       
+      // Load learned patterns if not cached
+      if (learnedPatternsCache === null) {
+        try {
+          const response = await fetch(API_URL + '/api/learned-patterns');
+          learnedPatternsCache = response.ok ? await response.json() : {};
+        } catch (e) {
+          learnedPatternsCache = {};
+        }
+      }
+      
+      // Check learned patterns first (what user has taught the system)
+      const merchant = description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+      if (learnedPatternsCache.merchants && learnedPatternsCache.merchants[merchant]) {
+        suggested = learnedPatternsCache.merchants[merchant];
+        console.log(`Using LEARNED pattern for "${description}": ${suggested}`);
+        return suggested;
+      }
+      
+      // Fall back to hardcoded patterns if not learned
       // More specific patterns first to avoid conflicts
       // Transfer patterns - be specific to avoid matching deposits
       if (desc.match(/transfer|xfer|from account|to account|internal|between accounts|move to|move from/i)) suggested = 'Transfer';
@@ -1988,7 +2009,7 @@
       // Health & Fitness - specific medical/health
       else if (desc.match(/doctor|hospital|pharmacy|health|cvs|walgreens|medical|dentist|urgent care|clinic|health insurance|medical office|lab|vision|eye doctor/i)) suggested = 'Health & Fitness';
       
-      console.log(`Suggested category for "${description}": ${suggested}`);
+      console.log(`Suggested category for "${description}": ${suggested} (hardcoded pattern)`);
       return suggested;
     }
     
@@ -2005,11 +2026,11 @@
       if (oldModal) oldModal.remove();
       
       // Small delay to ensure menu is fully removed from DOM
-      setTimeout(() => {
+      setTimeout(async () => {
         const txn = allTransactions.find(t => t.id == id);
         if (!txn) return;
         
-        const suggestedCat = getSuggestedCategory(txn.description);
+        const suggestedCat = await getSuggestedCategory(txn.description);
         const categories = ['Income', 'Utilities', 'Food & Dining', 'Groceries', 'Transportation', 'Entertainment', 'Shopping', 'Health & Fitness', 'Transfer', 'Other'];
         
         console.log(`Modal opened for transaction ${id}: "${txn.description}", current: ${txn.category}, suggested: ${suggestedCat}`);

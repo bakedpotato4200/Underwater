@@ -914,6 +914,10 @@ app.delete('/api/recurring-bills/:id', (req, res) => {
 });
 
 // Learning endpoints
+app.get('/api/learned-patterns', (req, res) => {
+  res.json(learnedPatterns);
+});
+
 app.post('/api/learn-category', express.json(), (req, res) => {
   const { description, category } = req.body;
   if (!description || !category) {
