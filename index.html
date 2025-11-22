@@ -356,7 +356,7 @@
       <button onclick="switchTab('trends'); toggleSidebar();">Trends</button>
       <button onclick="switchTab('calendar'); toggleSidebar();">Calendar</button>
       <button onclick="switchTab('insights'); toggleSidebar();">Insights</button>
-      <button onclick="switchTab('automation'); toggleSidebar();">Automation</button>
+      <button onclick="switchTab('debt'); toggleSidebar();">Debt Manager</button>
       <button onclick="switchTab('transactions'); toggleSidebar();">All Transactions</button>
     </div>
   </div>
@@ -447,7 +447,7 @@
       
       <div id="insightsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>💡 Financial Insights</h2><div id="insightsList" style="margin-top: 20px;"><div style="color: var(--text-secondary); text-align: center; padding: 20px;">Financial insights will appear here</div></div></div></div>
       
-      <div id="automationContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>⚙️ Automation Hub</h2><div id="automationHub" style="margin-top: 20px;"><div class="loading">Loading automation...</div></div></div></div>
+      <div id="debtContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>💳 Debt Manager</h2><div style="margin-top: 20px;"><button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="openAddDebtModal()">+ Add Debt</button><div id="debtList" style="display: grid; gap: 12px;"><div class="loading">Loading debts...</div></div><div style="margin-top: 20px; padding: 20px; background: var(--bg-tertiary); border-radius: 12px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary);">Debt Summary</h3><div id="debtSummary" style="display: grid; gap: 12px;"></div></div></div></div></div>
       
       <div id="transactionsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>🔍 All Transactions</h2><div style="margin-top: 20px;">
         <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
@@ -485,6 +485,8 @@
     </div>
     <button onclick="closeModal('categoryModal')" class="btn btn-secondary" style="width: 100%; margin-top: 12px;">Cancel</button>
   </div></div></div>
+  
+  <div id="addDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Add Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="debtName" placeholder="Credit Card, Student Loan, etc."></div><div class="form-group"><label>Current Balance</label><input type="number" id="debtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="debtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="debtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payoff Strategy</label><select id="debtStrategy"><option value="interest">Snowball (Pay Off Highest Balance First)</option><option value="interest">Avalanche (Pay Off Highest Interest First)</option></select></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveDebt()">Add</button><button class="btn btn-secondary" onclick="closeModal('addDebtModal')">Cancel</button></div></div></div>
 
   <script>
     const API_URL = window.location.origin;
@@ -532,7 +534,7 @@
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
       if (tab === 'calendar') { setTimeout(loadCalendar, 100); }
-      if (tab === 'automation') { setTimeout(loadAutomation, 100); }
+      if (tab === 'debt') { setTimeout(loadDebtManager, 100); }
       if (tab === 'trends') { setTimeout(loadTrends, 100); }
       if (tab === 'transactions') { setTimeout(loadAllTransactions, 100); }
     }
@@ -778,16 +780,96 @@
       } catch (e) { showToast('Error deleting transaction', 'error'); }
     }
     
-    async function loadAutomation() {
+    let allDebts = [];
+    
+    async function loadDebtManager() {
       try {
-        const res = await fetch(API_URL + '/api/automation/rules');
-        const rules = await res.json();
-        const rulesHtml = rules.length ? rules.map((r, i) => `<div class="bill-item"><div><div class="bill-name">${r.name}</div><div class="bill-date">Transfer $${r.amount.toFixed(2)} ${r.frequency}</div></div><button class="btn btn-small" onclick="executeTransfer(${i})">Execute</button></div>`).join('') : '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No automation rules. Create one to get started!</div>';
-        document.getElementById('automationHub').innerHTML = `${rulesHtml}<button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="openModal('uploadModal')">Create Rule</button>`;
-      } catch (e) { console.error('Automation error:', e); }
+        const res = await fetch(API_URL + '/api/debts');
+        allDebts = await res.json();
+        
+        const debtListHtml = allDebts.map(d => {
+          const monthsToPayoff = d.monthlyPayment > 0 ? Math.ceil(d.currentBalance / d.monthlyPayment) : 999;
+          const payoffDate = new Date();
+          payoffDate.setMonth(payoffDate.getMonth() + monthsToPayoff);
+          const progress = Math.max(0, Math.min(100, (1 - (d.currentBalance / d.originalBalance)) * 100));
+          return `<div style="padding: 16px; background: var(--bg-secondary); border-radius: 10px; border-left: 4px solid #ff3b30;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+              <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">${d.name}</div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Interest Rate: ${d.interestRate}%</div>
+              </div>
+              <button onclick="deleteDebt(${d.id})" style="padding: 6px 10px; background: #ff3b30; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+              <div><div style="font-size: 11px; color: var(--text-secondary);">Balance</div><div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${formatCurrency(d.currentBalance)}</div></div>
+              <div><div style="font-size: 11px; color: var(--text-secondary);">Monthly Payment</div><div style="font-size: 14px; font-weight: 700; color: var(--accent-success);">${formatCurrency(d.monthlyPayment)}</div></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+              <div style="flex: 1; height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, #34C759, #00d9ff); width: ${progress}%;"></div></div>
+              <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">${progress.toFixed(0)}%</div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Payoff: ${payoffDate.toLocaleDateString()} (${monthsToPayoff} months)</div>
+          </div>`;
+        }).join('');
+        
+        document.getElementById('debtList').innerHTML = debtListHtml || '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No debts. Click "Add Debt" to get started.</div>';
+        
+        const totalDebt = allDebts.reduce((sum, d) => sum + d.currentBalance, 0);
+        const totalPayment = allDebts.reduce((sum, d) => sum + d.monthlyPayment, 0);
+        const avgRate = allDebts.length > 0 ? (allDebts.reduce((sum, d) => sum + d.interestRate, 0) / allDebts.length) : 0;
+        
+        document.getElementById('debtSummary').innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div><div style="font-size: 12px; color: var(--text-secondary);">Total Debt</div><div style="font-size: 22px; font-weight: 800; color: #ff3b30;">${formatCurrency(totalDebt)}</div></div>
+            <div><div style="font-size: 12px; color: var(--text-secondary);">Total Monthly Payment</div><div style="font-size: 22px; font-weight: 800; color: #34C759;">${formatCurrency(totalPayment)}</div></div>
+            <div><div style="font-size: 12px; color: var(--text-secondary);">Avg Interest Rate</div><div style="font-size: 22px; font-weight: 800; color: var(--accent-primary);">${avgRate.toFixed(2)}%</div></div>
+            <div><div style="font-size: 12px; color: var(--text-secondary);">Debts Tracked</div><div style="font-size: 22px; font-weight: 800; color: var(--text-primary);">${formatNumber(allDebts.length)}</div></div>
+          </div>
+          <div style="margin-top: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid var(--accent-gold);">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Monthly Interest Charge</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--accent-danger);">${formatCurrency(allDebts.reduce((sum, d) => sum + (d.currentBalance * (d.interestRate / 100 / 12)), 0))}</div>
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">This much goes to interest, not principal</div>
+          </div>
+        `;
+      } catch (e) { console.error('Debt error:', e); }
     }
     
-    async function executeTransfer(ruleIndex) { try { await fetch(API_URL + '/api/automation/execute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ruleIndex }) }); showToast('Transfer executed!', 'success'); loadAutomation(); } catch (e) { showToast('Error executing transfer', 'error'); } }
+    function openAddDebtModal() {
+      document.getElementById('debtName').value = '';
+      document.getElementById('debtBalance').value = '';
+      document.getElementById('debtRate').value = '';
+      document.getElementById('debtPayment').value = '';
+      openModal('addDebtModal');
+    }
+    
+    async function saveDebt() {
+      const name = document.getElementById('debtName').value.trim();
+      const balance = parseFloat(document.getElementById('debtBalance').value);
+      const rate = parseFloat(document.getElementById('debtRate').value);
+      const payment = parseFloat(document.getElementById('debtPayment').value);
+      if (!name || !balance || balance < 0 || !payment || payment <= 0) { showToast('Please fill all fields correctly', 'warning'); return; }
+      
+      try {
+        const res = await fetch(API_URL + '/api/debts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, currentBalance: balance, originalBalance: balance, interestRate: rate || 0, monthlyPayment: payment })
+        });
+        const data = await res.json();
+        showToast('Debt added!', 'success');
+        closeModal('addDebtModal');
+        loadDebtManager();
+      } catch (e) { showToast('Error adding debt', 'error'); }
+    }
+    
+    async function deleteDebt(id) {
+      if (!confirm('Delete this debt?')) return;
+      try {
+        await fetch(API_URL + `/api/debts/${id}`, { method: 'DELETE' });
+        showToast('Debt deleted', 'success');
+        loadDebtManager();
+      } catch (e) { showToast('Error deleting debt', 'error'); }
+    }
     
     async function saveRecurringTransaction() {
       const name = document.getElementById('recurringName').value;
