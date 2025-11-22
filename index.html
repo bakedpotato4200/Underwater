@@ -1639,25 +1639,9 @@
         currentAngle = endAngle;
       });
 
-      const periods = [
-        { label: 'This Month', months: 1 },
-        { label: 'Last 2 Months', months: 2 },
-        { label: 'Last 3 Months', months: 3 },
-        { label: 'Last 4 Months', months: 4 },
-        { label: 'Last 6 Months', months: 6 },
-        { label: 'Last Year', months: 12 }
-      ];
-
-      const periodSelector = `
-        <select id="periodSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: ${!singleMonth ? '#0071e3' : '#f9fafb'}; color: ${!singleMonth ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
-          <option value="" ${!singleMonth && trendsPeriod === 4 ? 'selected' : ''} style="color: #000; background: #fff;">View Period</option>
-          ${periods.map(p => `<option value="${p.months}" ${!singleMonth && trendsPeriod === p.months ? 'selected' : ''} style="color: #000; background: #fff;">${p.label}</option>`).join('')}
-        </select>
-      `;
-
-      const monthSelector = `
-        <select id="monthSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: ${singleMonth ? '#0071e3' : '#f9fafb'}; color: ${singleMonth ? 'white' : '#000'}; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
-          <option value="" ${!singleMonth ? 'selected' : ''} style="color: #000; background: #fff;">View by Month</option>
+      const consolidatedSelector = `
+        <select id="trendsViewSelector" style="padding: 8px 12px; border: 1px solid #e5e5e7; background: #0071e3; color: white; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;">
+          <option value="year-to-date" ${!singleMonth && trendsPeriod === 12 ? 'selected' : ''} style="color: #000; background: #fff;">Year to Date</option>
           ${allMonths.reverse().map(m => {
             const [year, month] = m.split('-');
             const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -1683,8 +1667,7 @@
       container.innerHTML = `
         <div style="max-width: 900px; margin: 0 auto;">
           <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; margin-bottom: 24px;" id="trendsButtonsContainer">
-            ${periodSelector}
-            ${monthSelector}
+            ${consolidatedSelector}
           </div>
           <div style="background: white; border: 1px solid #e5e5e7; border-radius: 12px; padding: 32px; text-align: center;">
             <div style="font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">${periodLabel} Breakdown</div>
@@ -1699,24 +1682,14 @@
         </div>
       `;
 
-      // Attach event listener to period selector
-      const periodSelectorElement = document.getElementById('periodSelector');
-      if (periodSelectorElement) {
-        periodSelectorElement.addEventListener('change', function() {
-          if (this.value) {
-            changeTrendsPeriod(parseInt(this.value));
-          }
-        });
-      }
-
-      // Attach event listener to month selector
-      const monthSelectorElement = document.getElementById('monthSelector');
-      if (monthSelectorElement) {
-        monthSelectorElement.addEventListener('change', function() {
-          if (this.value) {
+      // Attach event listener to consolidated selector
+      const trendsViewSelector = document.getElementById('trendsViewSelector');
+      if (trendsViewSelector) {
+        trendsViewSelector.addEventListener('change', function() {
+          if (this.value === 'year-to-date') {
+            changeTrendsPeriod(12);
+          } else if (this.value) {
             selectSingleMonth(this.value);
-          } else {
-            changeTrendsPeriod(trendsPeriod);
           }
         });
       }
