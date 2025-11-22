@@ -39,7 +39,7 @@
     "id": 5,
     "date": "2025-10-10",
     "amount": 205,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "car payment - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -48,7 +48,7 @@
     "id": 6,
     "date": "2025-10-10",
     "amount": 70,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "amex prime - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -75,7 +75,7 @@
     "id": 9,
     "date": "2025-10-10",
     "amount": 40,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "discover card - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": true
@@ -1443,7 +1443,7 @@
     "id": 161,
     "date": "2025-10-24",
     "amount": 65,
-    "category": "Income",
+    "category": "Transfer",
     "description": "aroura - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1452,7 +1452,7 @@
     "id": 162,
     "date": "2025-10-24",
     "amount": 55,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "phone bill - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1461,7 +1461,7 @@
     "id": 163,
     "date": "2025-10-24",
     "amount": 27,
-    "category": "Income",
+    "category": "Transfer",
     "description": "trading view - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1470,7 +1470,7 @@
     "id": 164,
     "date": "2025-10-24",
     "amount": 22,
-    "category": "Income",
+    "category": "Transfer",
     "description": "skool - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
@@ -1479,7 +1479,7 @@
     "id": 165,
     "date": "2025-10-24",
     "amount": 7.99,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "crunchy roll - Deposit from Spending XXXXXXX7828",
     "type": "income",
     "excluded": false
