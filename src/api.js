@@ -930,6 +930,28 @@ app.delete('/api/recurring-bills/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// Convert a transaction to a recurring bill
+app.post('/api/transaction-to-recurring', express.json(), (req, res) => {
+  const { merchant, amount, frequency } = req.body;
+  if (!merchant || !amount || !frequency) {
+    return res.status(400).json({ error: 'merchant, amount, and frequency required' });
+  }
+  
+  const bill = {
+    id: Date.now(),
+    name: merchant,
+    amount: Math.abs(parseFloat(amount)),
+    frequency: parseInt(frequency),
+    startDate: new Date().toISOString().split('T')[0]
+  };
+  
+  if (!Array.isArray(recurringBills)) recurringBills = [];
+  recurringBills.push(bill);
+  saveData(recurringBillsFile, recurringBills);
+  
+  res.json(bill);
+});
+
 // Bills Calculator endpoint
 app.get('/api/bills-calculator', (req, res) => {
   try {
