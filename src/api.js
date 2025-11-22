@@ -607,9 +607,32 @@ app.delete('/api/transactions/:id', express.json(), (req, res) => {
 app.post('/api/transactions/:id/category', express.json(), (req, res) => {
   const txn = transactions.find(t => t.id == req.params.id);
   if (txn) {
-    txn.category = req.body.category || txn.category;
+    const newCategory = (req.body.category || txn.category).trim();
+    
+    // Normalize category: check for existing similar categories (case-insensitive exact match)
+    const existingCategory = transactions
+      .map(t => t.category)
+      .filter(cat => cat && cat.toLowerCase() === newCategory.toLowerCase())
+      .find(cat => cat); // Get the first exact match (case-insensitive)
+    
+    // Use existing category if found, otherwise use the new one
+    const finalCategory = existingCategory || newCategory;
+    
+    // Update this transaction
+    txn.category = finalCategory;
+    
+    // Consolidate: if there are other transactions with different case variations, update them too
+    const oldCategory = req.body.category;
+    if (oldCategory && oldCategory !== finalCategory) {
+      transactions.forEach(t => {
+        if (t.category && t.category.toLowerCase() === oldCategory.toLowerCase()) {
+          t.category = finalCategory;
+        }
+      });
+    }
+    
     saveData(transactionsFile, transactions);
-    res.json({ success: true, category: txn.category });
+    res.json({ success: true, category: finalCategory });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
   }
