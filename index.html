@@ -1921,44 +1921,15 @@
           });
         }
         
-        // Function to extract merchant name from transaction description
-        function extractMerchant(desc) {
-          // For "Card Purchase - MERCHANT NAME LOCATIONCODE ZIP CITY STATE" format
-          // Extract just the merchant name (words before location codes like F3054)
-          const purchaseMatch = desc.match(/[Pp]urchase\s*-\s*(.+?)(?:\s+[A-Z]\d+\s+|$)/);
-          if (purchaseMatch && purchaseMatch[1]) {
-            const merchant = purchaseMatch[1].trim();
-            // Split by spaces and take words until we hit a single letter followed by digits
-            const parts = merchant.split(/\s+/);
-            const merchantName = [];
-            for (let part of parts) {
-              // Stop if we hit a location code (single letter + numbers like F3054)
-              if (/^[A-Z]\d+/.test(part)) break;
-              merchantName.push(part);
-            }
-            return merchantName.join(' ').toLowerCase();
-          }
-          
-          // Fallback for other formats (like "Withdrawal from...", "Deposit from...")
-          const altMatch = desc.match(/(?:from|to)\s+([A-Za-z]+(?:\s+[A-Za-z]+)?)/i);
-          if (altMatch && altMatch[1]) {
-            return altMatch[1].trim().toLowerCase();
-          }
-          
-          // Last resort: return first meaningful word
-          const words = desc.toLowerCase().split(/[\s\-\d]+/).filter(w => w.length > 2);
-          return words[0] || 'unknown';
-        }
-        
-        // Find transactions with exact merchant match
-        const currentMerchant = extractMerchant(txn.description);
+        // Find transactions with EXACT description match
+        const currentDesc = txn.description.toLowerCase().trim();
         const matchingTxns = allTransactions
           .filter(t => {
-            if (t.id === id || t.category === category || t.type !== 'expense') return false;
+            if (t.id === id || t.category === category) return false;
             
-            // Match only transactions with the same merchant name
-            const otherMerchant = extractMerchant(t.description);
-            return otherMerchant === currentMerchant;
+            // Match only transactions with exact same description (case-insensitive)
+            const otherDesc = t.description.toLowerCase().trim();
+            return otherDesc === currentDesc;
           })
           .sort((a, b) => {
             // Sort by date (most recent first)

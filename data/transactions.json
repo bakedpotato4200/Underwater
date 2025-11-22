@@ -714,7 +714,7 @@
     "id": 80,
     "date": "2025-10-13",
     "amount": -44.71,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #0472 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -948,7 +948,7 @@
     "id": 106,
     "date": "2025-10-21",
     "amount": -5.84,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - MCDONALD S F3054 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -1029,7 +1029,7 @@
     "id": 115,
     "date": "2025-10-24",
     "amount": -65,
-    "category": "Other",
+    "category": "Subscriptions",
     "description": "aroura - Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -1101,7 +1101,7 @@
     "id": 123,
     "date": "2025-10-25",
     "amount": -44.49,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #0472 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -1155,7 +1155,7 @@
     "id": 129,
     "date": "2025-10-26",
     "amount": -7.69,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - SQ NOBILITEA BROKEN A BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -2613,7 +2613,7 @@
     "id": 291,
     "date": "2025-07-08",
     "amount": -80.1,
-    "category": "Utilities",
+    "category": "Groceries",
     "description": "Card Purchase - WAL-MART #0472 BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -3054,7 +3054,7 @@
     "id": 340,
     "date": "2025-07-20",
     "amount": -15.81,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - MCDONALD S F3054 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -3882,7 +3882,7 @@
     "id": 432,
     "date": "2025-06-19",
     "amount": -4.05,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - MCDONALD S F6613 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -3891,7 +3891,7 @@
     "id": 433,
     "date": "2025-06-19",
     "amount": -11.95,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - MCDONALD S F6613 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -3999,7 +3999,7 @@
     "id": 445,
     "date": "2025-06-28",
     "amount": -13.41,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - MCDONALD S F33834 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
