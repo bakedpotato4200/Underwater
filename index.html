@@ -1707,7 +1707,7 @@
         }
         
         // Immediately update the UI to show exclusion visual feedback
-        await loadTransactions();
+        await loadData();
         showToast(currentlyExcluded ? 'Transaction included' : 'Transaction excluded', 'success');
       } catch (e) {
         showToast('Failed to exclude: ' + e.message, 'error');
