@@ -954,6 +954,8 @@
     function displayCalendar(calendar) {
       const container = document.getElementById('billCalendar');
       const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      
       let html = '<div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar">';
       
       for (let m = 0; m < 3; m++) {
@@ -971,9 +973,11 @@
           const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
           const bills = calendar[dateStr] || [];
           const hasBills = bills.length > 0;
-          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}">
+          const isToday = dateStr === todayStr;
+          const dayStyle = isToday ? 'background: #0071e3; color: white; font-weight: 600; border-radius: 4px;' : '';
+          html += `<div class="calendar-day ${hasBills ? 'has-bills' : ''}" style="${dayStyle}">
             <div class="calendar-day-date">${d}</div>
-            ${bills.map(b => `<div style="font-size: 9px; margin-top: 2px;">$${b.amount.toFixed(0)}</div>`).join('')}
+            ${bills.map(b => `<div style="font-size: 9px; margin-top: 2px;">${isToday ? '●' : '$'}${isToday ? '' : b.amount.toFixed(0)}</div>`).join('')}
           </div>`;
         }
       }
