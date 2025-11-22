@@ -843,6 +843,9 @@
       });
       
       fullList.innerHTML = fullHtml;
+      
+      // Initialize filters after transactions load
+      setTimeout(() => filterTransactions(), 100);
     }
 
     let currentDateFilter = 'all';
@@ -874,7 +877,6 @@
       const today = new Date(2025, 10, 21);
       
       const items = document.querySelectorAll('#fullTransactionsList .transaction-item');
-      let visibleCount = 0;
       
       items.forEach(item => {
         let show = true;
@@ -885,22 +887,31 @@
           show = false;
         }
         
-        // Date filter
+        // Date filter - only apply if not "all"
         if (show && currentDateFilter !== 'all') {
           const dateStr = item.getAttribute('data-date');
           if (dateStr) {
-            const [y, m, d] = dateStr.split('-').map(Number);
-            const txnDate = new Date(y, m - 1, d);
-            const daysDiff = Math.floor((today - txnDate) / (1000 * 60 * 60 * 24));
-            
-            if (currentDateFilter === 'month') {
-              show = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
-            } else if (currentDateFilter === '30days') {
-              show = daysDiff >= 0 && daysDiff <= 30;
-            } else if (currentDateFilter === '3months') {
-              show = daysDiff >= 0 && daysDiff <= 90;
-            } else if (currentDateFilter === 'year') {
-              show = txnDate.getFullYear() === today.getFullYear();
+            try {
+              const parts = dateStr.split('-');
+              if (parts.length === 3) {
+                const y = parseInt(parts[0]);
+                const m = parseInt(parts[1]);
+                const d = parseInt(parts[2]);
+                const txnDate = new Date(y, m - 1, d);
+                const daysDiff = Math.floor((today - txnDate) / (1000 * 60 * 60 * 24));
+                
+                if (currentDateFilter === 'month') {
+                  show = txnDate.getMonth() === today.getMonth() && txnDate.getFullYear() === today.getFullYear();
+                } else if (currentDateFilter === '30days') {
+                  show = daysDiff >= 0 && daysDiff <= 30;
+                } else if (currentDateFilter === '3months') {
+                  show = daysDiff >= 0 && daysDiff <= 90;
+                } else if (currentDateFilter === 'year') {
+                  show = txnDate.getFullYear() === today.getFullYear();
+                }
+              }
+            } catch (e) {
+              show = true;
             }
           }
         }
@@ -911,7 +922,6 @@
         }
         
         item.style.display = show ? 'flex' : 'none';
-        if (show) visibleCount++;
       });
     }
     
