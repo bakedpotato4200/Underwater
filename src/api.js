@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import pdfParse from 'pdf-parse';
 import { fileURLToPath } from 'url';
+import OpenAI from 'openai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -902,6 +903,55 @@ app.post('/api/payoff-strategy', express.json(), (req, res) => {
     payoff: selected,
     comparison: { avalanche: aval, snowball: snow }
   });
+});
+
+// AI Debt Advisor - the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+app.post('/api/ai-debt-advisor', express.json(), async (req, res) => {
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(400).json({ error: 'OpenAI API key not configured' });
+    }
+    
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    
+    // Get income info
+    const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+    const totalSpending = Math.abs(transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + t.amount, 0));
+    const availableForPayoff = totalIncome - totalSpending;
+    
+    // Build debt summary
+    const debtSummary = debts.map(d => `- ${d.name || 'Debt'}: $${d.balance} at ${d.interestRate || 0}% interest, ${d.minPayment || 'no'} min payment`).join('\n');
+    
+    const prompt = `You are a financial advisor. Based on this financial situation, provide specific debt payoff strategy recommendations:
+
+FINANCIAL SITUATION:
+- Monthly Income: $${totalIncome.toFixed(0)}
+- Monthly Spending: $${totalSpending.toFixed(0)}
+- Available for Extra Payments: $${availableForPayoff.toFixed(0)}
+
+DEBTS:
+${debtSummary || 'No debts'}
+
+Provide:
+1. Recommended payoff strategy (avalanche or snowball) with reasoning
+2. Suggested extra monthly payment amount
+3. Estimated time to debt freedom
+4. Specific action steps for this month
+5. Quick win opportunities
+
+Keep it practical and actionable.`;
+
+    const message = await client.chat.completions.create({
+      model: 'gpt-5',
+      messages: [{ role: 'user', content: prompt }],
+      max_completion_tokens: 2000
+    });
+    
+    res.json({ advice: message.choices[0].message.content });
+  } catch (error) {
+    console.error('AI Advisor error:', error);
+    res.status(500).json({ error: 'Failed to get advice: ' + error.message });
+  }
 });
 
 app.post('/api/subscriptions', express.json(), (req, res) => {

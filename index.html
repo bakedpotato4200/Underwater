@@ -300,6 +300,7 @@
               <div id="debtsList" style="max-height: 300px; overflow-y: auto;">
                 <div class="loading">No debts added</div>
               </div>
+              <button class="btn btn-primary" onclick="showAIAdvisor()" style="width: 100%; margin-top: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">🤖 AI Debt Advisor</button>
             </div>
           </div>
         </div>
@@ -496,6 +497,19 @@
             <div class="loading">No transactions</div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Advisor Modal -->
+  <div id="aiAdvisorModal" class="modal">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header">🤖 AI Debt Payoff Advisor</div>
+      <div id="aiAdvisorContent" style="padding: 16px; color: #333;">
+        <div class="loading" style="text-align: center;">Getting personalized advice...</div>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="closeModal('aiAdvisorModal')">Close</button>
       </div>
     </div>
   </div>
@@ -2722,6 +2736,31 @@
     function showUploadModal() { document.getElementById('uploadModal').classList.add('active'); }
     function showAddTransactionModal() { document.getElementById('transactionModal').classList.add('active'); }
     function showAddGoalModal() { document.getElementById('goalModal').classList.add('active'); }
+
+    async function showAIAdvisor() {
+      const content = document.getElementById('aiAdvisorContent');
+      content.innerHTML = '<div class="loading" style="text-align: center;">Getting personalized advice...</div>';
+      openModal('aiAdvisorModal');
+      
+      try {
+        const response = await fetch(API_URL + '/api/ai-debt-advisor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to get advice');
+        }
+        
+        const data = await response.json();
+        content.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.6; font-size: 13px; color: #333;">${data.advice}</div>`;
+      } catch (e) {
+        console.error('AI Advisor error:', e);
+        content.innerHTML = `<div style="color: #ff3b30; padding: 16px; background: #fff0f0; border-radius: 8px; border-left: 3px solid #ff3b30;"><strong>Error:</strong> ${e.message}</div>`;
+      }
+    }
     function showAddDebtModal() { document.getElementById('debtModal').classList.add('active'); }
 
     function updateCategoryOptions() {
