@@ -1415,8 +1415,6 @@
       const allMonths = Object.keys(trends).sort();
       const months = allMonths.slice(-monthCount);
       
-      console.log('DEBUG: trendsPeriod=', trendsPeriod, 'monthCount=', monthCount, 'allMonths=', allMonths, 'selectedMonths=', months);
-      
       const categories = Array.from(new Set(Object.values(trends).flatMap(m => Object.keys(m || {}))));
       
       if (categories.length === 0) {
@@ -1437,8 +1435,6 @@
           totals[cat] = (totals[cat] || 0) + val;
         });
       });
-      
-      console.log('DEBUG: totals=', totals);
 
       const data = Object.entries(totals).filter(([, val]) => val > 0).sort((a, b) => b[1] - a[1]);
       const total = data.reduce((sum, [, val]) => sum + val, 0);
