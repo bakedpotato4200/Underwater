@@ -268,6 +268,7 @@
         <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
           <button class="btn btn-primary" onclick="showAddTransactionModal()">Add Transaction</button>
           <button class="btn btn-secondary" onclick="showUploadModal()">Upload PDF</button>
+          <button class="btn btn-secondary" onclick="showAddRecurringBillModal()">Manage Bills</button>
           <button class="btn btn-secondary" onclick="showAddGoalModal()">Set Goal</button>
           <button class="btn btn-secondary" onclick="showAddDebtModal()">Add Debt</button>
         </div>
@@ -542,6 +543,44 @@
     </div>
   </div>
 
+  <!-- Recurring Bills Modal -->
+  <div id="recurringBillModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Manage Recurring Bills</div>
+      <div style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;" id="recurringBillsList">
+        <div class="loading">No recurring bills added</div>
+      </div>
+      <div style="border-top: 1px solid #e5e5e7; padding-top: 20px; margin-top: 20px;">
+        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Add New Recurring Bill</h3>
+        <div class="form-group">
+          <label>Bill Name</label>
+          <input type="text" id="billName" placeholder="e.g., Netflix">
+        </div>
+        <div class="form-group">
+          <label>Amount</label>
+          <input type="number" id="billAmount" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Frequency</label>
+          <select id="billFrequency">
+            <option value="7">Weekly</option>
+            <option value="14">Bi-weekly</option>
+            <option value="30">Monthly</option>
+            <option value="365">Annually</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="billStartDate">
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="addRecurringBill()">Add Bill</button>
+          <button class="btn btn-secondary" onclick="closeModal('recurringBillModal')">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Transaction Note Modal -->
   <div id="noteModal" class="modal">
     <div class="modal-content">
@@ -606,7 +645,7 @@
 
     async function loadData() {
       try {
-        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules] = await Promise.all([
+        const [txns, summary, cats, debts, daily, insights, calendar, cashflow, velocity, alerts, trends, rules, recurringBills] = await Promise.all([
           fetch(API_URL + '/api/transactions').then(r => r.json()),
           fetch(API_URL + '/api/summary').then(r => r.json()),
           fetch(API_URL + '/api/categories').then(r => r.json()),
@@ -618,7 +657,8 @@
           fetch(API_URL + '/api/spending-velocity').then(r => r.json()),
           fetch(API_URL + '/api/alerts').then(r => r.json()),
           fetch(API_URL + '/api/spending-trends').then(r => r.json()),
-          fetch(API_URL + '/api/exclusion-rules').then(r => r.json())
+          fetch(API_URL + '/api/exclusion-rules').then(r => r.json()),
+          fetch(API_URL + '/api/recurring-bills').then(r => r.json())
         ]);
 
         displayTransactions(txns);
@@ -1578,7 +1618,89 @@
         await fetch(API_URL + `/api/transactions/${txnId}/toggle-exclude`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
         loadData();
       } catch (e) {
-        alert('Failed: ' + e.message);
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    function showAddRecurringBillModal() {
+      openModal('recurringBillModal');
+      document.getElementById('billStartDate').valueAsDate = new Date();
+      displayRecurringBillsList();
+    }
+
+    async function displayRecurringBillsList() {
+      try {
+        const bills = await fetch(API_URL + '/api/recurring-bills').then(r => r.json());
+        const list = document.getElementById('recurringBillsList');
+        if (!bills.length) {
+          list.innerHTML = '<div class="loading">No recurring bills added</div>';
+          return;
+        }
+        list.innerHTML = bills.map(b => `
+          <div class="bill-item" style="margin-bottom: 10px;">
+            <div>
+              <div class="bill-name">${b.name}</div>
+              <div class="bill-date">${['Weekly', 'Bi-weekly', 'Monthly', 'Annually'][Math.log2(b.frequency/7)]} • Started ${b.startDate}</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div class="bill-amount">$${b.amount.toFixed(2)}</div>
+              <button class="btn btn-small" style="background: #ff3b30; color: white; padding: 6px 10px;" onclick="deleteRecurringBill(${b.id})">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        showToast('Error loading bills: ' + e.message, 'error');
+      }
+    }
+
+    async function addRecurringBill() {
+      const name = document.getElementById('billName').value.trim();
+      const amount = parseFloat(document.getElementById('billAmount').value);
+      const frequency = parseInt(document.getElementById('billFrequency').value);
+      const startDate = document.getElementById('billStartDate').value;
+
+      if (!name) {
+        showToast('Please enter bill name', 'warning');
+        return;
+      }
+      if (!amount || amount <= 0) {
+        showToast('Amount must be greater than 0', 'warning');
+        return;
+      }
+      if (!startDate) {
+        showToast('Please select start date', 'warning');
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL + '/api/recurring-bills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, amount, frequency, startDate })
+        });
+        if (!res.ok) throw new Error('Failed to add bill');
+        
+        document.getElementById('billName').value = '';
+        document.getElementById('billAmount').value = '';
+        document.getElementById('billFrequency').value = '30';
+        showToast('Recurring bill added successfully', 'success');
+        displayRecurringBillsList();
+        loadData();
+      } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteRecurringBill(id) {
+      if (!confirm('Delete this recurring bill?')) return;
+      try {
+        const res = await fetch(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Failed to delete');
+        showToast('Bill deleted', 'success');
+        displayRecurringBillsList();
+        loadData();
+      } catch (e) {
+        showToast('Error: ' + e.message, 'error');
       }
     }
 

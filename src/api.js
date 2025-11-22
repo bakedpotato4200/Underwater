@@ -41,6 +41,7 @@ const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
 const goalsFile = path.join(dataDir, 'goals.json');
 const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
 const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
+const recurringBillsFile = path.join(dataDir, 'recurring-bills.json');
 
 // Load/Save functions
 function loadData(file) {
@@ -69,6 +70,7 @@ let subscriptions = loadData(subscriptionsFile);
 let goals = loadData(goalsFile);
 let exclusionRules = loadData(exclusionRulesFile);
 let learnedPatterns = loadData(learnedPatternsFile) || { merchants: {}, exclusions: {} };
+let recurringBills = loadData(recurringBillsFile);
 
 function shouldExcludeByRule(txn) {
   if (!Array.isArray(exclusionRules)) return false;
@@ -169,6 +171,26 @@ function generateBillCalendar(months = 3) {
           });
         }
       });
+
+      // Add manually added recurring bills
+      if (Array.isArray(recurringBills)) {
+        recurringBills.forEach(bill => {
+          const startDate = new Date(bill.startDate);
+          const checkDate = new Date(startDate);
+          while (checkDate <= date) {
+            const checkStr = checkDate.toISOString().split('T')[0];
+            if (checkStr === dateStr) {
+              calendar[dateStr].push({
+                merchant: bill.name,
+                amount: bill.amount,
+                daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
+                frequency: bill.frequency
+              });
+            }
+            checkDate.setDate(checkDate.getDate() + bill.frequency);
+          }
+        });
+      }
     }
   }
 
@@ -816,6 +838,37 @@ app.post('/api/subscriptions', express.json(), (req, res) => {
 });
 
 app.get('/api/subscriptions', (req, res) => res.json(subscriptions));
+
+app.get('/api/recurring-bills', (req, res) => res.json(Array.isArray(recurringBills) ? recurringBills : []));
+
+app.post('/api/recurring-bills', express.json(), (req, res) => {
+  const { name, amount, frequency, startDate } = req.body;
+  if (!name || !amount || !frequency || !startDate) {
+    return res.status(400).json({ error: 'name, amount, frequency, and startDate required' });
+  }
+  
+  const bill = {
+    id: Date.now(),
+    name,
+    amount: parseFloat(amount),
+    frequency: parseInt(frequency),
+    startDate
+  };
+  
+  if (!Array.isArray(recurringBills)) recurringBills = [];
+  recurringBills.push(bill);
+  saveData(recurringBillsFile, recurringBills);
+  
+  res.json(bill);
+});
+
+app.delete('/api/recurring-bills/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  if (!Array.isArray(recurringBills)) recurringBills = [];
+  recurringBills = recurringBills.filter(b => b.id !== id);
+  saveData(recurringBillsFile, recurringBills);
+  res.json({ success: true });
+});
 
 // Learning endpoints
 app.post('/api/learn-category', express.json(), (req, res) => {
