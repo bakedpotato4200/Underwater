@@ -1290,7 +1290,7 @@
     "id": 144,
     "date": "2025-10-31",
     "amount": 36,
-    "category": "Income",
+    "category": "Transfer",
     "description": "Deposit from Bills XXXXXXX5600",
     "type": "income",
     "excluded": false
@@ -1506,7 +1506,7 @@
     "id": 168,
     "date": "2025-10-31",
     "amount": -1154,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
