@@ -379,15 +379,46 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
     const pdfBuffer = fs.readFileSync(req.file.path);
     const pdfData = await pdfParse(pdfBuffer);
     const text = pdfData.text;
+    
+    // Extract transactions from new PDF
     const parsedTransactions = extractTransactions(text);
-    if (parsedTransactions.length > 0) {
-      transactions = parsedTransactions;
-    } else {
+    
+    // Get next ID based on existing transactions
+    const nextId = transactions.length > 0 ? Math.max(...transactions.map(t => t.id || 0)) + 1 : 1;
+    
+    // Reassign IDs to new transactions to avoid conflicts
+    parsedTransactions.forEach((t, idx) => {
+      t.id = nextId + idx;
+      t.excluded = false;
+    });
+    
+    // Merge new transactions with existing ones, avoiding duplicates
+    const seen = new Set();
+    transactions.forEach(t => {
+      const key = `${t.date}|${t.amount}|${t.description}`;
+      seen.add(key);
+    });
+    
+    const newTransactions = [];
+    parsedTransactions.forEach(t => {
+      const key = `${t.date}|${t.amount}|${t.description}`;
+      if (!seen.has(key)) {
+        newTransactions.push(t);
+        seen.add(key);
+      }
+    });
+    
+    // Add new transactions to existing array
+    transactions.push(...newTransactions);
+    
+    // If no transactions at all, add sample
+    if (transactions.length === 0) {
       transactions = [{ id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense', excluded: false }];
     }
+    
     saveData(transactionsFile, transactions);
     fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
-    res.json({ success: true, transactions: transactions.length, message: `Loaded ${transactions.length} transactions` });
+    res.json({ success: true, transactions: transactions.length, message: `Loaded ${transactions.length} total transactions (${newTransactions.length} new)` });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Upload failed: ' + error.message });
