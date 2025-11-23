@@ -17,7 +17,7 @@
   
   <script>
     if (localStorage.getItem('authToken') && localStorage.getItem('currentUser')) {
-      document.documentElement.style.visibility = 'hidden';
+      document.write('<style>#authScreen { display: none !important; }</style>');
     }
   </script>
   
@@ -2669,10 +2669,9 @@
       if (savedTab === 'overview') { await loadDashboard(); }
       else if (savedTab === 'calendar') { setTimeout(loadCalendar, 100); }
       else if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
-      document.documentElement.style.visibility = 'visible';
     }
     
-    if (authToken) { pageInit(); } else { document.documentElement.style.visibility = 'visible'; }
+    if (authToken) { pageInit(); }
     setInterval(loadDashboard, 30000);
   </script>
   
