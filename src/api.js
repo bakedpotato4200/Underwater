@@ -566,6 +566,20 @@ app.post('/api/upload-statement', verifyToken, upload.single('file'), async (req
     userTxns.push(...newTransactions);
     saveData(userTxnFile, userTxns);
     fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
+    
+    // Process categorization in background (don't wait for it)
+    setImmediate(async () => {
+      try {
+        const updated = loadData(userTxnFile) || [];
+        updated.forEach(t => {
+          if (!t.category || t.category === 'Other') {
+            t.category = categorizeTransaction(t.description);
+          }
+        });
+        saveData(userTxnFile, updated);
+      } catch (e) { console.error('Background categorization error:', e); }
+    });
+    
     res.json({ success: true, transactions: userTxns.length, message: `Loaded ${userTxns.length} total transactions (${newTransactions.length} new)` });
   } catch (error) {
     console.error('Upload error:', error);
