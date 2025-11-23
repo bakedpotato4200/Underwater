@@ -44,6 +44,7 @@
     "name": "Rent",
     "amount": 400,
     "frequency": 14,
-    "startDate": "2025-09-12"
+    "startDate": "2025-09-12",
+    "type": "expense"
   }
 ]

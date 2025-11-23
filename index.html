@@ -811,6 +811,7 @@
         const spending = paycheck.amount - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 1: ' + paycheck1Date.toLocaleDateString() + '</h3>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheck.amount) + '</div>';
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
@@ -831,6 +832,7 @@
         const spending = paycheck.amount - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 2: ' + paycheck2Date.toLocaleDateString() + '</h3>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheck.amount) + '</div>';
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
