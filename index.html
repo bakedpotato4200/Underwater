@@ -820,7 +820,7 @@
           html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Bills Due</h4>';
           bills.forEach(b => {
             const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px; cursor: pointer;" onclick="closeBillsAndGoToCalendar(' + b.id + ')"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
           });
         } else {
           html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
@@ -840,7 +840,7 @@
           html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Bills Due</h4>';
           bills.forEach(b => {
             const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px; cursor: pointer;" onclick="closeBillsAndGoToCalendar(' + b.id + ')"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
           });
         } else {
           html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
@@ -869,6 +869,14 @@
       }
       
       document.getElementById('billsDetailsList').innerHTML = html;
+    }
+    
+    function closeBillsAndGoToCalendar(billId) {
+      closeModal('billsDetailsModal');
+      switchTab('calendar');
+      setTimeout(() => {
+        viewRecurringOnCalendar(billId);
+      }, 100);
     }
     
     function formatCurrency(num) {
