@@ -619,7 +619,7 @@
     async function saveStartingBalance() {
       const balance = parseFloat(document.getElementById('startingBalanceInput').value);
       const date = document.getElementById('startingBalanceDateInput').value;
-      if (!balance || balance < 0) {
+      if (isNaN(balance) || balance < 0) {
         showToast('Please enter a valid amount', 'warning');
         return;
       }
