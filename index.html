@@ -2187,7 +2187,13 @@
           showToast('Category updated & learned!', 'success');
           closeModal('categoryModal');
           await loadCustomCategories();
-          loadAllTransactions();
+          
+          // Reset filters to show all transactions after category change
+          document.getElementById('transactionSearch').value = '';
+          document.getElementById('categoryFilter').value = '';
+          document.getElementById('statusFilter').value = 'all';
+          
+          await loadAllTransactions();
         }
       } catch (e) { console.error('Category error:', e); showToast('Error updating category', 'error'); }
     }
