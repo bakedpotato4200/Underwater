@@ -362,8 +362,6 @@
     .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--accent-primary); transition: all 0.25s ease; }
     .insight-box:hover { border-color: var(--accent-primary); box-shadow: 0 6px 16px rgba(0, 217, 255, 0.12); transform: translateY(-2px); }
     
-    #overviewContent, #overviewHeader, #calendarContent, #transactionsContent, #debtContent, #trendsContent, #insightsContent, #settingsContent { display: none !important; }
-    
     @media (max-width: 1024px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
     }
@@ -2417,14 +2415,13 @@
     loadCustomCategories();
     
     async function pageInit() {
-      document.getElementById('overviewContent').style.display = 'none';
       await loadPaycheckSettings();
       await loadStartingBalance();
       const savedTab = localStorage.getItem('currentTab') || 'overview';
-      switchTab(savedTab);
       if (savedTab === 'overview') { await loadDashboard(); }
-      else if (savedTab === 'calendar') { setTimeout(loadCalendar, 100); }
-      else if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
+      else if (savedTab === 'calendar') { document.getElementById('overviewContent').style.display = 'none'; document.getElementById('overviewHeader').style.display = 'none'; setTimeout(loadCalendar, 100); }
+      else if (savedTab === 'transactions') { document.getElementById('overviewContent').style.display = 'none'; document.getElementById('overviewHeader').style.display = 'none'; setTimeout(loadAllTransactions, 100); }
+      switchTab(savedTab);
     }
     
     pageInit();
