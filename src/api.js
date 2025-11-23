@@ -1336,7 +1336,10 @@ app.get('/api/expendable-income', (req, res) => {
 });
 
 app.get('/api/spending-suggestions', (req, res) => {
-  let transactions = getTransactions();
+  // Force fresh load from file to get updated categories
+  transactions = loadData(transactionsFile);
+  if (!Array.isArray(transactions)) transactions = [];
+  
   const today = new Date();
   const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
   
