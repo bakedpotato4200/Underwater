@@ -727,8 +727,22 @@
       openModal('billsDetailsModal');
     }
     
-    function getPaycheckIncomeSources(startDate, endDate) {
-      if (!startDate) return { total: paycheck.amount, sources: [{ name: 'Paycheck', amount: paycheck.amount }] };
+    function getPaycheckIncomeSources(paycheckIndex) {
+      if (!paycheck1Date || !paycheck2Date) return { total: paycheck.amount, sources: [{ name: 'Paycheck', amount: paycheck.amount }] };
+      
+      let startDate, endDate;
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      
+      if (paycheckIndex === 1) {
+        // Paycheck 1: From start of month to day before Paycheck 2
+        startDate = new Date(currentYear, currentMonth, 1);
+        endDate = new Date(paycheck2Date.getTime() - 1);
+      } else {
+        // Paycheck 2: From Paycheck 2 date to end of month
+        startDate = new Date(paycheck2Date);
+        endDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+      }
       
       let sources = [];
       let total = 0;
@@ -740,31 +754,24 @@
         const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
         let billDate = new Date(startYear, startMonth - 1, startDay);
         
+        // Find first occurrence on or after period start
         while (billDate < startDate) {
           billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
         }
         
-        while (billDate < endDate) {
+        // Collect all occurrences within period
+        while (billDate <= endDate) {
           const dateStr = billDate.getFullYear() + '-' + String(billDate.getMonth() + 1).padStart(2, '0') + '-' + String(billDate.getDate()).padStart(2, '0');
           const actualAmount = actualIncomeData[dateStr];
+          const amount = actualAmount || bill.amount;
           
-          if (actualAmount) {
-            const existingSource = sources.find(s => s.name === bill.name);
-            if (existingSource) {
-              existingSource.amount += actualAmount;
-            } else {
-              sources.push({ name: bill.name, amount: actualAmount, date: billDate.toLocaleDateString() });
-            }
-            total += actualAmount;
+          const existingSource = sources.find(s => s.name === bill.name);
+          if (existingSource) {
+            existingSource.amount += amount;
           } else {
-            const existingSource = sources.find(s => s.name === bill.name);
-            if (existingSource) {
-              existingSource.amount += bill.amount;
-            } else {
-              sources.push({ name: bill.name, amount: bill.amount, date: billDate.toLocaleDateString() });
-            }
-            total += bill.amount;
+            sources.push({ name: bill.name, amount: amount, date: billDate.toLocaleDateString() });
           }
+          total += amount;
           
           billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
         }
@@ -856,8 +863,7 @@
       
       if (billsModalCurrentView === 'paycheck1' && paycheck1Date) {
         const bills = getPaycheckBills(paycheck1Date);
-        const nextPaycheck = new Date(paycheck1Date.getTime() + (paycheck.frequencyDays * 24 * 60 * 60 * 1000));
-        const incomeInfo = getPaycheckIncomeSources(paycheck1Date, nextPaycheck);
+        const incomeInfo = getPaycheckIncomeSources(1);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
         const spending = incomeInfo.total - billsTotal;
         
@@ -888,8 +894,7 @@
         }
       } else if (billsModalCurrentView === 'paycheck2' && paycheck2Date) {
         const bills = getPaycheckBills(paycheck2Date);
-        const nextPaycheck = new Date(paycheck2Date.getTime() + (paycheck.frequencyDays * 24 * 60 * 60 * 1000));
-        const incomeInfo = getPaycheckIncomeSources(paycheck2Date, nextPaycheck);
+        const incomeInfo = getPaycheckIncomeSources(2);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
         const spending = incomeInfo.total - billsTotal;
         
