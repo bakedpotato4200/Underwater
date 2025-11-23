@@ -570,7 +570,7 @@
 
   <div id="billsDetailsModal" class="modal"><div class="modal-content" style="max-width: 600px; max-height: 85vh;"><div class="modal-header">📋 Bills Breakdown</div><div style="margin-bottom: 20px; display: flex; gap: 8px;"><button id="detailPaycheck1Btn" onclick="setBillsDetailView('paycheck1')" style="flex: 1; padding: 10px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 1</button><button id="detailPaycheck2Btn" onclick="setBillsDetailView('paycheck2')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 2</button><button id="detailMonthlyBtn" onclick="setBillsDetailView('monthly')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">All Month</button></div><div id="billsDetailsList" style="max-height: calc(85vh - 180px); overflow-y: auto;"><div class="loading">Loading...</div></div><div class="action-buttons"><button class="btn btn-secondary" onclick="closeModal('billsDetailsModal')">Close</button></div></div></div>
 
-  <div id="bulkActionsBar"><span id="bulkActionsCount"></span><button onclick="selectAllTransactions()">Select All</button><button onclick="bulkExclude()">Mark Excluded</button><button id="deleteBtn" onclick="bulkDelete()">Delete</button><button onclick="selectionMode = false; selectedTransactions.clear(); updateBulkActionsBar(); filterTransactions();">Cancel</button></div>
+  <div id="bulkActionsBar"><span id="bulkActionsCount"></span><button onclick="selectAllTransactions()">Select All</button><button onclick="bulkExclude()">Mark Excluded</button><button id="deleteBtn" onclick="bulkDelete()">Delete</button><button onclick="cancelSelection()">Cancel</button></div>
 
   <script>
     // Hidden data elements for bills calculation
@@ -2266,6 +2266,13 @@
     function selectAllTransactions() {
       allTransactionsData.forEach(t => selectedTransactions.add(t.id));
       selectionMode = true;
+      updateBulkActionsBar();
+      filterTransactions();
+    }
+    
+    function cancelSelection() {
+      selectedTransactions.clear();
+      selectionMode = false;
       updateBulkActionsBar();
       filterTransactions();
     }
