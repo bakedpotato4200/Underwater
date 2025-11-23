@@ -57,7 +57,7 @@
     "id": 8,
     "date": "2025-06-17",
     "amount": -200,
-    "category": "Other",
+    "category": "Utilities",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -75,7 +75,7 @@
     "id": 10,
     "date": "2025-06-18",
     "amount": -20,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -84,7 +84,7 @@
     "id": 11,
     "date": "2025-06-18",
     "amount": -50,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -507,7 +507,7 @@
     "id": 68,
     "date": "2025-06-23",
     "amount": -1177,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -552,7 +552,7 @@
     "id": 73,
     "date": "2025-06-30",
     "amount": -100,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
