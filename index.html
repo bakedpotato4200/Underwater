@@ -1072,12 +1072,20 @@
     
     function restoreTab() {
       const savedTab = localStorage.getItem('currentTab') || 'overview';
-      const tabButton = Array.from(document.querySelectorAll('.nav-tabs button')).find(b => b.textContent.toLowerCase().includes(savedTab.replace('overview', 'dashboard').replace('calendar', 'calendar').replace('transactions', 'transactions')));
-      if (tabButton) {
-        tabButton.click();
-      } else {
-        switchTab(savedTab);
-      }
+      setTimeout(() => {
+        document.querySelectorAll('[id$="Content"]').forEach(el => el.style.display = 'none');
+        document.getElementById('overviewHeader').style.display = savedTab === 'overview' ? 'block' : 'none';
+        if (savedTab === 'overview') { document.getElementById('overviewContent').style.display = 'grid'; }
+        else if (savedTab === 'transactions') { document.getElementById('transactionsContent').style.display = 'grid'; }
+        else { document.getElementById(savedTab + 'Content').style.display = 'grid'; }
+        document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+        const buttons = Array.from(document.querySelectorAll('.nav-tabs button'));
+        if (savedTab === 'overview') { buttons[0]?.classList.add('active'); }
+        else if (savedTab === 'calendar') { buttons[1]?.classList.add('active'); }
+        else if (savedTab === 'transactions') { buttons[2]?.classList.add('active'); }
+        if (savedTab === 'calendar') { setTimeout(loadCalendar, 100); }
+        if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
+      }, 50);
     }
     
     let currentTransactionId = null;
