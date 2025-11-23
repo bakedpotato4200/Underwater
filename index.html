@@ -953,10 +953,14 @@
       if (highlightedRecurringId === billId) {
         highlightedRecurringId = null;
         clearCalendarHighlight();
+        displayAllRecurring();
         return;
       }
       
+      // Clear previous highlight first
+      clearCalendarHighlight();
       highlightedRecurringId = billId;
+      displayAllRecurring();
       
       // Calculate all occurrences in current month
       const occurrences = [];
