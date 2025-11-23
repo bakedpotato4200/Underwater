@@ -42,7 +42,7 @@
   {
     "id": 1763838928034,
     "name": "Rent",
-    "amount": 800,
+    "amount": 400,
     "frequency": 14,
     "startDate": "2025-06-06",
     "type": "expense"
