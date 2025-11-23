@@ -1064,10 +1064,12 @@ app.post('/api/transaction-to-recurring', express.json(), (req, res) => {
 });
 
 // Bills Calculator endpoint
-app.get('/api/bills-calculator', (req, res) => {
+app.get('/api/bills-calculator', verifyToken, (req, res) => {
   try {
+    const userId = req.user.userId;
+    const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
     // Reload bills from disk to ensure we have the latest
-    const freshBills = loadData(recurringBillsFile);
+    const freshBills = loadData(userBillsFile);
     
     // Calculate total monthly bills from recurring bills
     let totalMonthlyBills = 0;
@@ -1367,14 +1369,14 @@ app.get('/api/expendable-income', verifyToken, (req, res) => {
 app.get('/api/spending-suggestions', verifyToken, (req, res) => {
   const userId = req.user.userId;
   const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userTransactions = loadData(userTxnFile);
-  if (!Array.isArray(transactions)) transactions = [];
+  let userTransactions = loadData(userTxnFile);
+  if (!Array.isArray(userTransactions)) userTransactions = [];
   
   const today = new Date();
   const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
   
   // Ensure all transactions have categories assigned
-  transactions = transactions.map(t => {
+  userTransactions = userTransactions.map(t => {
     if (!t.category || t.category === 'Other') {
       t.category = categorizeTransaction(t.description);
     }
@@ -1387,7 +1389,7 @@ app.get('/api/spending-suggestions', verifyToken, (req, res) => {
   
   // Analyze spending by category
   const categorySpending = {};
-  transactions.forEach(t => {
+  userTransactions.forEach(t => {
     const txDate = new Date(t.date);
     if (txDate >= sixMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
       if (!categorySpending[t.category]) {
@@ -1431,9 +1433,11 @@ app.get('/api/spending-suggestions', verifyToken, (req, res) => {
   });
 });
 
-app.get('/api/debts/analysis', (req, res) => {
-  debts = loadData(debtsFile);
-  if (!Array.isArray(debts) || debts.length === 0) {
+app.get('/api/debts/analysis', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  let userDebts = loadData(userDebtsFile);
+  if (!Array.isArray(userDebts) || userDebts.length === 0) {
     return res.json({ avalanche: null, snowball: null, currentPath: null, recommendation: 'Add debts to see analysis' });
   }
 
@@ -1482,15 +1486,15 @@ app.get('/api/debts/analysis', (req, res) => {
   }
 
   // Avalanche: Sort by interest rate (highest first)
-  const avalancheDebts = JSON.parse(JSON.stringify(debts)).sort((a, b) => b.interestRate - a.interestRate);
+  const avalancheDebts = JSON.parse(JSON.stringify(userDebts)).sort((a, b) => b.interestRate - a.interestRate);
   const avalanche = simulatePayoff(avalancheDebts, 'avalanche');
 
   // Snowball: Sort by balance (smallest first)
-  const snowballDebts = JSON.parse(JSON.stringify(debts)).sort((a, b) => a.currentBalance - b.currentBalance);
+  const snowballDebts = JSON.parse(JSON.stringify(userDebts)).sort((a, b) => a.currentBalance - b.currentBalance);
   const snowball = simulatePayoff(snowballDebts, 'snowball');
 
   // Current path (paying minimums only)
-  const currentDebts = JSON.parse(JSON.stringify(debts));
+  const currentDebts = JSON.parse(JSON.stringify(userDebts));
   const currentPath = simulatePayoff(currentDebts, 'minimum');
 
   // Determine recommendation
@@ -1511,7 +1515,7 @@ app.get('/api/debts/analysis', (req, res) => {
     recommendation,
     recommendationLabel,
     savingsVsMinimum: Math.max(0, savingsVsMinimum),
-    debts: debts.map(d => ({ name: d.name, balance: d.currentBalance, rate: d.interestRate }))
+    debts: userDebts.map(d => ({ name: d.name, balance: d.currentBalance, rate: d.interestRate }))
   });
 });
 
