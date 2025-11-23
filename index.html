@@ -648,6 +648,8 @@
 
   <div id="bulkActionsBar"><span id="bulkActionsCount"></span><button onclick="selectAllTransactions()">Select All</button><button onclick="bulkExclude()">Mark Excluded</button><button id="deleteBtn" onclick="bulkDelete()">Delete</button><button onclick="cancelSelection()">Cancel</button></div>
 
+  <div id="transactionMenu" style="display: none; position: fixed; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; min-width: 160px; overflow: hidden;"><button onclick="excludeTransaction()" style="width: 100%; text-align: left; padding: 12px 16px; background: none; border: none; color: var(--text-primary); cursor: pointer; font-size: 14px; border-bottom: 1px solid var(--border-color); transition: all 0.2s;" onmouseover="this.style.background='var(--bg-tertiary)';" onmouseout="this.style.background='none';">Exclude/Include</button><button onclick="currentMenuTxnId && deleteTransaction(currentMenuTxnId); closeTransactionMenu();" style="width: 100%; text-align: left; padding: 12px 16px; background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-tertiary)';" onmouseout="this.style.background='none';">Delete</button></div>
+
   <script>
     // Authentication setup
     const API_URL = window.location.origin;
@@ -2516,6 +2518,40 @@
       } catch (e) { showToast('Error excluding transactions', 'error'); }
     }
     
+    let currentMenuTxnId = null;
+    
+    function openTransactionMenu(txnId, event) {
+      event.stopPropagation();
+      currentMenuTxnId = txnId;
+      const menu = document.getElementById('transactionMenu');
+      const rect = event.target.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 5) + 'px';
+      menu.style.left = (rect.left - 80) + 'px';
+      menu.style.display = 'block';
+      document.addEventListener('click', closeTransactionMenu);
+    }
+    
+    function closeTransactionMenu() {
+      document.getElementById('transactionMenu').style.display = 'none';
+      document.removeEventListener('click', closeTransactionMenu);
+    }
+    
+    async function excludeTransaction() {
+      if (!currentMenuTxnId) return;
+      closeTransactionMenu();
+      try {
+        await apiCall(API_URL + `/api/transactions/${currentMenuTxnId}/toggle-exclude`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        showSuccess('Toggled!');
+        await loadAllTransactions();
+      } catch (e) { 
+        showError('Error excluding transaction: ' + e.message);
+      }
+    }
+    
     async function deleteTransaction(txnId) {
       if (!confirm('Delete this transaction?')) return;
       try {
@@ -2574,7 +2610,7 @@
       
       const html = filtered.map(t => {
         const isSelected = selectedTransactions.has(t.id);
-        return `<div class="transaction-item" data-txn-id="${t.id}" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative; background: ${isSelected ? 'rgba(0, 217, 255, 0.1)' : 'transparent'}; border: 2px solid ${isSelected ? 'rgba(0, 217, 255, 0.4)' : 'transparent'}; border-radius: 8px; padding: 8px; transition: all 0.2s; user-select: none;" ontouchstart="handleTransactionTouchStart(${t.id}, event)" onmousedown="handleTransactionMouseDown(${t.id}, event)"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div><div style="display: flex; gap: 4px;"><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; flex: 1;">${t.category || 'No Category'}</button><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); deleteTransaction(${t.id})" style="font-size: 11px; padding: 4px 8px; background: #ff3b30; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Delete</button></div></div></div>`;
+        return `<div class="transaction-item" data-txn-id="${t.id}" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative; background: ${isSelected ? 'rgba(0, 217, 255, 0.1)' : 'transparent'}; border: 2px solid ${isSelected ? 'rgba(0, 217, 255, 0.4)' : 'transparent'}; border-radius: 8px; padding: 8px; transition: all 0.2s; user-select: none;" ontouchstart="handleTransactionTouchStart(${t.id}, event)" onmousedown="handleTransactionMouseDown(${t.id}, event)"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div><div style="display: flex; gap: 4px; align-items: center;"><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; flex: 1;">${t.category || 'No Category'}</button><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openTransactionMenu(${t.id}, event)" style="font-size: 16px; padding: 4px 6px; background: none; color: var(--text-secondary); border: none; border-radius: 4px; cursor: pointer; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'; this.style.color='var(--text-primary)';" onmouseout="this.style.background='none'; this.style.color='var(--text-secondary)';">⋮</button></div></div></div>`;
       }).join('');
       document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No matching transactions</div>';
     }

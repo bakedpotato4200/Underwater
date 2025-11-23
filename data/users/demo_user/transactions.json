@@ -867,7 +867,7 @@
     "id": 123,
     "date": "2025-07-31",
     "amount": -13.92,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - SUBWAY 46801 4802802446 OK",
     "type": "expense",
     "excluded": false
