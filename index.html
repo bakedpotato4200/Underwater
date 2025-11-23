@@ -1126,6 +1126,7 @@
       
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const dateStr = `${monthNames[calendarCurrentMonth]} ${day}, ${calendarCurrentYear}`;
+      const isoDateStr = calendarCurrentYear + '-' + String(calendarCurrentMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
       
       let html = `<div style="padding: 20px; background: var(--bg-tertiary); border-radius: 12px; max-width: 500px; margin: 0 auto;">`;
       html += `<h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 18px;">${dateStr}</h3>`;
@@ -1161,7 +1162,7 @@
           if (!b.isActualOverride) {
             html += `<button onclick="deleteRecurringTransaction(${b.id})" style="padding: 6px 10px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>`;
           } else {
-            html += `<button onclick="deleteActualIncome('${dateStr}')" style="padding: 6px 10px; background: #ff9500; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Clear</button>`;
+            html += `<button onclick="deleteActualIncome('${isoDateStr}')" style="padding: 6px 10px; background: #ff9500; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Clear</button>`;
           }
           html += `</div>`;
         });
