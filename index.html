@@ -754,33 +754,63 @@
       
       incomeBills.forEach(bill => {
         const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
-        let billDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
         
-        // Find occurrences within this period (count each occurrence only once)
-        let billsThisPeriod = [];
-        while (billDate < endDate) {
-          if (billDate >= startDate) {
-            billsThisPeriod.push(new Date(billDate));
-          }
-          billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
-        }
-        
-        console.log(`${bill.name}: found ${billsThisPeriod.length} occurrence(s)`, billsThisPeriod.map(d => d.toLocaleDateString()));
-        
-        // Add each occurrence
-        billsThisPeriod.forEach(occurrenceDate => {
-          const dateStr = occurrenceDate.getFullYear() + '-' + String(occurrenceDate.getMonth() + 1).padStart(2, '0') + '-' + String(occurrenceDate.getDate()).padStart(2, '0');
-          const actualAmount = actualIncomeData[dateStr];
-          const amount = actualAmount || bill.amount;
+        // For monthly (30-day) frequency, match by day-of-month
+        if (bill.frequency === 30) {
+          let billDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
+          let billsThisPeriod = [];
+          let checkDate = new Date(startDate);
           
-          const existingSource = sources.find(s => s.name === bill.name);
-          if (existingSource) {
-            existingSource.amount += amount;
-          } else {
-            sources.push({ name: bill.name, amount: amount, date: occurrenceDate.toLocaleDateString() });
+          while (checkDate < endDate) {
+            if (checkDate.getDate() === startDay && checkDate >= new Date(startYear, startMonth - 1, startDay)) {
+              billsThisPeriod.push(new Date(checkDate));
+            }
+            checkDate = new Date(checkDate.getTime() + 24 * 60 * 60 * 1000);
           }
-          total += amount;
-        });
+          
+          console.log(`${bill.name}: found ${billsThisPeriod.length} occurrence(s)`, billsThisPeriod.map(d => d.toLocaleDateString()));
+          
+          billsThisPeriod.forEach(occurrenceDate => {
+            const dateStr = occurrenceDate.getFullYear() + '-' + String(occurrenceDate.getMonth() + 1).padStart(2, '0') + '-' + String(occurrenceDate.getDate()).padStart(2, '0');
+            const actualAmount = actualIncomeData[dateStr];
+            const amount = actualAmount || bill.amount;
+            
+            const existingSource = sources.find(s => s.name === bill.name);
+            if (existingSource) {
+              existingSource.amount += amount;
+            } else {
+              sources.push({ name: bill.name, amount: amount, date: occurrenceDate.toLocaleDateString() });
+            }
+            total += amount;
+          });
+        } else {
+          // For non-monthly frequencies, use day-based calculation
+          let billDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
+          let billsThisPeriod = [];
+          
+          while (billDate < endDate) {
+            if (billDate >= startDate) {
+              billsThisPeriod.push(new Date(billDate));
+            }
+            billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+          }
+        
+          console.log(`${bill.name}: found ${billsThisPeriod.length} occurrence(s)`, billsThisPeriod.map(d => d.toLocaleDateString()));
+          
+          billsThisPeriod.forEach(occurrenceDate => {
+            const dateStr = occurrenceDate.getFullYear() + '-' + String(occurrenceDate.getMonth() + 1).padStart(2, '0') + '-' + String(occurrenceDate.getDate()).padStart(2, '0');
+            const actualAmount = actualIncomeData[dateStr];
+            const amount = actualAmount || bill.amount;
+            
+            const existingSource = sources.find(s => s.name === bill.name);
+            if (existingSource) {
+              existingSource.amount += amount;
+            } else {
+              sources.push({ name: bill.name, amount: amount, date: occurrenceDate.toLocaleDateString() });
+            }
+            total += amount;
+          });
+        }
       });
       
       console.log(`Paycheck ${paycheckIndex} total: $${total}`);
