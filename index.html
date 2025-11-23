@@ -1403,6 +1403,12 @@
         showToast('Recurring transaction updated!', 'success');
         closeModal('editRecurringModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+        // Refresh Bills Calculator if modal is open
+        const modal = document.getElementById('billsDetailsModal');
+        if (modal && modal.style.display !== 'none') {
+          calculatePaycheckDates();
+          updateBillsDetailsList();
+        }
       } catch (e) { showToast('Error updating transaction', 'error'); }
     }
     
@@ -1413,6 +1419,12 @@
         showToast('Recurring transaction deleted!', 'success');
         highlightedRecurringId = null;
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+        // Refresh Bills Calculator if modal is open
+        const modal = document.getElementById('billsDetailsModal');
+        if (modal && modal.style.display !== 'none') {
+          calculatePaycheckDates();
+          updateBillsDetailsList();
+        }
       } catch (e) { showToast('Error deleting transaction', 'error'); }
     }
     

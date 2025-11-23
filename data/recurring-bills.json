@@ -40,9 +40,10 @@
     "type": "expense"
   },
   {
-    "id": 1763917840181,
+    "id": 1763918017377,
     "name": "Paycheck ",
     "amount": 1500,
+    "type": "income",
     "frequency": 14,
     "startDate": "2025-11-07"
   }
