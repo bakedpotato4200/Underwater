@@ -462,7 +462,7 @@
     "id": 63,
     "date": "2025-06-21",
     "amount": -15.34,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -471,7 +471,7 @@
     "id": 64,
     "date": "2025-06-21",
     "amount": -11.39,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -480,7 +480,7 @@
     "id": 65,
     "date": "2025-06-21",
     "amount": -41.4,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Digital Card Purchase - STAXX BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -489,7 +489,7 @@
     "id": 66,
     "date": "2025-06-22",
     "amount": -40.88,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Digital Card Purchase - MURPHY6587ATWAL BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
@@ -498,7 +498,7 @@
     "id": 67,
     "date": "2025-06-22",
     "amount": -84.05,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Digital Card Purchase - OLIVE GARDEN ZK 002181 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -516,7 +516,7 @@
     "id": 69,
     "date": "2025-06-24",
     "amount": -13.64,
-    "category": "Card/loan payment",
+    "category": "Subscription",
     "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -525,7 +525,7 @@
     "id": 70,
     "date": "2025-06-24",
     "amount": -5.29,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Card Purchase - WALGREENS 7821 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -534,7 +534,7 @@
     "id": 71,
     "date": "2025-06-28",
     "amount": -13.41,
-    "category": "Card/loan payment",
+    "category": "Subscription",
     "description": "Digital Card Purchase - MCDONALD S F33834 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -543,7 +543,7 @@
     "id": 72,
     "date": "2025-06-29",
     "amount": -21.67,
-    "category": "Card/loan payment",
+    "category": "Transfer",
     "description": "Digital Card Purchase - BUFFALO WILD ECOM 3309 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -561,7 +561,7 @@
     "id": 76,
     "date": "2025-06-24",
     "amount": -1177,
-    "category": "Subscriptions",
+    "category": "Subscription",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
