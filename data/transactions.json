@@ -4075,5 +4075,14 @@
     "category": "Bonus",
     "description": "Actual income adjustment",
     "excluded": false
+  },
+  {
+    "id": 454,
+    "date": "2025-11-23",
+    "amount": 1696,
+    "type": "income",
+    "category": "Actual Income",
+    "description": "Actual income received",
+    "excluded": false
   }
 ]
