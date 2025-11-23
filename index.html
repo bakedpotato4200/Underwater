@@ -1858,33 +1858,52 @@
         `;
         
         if (allDebts.length > 0 && analysis.recommendation) {
+          const isAvalancheRecommended = analysis.recommendation === 'avalanche';
           analysisHtml += `
-            <div style="margin-top: 16px; padding: 16px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-gold)); border-radius: 10px; color: white;">
-              <div style="font-weight: 800; font-size: 16px; margin-bottom: 12px;">🎯 ${analysis.recommendationLabel}</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                <div>
-                  <div style="font-size: 11px; opacity: 0.9; margin-bottom: 4px;">Payoff Time</div>
-                  <div style="font-size: 18px; font-weight: 700;">${analysis[analysis.recommendation].years} years</div>
+            <div style="margin-top: 16px;">
+              <div style="font-weight: 700; font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Payoff Strategy Recommendation</div>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                <div style="padding: 16px; background: var(--bg-secondary); border: 1.5px solid ${isAvalancheRecommended ? 'var(--accent-primary)' : 'var(--border-color)'}; border-radius: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div style="font-weight: 700; font-size: 14px; color: var(--text-primary);">Debt Avalanche</div>
+                    ${isAvalancheRecommended ? '<div style="font-weight: 700; font-size: 11px; color: var(--accent-primary); background: rgba(0, 217, 255, 0.1); padding: 4px 8px; border-radius: 4px;">Recommended</div>' : ''}
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Pay high-interest debts first</div>
+                  <div style="display: grid; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                      <span style="color: var(--text-secondary);">Time to payoff</span>
+                      <span style="font-weight: 700; color: var(--text-primary);">${analysis.avalanche.years} years</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                      <span style="color: var(--text-secondary);">Total interest paid</span>
+                      <span style="font-weight: 700; color: var(--text-primary);">${formatCurrency(analysis.avalanche.totalInterest)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div style="font-size: 11px; opacity: 0.9; margin-bottom: 4px;">Total Interest</div>
-                  <div style="font-size: 18px; font-weight: 700;">${formatCurrency(analysis[analysis.recommendation].totalInterest)}</div>
+                
+                <div style="padding: 16px; background: var(--bg-secondary); border: 1.5px solid ${!isAvalancheRecommended ? 'var(--accent-primary)' : 'var(--border-color)'}; border-radius: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div style="font-weight: 700; font-size: 14px; color: var(--text-primary);">Debt Snowball</div>
+                    ${!isAvalancheRecommended ? '<div style="font-weight: 700; font-size: 11px; color: var(--accent-primary); background: rgba(0, 217, 255, 0.1); padding: 4px 8px; border-radius: 4px;">Recommended</div>' : ''}
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Pay smallest debts first</div>
+                  <div style="display: grid; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                      <span style="color: var(--text-secondary);">Time to payoff</span>
+                      <span style="font-weight: 700; color: var(--text-primary);">${analysis.snowball.years} years</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                      <span style="color: var(--text-secondary);">Total interest paid</span>
+                      <span style="font-weight: 700; color: var(--text-primary);">${formatCurrency(analysis.snowball.totalInterest)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div style="font-size: 12px; opacity: 0.95; margin-bottom: 12px;">💰 Save ${formatCurrency(analysis.savingsVsMinimum)} vs. minimum payments</div>
               
-              <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; margin-top: 12px;">
-                <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">📊 Strategy Comparison</div>
-                <div style="display: grid; gap: 8px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span>${analysis.avalanche.strategy === 'avalanche' ? '⭐ ' : ''}Debt Avalanche</span>
-                    <span>${analysis.avalanche.years} years • ${formatCurrency(analysis.avalanche.totalInterest)}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span>${analysis.snowball.strategy === 'snowball' ? '⭐ ' : ''}Debt Snowball</span>
-                    <span>${analysis.snowball.years} years • ${formatCurrency(analysis.snowball.totalInterest)}</span>
-                  </div>
-                </div>
+              <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 3px solid var(--accent-primary);">
+                <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${analysis.recommendationLabel}</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">Save ${formatCurrency(analysis.savingsVsMinimum)} compared to minimum payments</div>
               </div>
             </div>
           `;
