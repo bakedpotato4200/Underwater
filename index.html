@@ -2276,7 +2276,7 @@
           body: JSON.stringify({ name, type, currentBalance: balance, originalBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay, dueDate: dueDateStr })
         });
         const data = await res.json();
-        showSuccess("Added successfully!")');
+        showSuccess('Debt added!');
         closeModal('addDebtModal');
         loadDebtManager();
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
@@ -2301,7 +2301,7 @@
           body: JSON.stringify({ name, type, currentBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay, dueDate: dueDateStr })
         });
         const data = await res.json();
-        showSuccess("Transaction updated successfully!")');
+        showSuccess('Debt updated!');
         closeModal('editDebtModal');
         loadDebtManager();
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
@@ -2312,7 +2312,7 @@
       if (!confirm('Delete this debt?')) return;
       try {
         await apiCall(API_URL + `/api/debts/${id}`, { method: 'DELETE' });
-        showSuccess("Deleted successfully!")');
+        showSuccess('Deleted!');
         loadDebtManager();
       } catch (e) { showToast('Error deleting debt', 'error'); }
     }
@@ -2327,7 +2327,7 @@
       try {
         const res = await apiCall(API_URL + '/api/recurring-bills', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, amount, type, frequency, startDate }) });
         const data = await res.json();
-        if (data.id || data.message) { showSuccess("Added successfully!")'); document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('recurringFrequency').value = '14'; document.getElementById('recurringStartDate').value = ''; closeModal('addRecurringModal'); loadCalendar(calendarCurrentYear, calendarCurrentMonth); }
+        if (data.id || data.message) { showSuccess('Added!'); document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('recurringFrequency').value = '14'; document.getElementById('recurringStartDate').value = ''; closeModal('addRecurringModal'); loadCalendar(calendarCurrentYear, calendarCurrentMonth); }
       } catch (e) { showToast('Error adding transaction: ' + e.message, 'error'); }
     }
     
@@ -2455,7 +2455,7 @@
             body: JSON.stringify({ category: data.category || category })
           });
           
-          showSuccess("Transaction updated successfully!")');
+          showSuccess('Categorized!');
           closeModal('categoryModal');
           await loadCustomCategories();
           
@@ -2525,7 +2525,7 @@
         selectedTransactions.clear();
         selectionMode = false;
         updateBulkActionsBar();
-        showSuccess("Deleted successfully!")');
+        showSuccess('Deleted!');
         await loadAllTransactions();
       } catch (e) { showToast('Error deleting transactions', 'error'); }
     }
@@ -2639,7 +2639,7 @@
       document.addEventListener('mouseup', handleMouseUp);
     }
     
-    function saveNote() { showSuccess("Saved successfully!")'); closeModal('noteModal'); document.getElementById('noteText').value = ''; }
+    function saveNote() { showSuccess('Saved!'); closeModal('noteModal'); document.getElementById('noteText').value = ''; }
     
     async function handleUpload() {
       const file = document.getElementById('pdfFile').files[0];
