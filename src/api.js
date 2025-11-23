@@ -986,6 +986,29 @@ app.post('/api/recurring-bills', express.json(), (req, res) => {
   res.json(bill);
 });
 
+app.put('/api/recurring-bills/:id', express.json(), (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, amount, type, frequency, startDate } = req.body;
+  if (!name || amount === undefined || !frequency || !startDate) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  
+  if (!Array.isArray(recurringBills)) recurringBills = [];
+  const bill = recurringBills.find(b => b.id === id);
+  if (!bill) {
+    return res.status(404).json({ error: 'Bill not found' });
+  }
+  
+  bill.name = name;
+  bill.amount = parseFloat(amount);
+  bill.type = type;
+  bill.frequency = parseInt(frequency);
+  bill.startDate = startDate;
+  
+  saveData(recurringBillsFile, recurringBills);
+  res.json(bill);
+});
+
 app.delete('/api/recurring-bills/:id', (req, res) => {
   const id = parseInt(req.params.id);
   if (!Array.isArray(recurringBills)) recurringBills = [];

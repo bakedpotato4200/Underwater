@@ -513,6 +513,8 @@
 
   <div id="addRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Add Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="recurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="recurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="recurringFrequency"><option value="7">Weekly</option><option value="14" selected>Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="recurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveRecurringTransaction()">Add</button><button class="btn btn-secondary" onclick="closeModal('addRecurringModal')">Cancel</button></div></div></div>
 
+  <div id="editRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="editRecurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="editRecurringAmount" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="editRecurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="editRecurringFrequency"><option value="7">Weekly</option><option value="14">Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="editRecurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditRecurringTransaction()">Save</button><button class="btn btn-secondary" onclick="closeModal('editRecurringModal')">Cancel</button></div></div></div>
+
   <div id="categoryTransactionsModal" class="modal"><div class="modal-content" style="max-width: 700px; max-height: 85vh;"><div class="modal-header">Category Transactions</div><div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;"><div class="loading">Loading...</div></div></div></div>
   
   <div id="categoryModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header" id="categoryModalHeader">Assign Category</div><div style="margin-top: 20px;">
@@ -675,21 +677,73 @@
       if (listView.style.display === 'block') displayAllRecurring();
     }
     
+    let editingRecurringId = null;
+    
     function displayAllRecurring() {
       const html = calendarBills.map(b => {
         const color = b.type === 'income' ? '#34c759' : '#ff3b30';
         const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : `Every ${b.frequency} days`;
-        return `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid ${color}; display: flex; justify-content: space-between; align-items: center;">
-          <div style="flex: 1;">
+        return `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid ${color}; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 600; color: var(--text-primary);">${b.name}</div>
             <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">${freqText} • Started ${new Date(b.startDate).toLocaleDateString()}</div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-weight: 700; font-size: 16px; color: ${color};">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <div style="font-weight: 700; font-size: 16px; color: ${color}; margin-bottom: 6px;">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div>
+            <div style="display: flex; gap: 4px;">
+              <button onclick="openEditRecurringModal(${b.id})" style="padding: 4px 8px; background: var(--accent-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">Edit</button>
+              <button onclick="deleteRecurringBill(${b.id})" style="padding: 4px 8px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
+            </div>
           </div>
         </div>`;
       }).join('');
       document.getElementById('recurringTransactionsList').innerHTML = html || '<div style="color: var(--text-secondary);">No recurring transactions</div>';
+    }
+    
+    function openEditRecurringModal(id) {
+      const bill = calendarBills.find(b => b.id === id);
+      if (!bill) return;
+      editingRecurringId = id;
+      document.getElementById('editRecurringName').value = bill.name;
+      document.getElementById('editRecurringAmount').value = bill.amount;
+      document.getElementById('editRecurringType').value = bill.type || 'expense';
+      document.getElementById('editRecurringFrequency').value = bill.frequency;
+      document.getElementById('editRecurringStartDate').value = bill.startDate;
+      openModal('editRecurringModal');
+    }
+    
+    async function saveEditRecurringTransaction() {
+      const name = document.getElementById('editRecurringName').value.trim();
+      const amount = parseFloat(document.getElementById('editRecurringAmount').value);
+      const type = document.getElementById('editRecurringType').value;
+      const frequency = parseInt(document.getElementById('editRecurringFrequency').value);
+      const startDate = document.getElementById('editRecurringStartDate').value;
+      
+      if (!name || !amount || !frequency || !startDate) {
+        showToast('Please fill all fields', 'warning');
+        return;
+      }
+      
+      try {
+        const res = await fetch(API_URL + `/api/recurring-bills/${editingRecurringId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, amount, type, frequency, startDate })
+        });
+        const data = await res.json();
+        showToast('Recurring transaction updated!', 'success');
+        closeModal('editRecurringModal');
+        loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+      } catch (e) { showToast('Error updating transaction', 'error'); }
+    }
+    
+    async function deleteRecurringBill(id) {
+      if (!confirm('Delete this recurring transaction?')) return;
+      try {
+        await fetch(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
+        showToast('Recurring transaction deleted!', 'success');
+        loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+      } catch (e) { showToast('Error deleting transaction', 'error'); }
     }
     
     async function loadCalendar(year = calendarCurrentYear, month = calendarCurrentMonth) {
