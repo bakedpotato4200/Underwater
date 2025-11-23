@@ -1194,3 +1194,30 @@ app.delete('/api/debts/:id', (req, res) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+
+// Paycheck settings endpoints
+const settingsFile = path.join(dataDir, 'settings.json');
+let settings = loadData(settingsFile) || { paycheckAmount: 1500, paycheckFrequencyDays: 14 };
+
+app.get('/api/paycheck-settings', (req, res) => {
+  res.json({
+    amount: settings.paycheckAmount || 1500,
+    frequencyDays: settings.paycheckFrequencyDays || 14
+  });
+});
+
+app.post('/api/paycheck-settings', express.json(), (req, res) => {
+  const { amount, frequencyDays } = req.body;
+  if (amount === undefined || frequencyDays === undefined) {
+    return res.status(400).json({ error: 'amount and frequencyDays required' });
+  }
+  
+  settings.paycheckAmount = parseFloat(amount);
+  settings.paycheckFrequencyDays = parseInt(frequencyDays);
+  saveData(settingsFile, settings);
+  
+  res.json({
+    amount: settings.paycheckAmount,
+    frequencyDays: settings.paycheckFrequencyDays
+  });
+});

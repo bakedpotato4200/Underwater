@@ -423,6 +423,7 @@
           </div>
           <div style="display: flex; gap: 8px; flex-shrink: 0;">
             <input type="month" id="dashboardMonth" style="padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 14px;" onchange="loadDashboard()">
+            <button onclick="openPaycheckSettings()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;" title="Paycheck Settings">⚙️</button>
             <button onclick="toggleDarkMode()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
               <span id="themeIcon">🌙</span>
             </button>
@@ -527,6 +528,8 @@
 
   <div id="categoryTransactionsModal" class="modal"><div class="modal-content" style="max-width: 700px; max-height: 85vh;"><div class="modal-header">Category Transactions</div><div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;"><div class="loading">Loading...</div></div></div></div>
   
+  <div id="paycheckSettingsModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">⚙️ Paycheck Settings</div><div class="form-group"><label>Paycheck Amount</label><input type="number" id="paycheckAmountInput" placeholder="1500" step="0.01" min="0"></div><div class="form-group"><label>Frequency (Days)</label><input type="number" id="paycheckFreqInput" placeholder="14" step="1" min="1" max="365"></div><div class="action-buttons"><button class="btn btn-primary" onclick="savePaycheckSettings()">Save</button><button class="btn btn-secondary" onclick="closeModal('paycheckSettingsModal')">Cancel</button></div></div></div>
+
   <div id="categoryModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header" id="categoryModalHeader">Assign Category</div><div style="margin-top: 20px;">
     <div style="margin-bottom: 16px;">
       <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Quick categories:</p>
@@ -566,6 +569,40 @@
     
     const API_URL = window.location.origin;
     let currentBillsView = 'paycheck';
+    let paycheck = { amount: 1500, frequencyDays: 14 };
+    
+    async function loadPaycheckSettings() {
+      try {
+        const res = await fetch(API_URL + '/api/paycheck-settings');
+        paycheck = await res.json();
+      } catch (e) { console.log('Using default paycheck settings'); }
+    }
+    
+    function openPaycheckSettings() {
+      document.getElementById('paycheckAmountInput').value = paycheck.amount;
+      document.getElementById('paycheckFreqInput').value = paycheck.frequencyDays;
+      openModal('paycheckSettingsModal');
+    }
+    
+    async function savePaycheckSettings() {
+      const amount = parseFloat(document.getElementById('paycheckAmountInput').value);
+      const freq = parseInt(document.getElementById('paycheckFreqInput').value);
+      if (!amount || amount <= 0 || !freq || freq <= 0) {
+        showToast('Please enter valid amounts', 'warning');
+        return;
+      }
+      try {
+        const res = await fetch(API_URL + '/api/paycheck-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, frequencyDays: freq })
+        });
+        paycheck = await res.json();
+        showToast('Paycheck settings saved!', 'success');
+        closeModal('paycheckSettingsModal');
+        loadDashboard();
+      } catch (e) { showToast('Error saving settings', 'error'); }
+    }
     
     function setBillsView(view) {
       currentBillsView = view;
@@ -657,6 +694,11 @@
       return { start, end };
     }
     
+    async function initDashboard() {
+      await loadPaycheckSettings();
+      loadDashboard();
+    }
+    
     async function loadDashboard() {
       try {
         const monthInput = document.getElementById('dashboardMonth');
@@ -687,8 +729,8 @@
         document.getElementById('financialScore').textContent = formatNumber((95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0));
         
         const monthlyBillsAmount = bills.reduce((s, b) => s + b.amount, 0);
-        const paycheckAmount = 1500;
-        const daysPerPaycheck = 14;
+        const paycheckAmount = paycheck.amount;
+        const daysPerPaycheck = paycheck.frequencyDays;
         const paychecksPerMonth = 30.44 / daysPerPaycheck;
         
         const billsPerPaycheckAmt = monthlyBillsAmount / paychecksPerMonth;
