@@ -894,8 +894,15 @@
     
     function toggleRecurringList() {
       const listView = document.getElementById('recurringListView');
-      listView.style.display = listView.style.display === 'none' ? 'block' : 'none';
-      if (listView.style.display === 'block') displayAllRecurring();
+      if (listView.style.display === 'none') {
+        listView.style.display = 'block';
+        displayAllRecurring();
+      } else {
+        listView.style.display = 'none';
+        highlightedRecurringId = null;
+        expandedRecurringId = null;
+        clearCalendarHighlight();
+      }
     }
     
     let editingRecurringId = null;
