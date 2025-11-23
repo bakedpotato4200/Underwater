@@ -647,6 +647,14 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
     // Update this transaction
     txn.category = finalCategory;
     
+    // Learn from this category change - extract merchant name and remember the category
+    const merchant = txn.description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+    if (merchant && finalCategory) {
+      if (!learnedPatterns.merchants) learnedPatterns.merchants = {};
+      learnedPatterns.merchants[merchant] = finalCategory;
+      saveData(learnedPatternsFile, learnedPatterns);
+    }
+    
     // Consolidate: if there are other transactions with different case variations, update them too
     const oldCategory = req.body.category;
     if (oldCategory && oldCategory !== finalCategory) {
