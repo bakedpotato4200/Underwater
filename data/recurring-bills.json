@@ -4,7 +4,7 @@
     "name": "Paycheck",
     "amount": 1500,
     "frequency": 14,
-    "startDate": "2025-06-06",
+    "startDate": "2025-06-07",
     "type": "income"
   },
   {
@@ -40,11 +40,11 @@
     "type": "expense"
   },
   {
-    "id": 1763914795318,
+    "id": 1763838928034,
     "name": "Rent",
-    "amount": 400,
+    "amount": 800,
     "frequency": 14,
-    "startDate": "2025-09-12",
+    "startDate": "2025-06-06",
     "type": "expense"
   }
 ]
