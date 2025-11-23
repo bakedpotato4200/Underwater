@@ -850,9 +850,24 @@
         if (!expenseBills.length) {
           html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills scheduled</div>';
         } else {
+          function countActualOccurrences(startDate, frequencyDays) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const start = new Date(year, month, 1);
+            const end = new Date(year, month + 1, 0, 23, 59, 59);
+            let count = 0;
+            let currentDate = new Date(startDate);
+            while (currentDate <= end) {
+              if (currentDate >= start) count++;
+              currentDate = new Date(currentDate.getTime() + frequencyDays * 24 * 60 * 60 * 1000);
+            }
+            return count;
+          }
+          
           html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">All Monthly Bills</h3>';
           const monthlyTotal = expenseBills.reduce((sum, b) => {
-            const occurrences = Math.ceil(30 / b.frequency);
+            const occurrences = countActualOccurrences(b.startDate, b.frequency);
             return sum + (b.amount * occurrences);
           }, 0);
           html += '<div style="font-size: 20px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(monthlyTotal) + '</div>';
@@ -861,7 +876,7 @@
           html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Breakdown by Bill</h4>';
           expenseBills.forEach(b => {
             const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-            const occurrences = Math.ceil(30 / b.frequency);
+            const occurrences = countActualOccurrences(b.startDate, b.frequency);
             const monthlyAmount = b.amount * occurrences;
             html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="text-align: right;"><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div><div style="font-size: 10px; color: var(--text-secondary);">× ' + occurrences + ' = ' + formatCurrency(monthlyAmount) + '</div></div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
           });
