@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Underwater - Smart Budget</title>
   
   <!-- PWA Meta Tags -->
@@ -16,9 +16,15 @@
   <link rel="icon" type="image/png" href="underwater-logo.png">
   
   <script>
-    if (localStorage.getItem('authToken') && localStorage.getItem('currentUser')) {
-      document.write('<style>#authScreen { display: none !important; }</style>');
-    }
+    (function() {
+      const savedToken = localStorage.getItem('authToken');
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedToken && savedUser) {
+        const style = document.createElement('style');
+        style.textContent = '#authScreen { display: none !important; visibility: hidden !important; }';
+        document.head.appendChild(style);
+      }
+    })();
   </script>
   
   <style>
