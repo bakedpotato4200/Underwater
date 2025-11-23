@@ -341,7 +341,9 @@
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); animation: fadeIn 0.25s ease-out; }
     .modal.active { display: flex !important; }
     .modal.active { display: flex; }
-    .modal-content { background: var(--bg-primary); border-radius: 24px; padding: 44px 40px; max-width: 520px; width: 92%; max-height: 90vh; overflow-y: auto; box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2); animation: slideIn 0.35s ease; border: 1px solid var(--border-color); }
+    .modal-content { background: var(--bg-primary); border-radius: 24px; padding: 44px 40px 44px 40px; max-width: 520px; width: 92%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2); animation: slideIn 0.35s ease; border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    .modal-content > :not(.action-buttons) { flex: 0 0 auto; }
+    .action-buttons { position: sticky; bottom: -40px; margin-left: -40px; margin-right: -40px; margin-bottom: -40px; padding: 20px 40px 40px 40px; background: linear-gradient(180deg, transparent 0%, var(--bg-primary) 20%, var(--bg-primary) 100%); display: flex; gap: 12px; flex-wrap: wrap; z-index: 10; }
     .modal-header { font-size: 24px; font-weight: 800; margin-bottom: 28px; color: var(--text-primary); letter-spacing: -0.6px; }
     .form-group { margin-bottom: 24px; }
     .form-group label { display: block; margin-bottom: 12px; color: var(--text-primary); font-weight: 700; font-size: 13px; letter-spacing: -0.2px; }
