@@ -2092,7 +2092,9 @@
     }
     
     let currentCategoryTransactionId = null;
-    const commonCategories = ['Food & Dining', 'Groceries', 'Shopping', 'Transportation', 'Entertainment', 'Utilities', 'Health & Fitness'];
+    let customSavedCategories = [];
+    const baseCategories = ['Food & Dining', 'Groceries', 'Shopping', 'Transportation', 'Entertainment', 'Utilities', 'Health & Fitness'];
+    let commonCategories = [...baseCategories];
     
     const categoryColors = {
       'Food & Dining': '#EF4444',
@@ -2106,6 +2108,13 @@
       'Transfer': '#6B7280',
       'Other': '#A0AEC0'
     };
+    
+    async function loadCustomCategories() {
+      try {
+        customSavedCategories = await fetch(API_URL + '/api/custom-categories').then(r => r.json());
+        commonCategories = [...baseCategories, ...customSavedCategories.filter(c => !baseCategories.includes(c))];
+      } catch (e) { console.log('Could not load custom categories'); }
+    }
     
     function getCategoryColor(category) {
       return categoryColors[category] || categoryColors['Other'];
@@ -2141,8 +2150,17 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ description: allTransactionsData.find(t => t.id === currentCategoryTransactionId).description, category: data.category || category })
           });
+          
+          // Track custom category usage for auto-saving
+          await fetch(API_URL + '/api/custom-categories/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category: data.category || category })
+          });
+          
           showToast('Category updated & learned!', 'success');
           closeModal('categoryModal');
+          await loadCustomCategories();
           loadAllTransactions();
         }
       } catch (e) { showToast('Error updating category', 'error'); }
@@ -2186,6 +2204,7 @@
     
     if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); }
     
+    loadCustomCategories();
     loadDashboard();
     setInterval(loadDashboard, 30000);
   </script>

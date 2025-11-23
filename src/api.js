@@ -42,6 +42,7 @@ const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
 const goalsFile = path.join(dataDir, 'goals.json');
 const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
 const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
+const customCategoriesFile = path.join(dataDir, 'custom-categories.json');
 const recurringBillsFile = path.join(dataDir, 'recurring-bills.json');
 const bankBalanceFile = path.join(dataDir, 'bank-balance.json');
 const settingsFile = path.join(dataDir, 'settings.json');
@@ -81,6 +82,7 @@ let bankBalance = loadData(bankBalanceFile) || { balance: 0 };
 let goals = loadData(goalsFile);
 let exclusionRules = loadData(exclusionRulesFile);
 let learnedPatterns = loadData(learnedPatternsFile) || { merchants: {}, exclusions: {} };
+let customCategories = loadData(customCategoriesFile) || {};
 let recurringBills = loadData(recurringBillsFile);
 
 function shouldExcludeByRule(txn) {
@@ -655,6 +657,12 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
       saveData(learnedPatternsFile, learnedPatterns);
     }
     
+    // Track custom category usage (for auto-saving after 3 uses)
+    customCategories[finalCategory] = (customCategories[finalCategory] || 0) + 1;
+    if (customCategories[finalCategory] >= 3) {
+      saveData(customCategoriesFile, customCategories);
+    }
+    
     // Consolidate: if there are other transactions with different case variations, update them too
     const oldCategory = req.body.category;
     if (oldCategory && oldCategory !== finalCategory) {
@@ -1135,6 +1143,30 @@ app.post('/api/learn-category', express.json(), (req, res) => {
   saveData(learnedPatternsFile, learnedPatterns);
   
   res.json({ success: true, learned: { merchant, category } });
+});
+
+app.post('/api/custom-categories/track', express.json(), (req, res) => {
+  const { category } = req.body;
+  if (!category) {
+    return res.status(400).json({ error: 'category required' });
+  }
+  
+  // Track usage of this category
+  customCategories[category] = (customCategories[category] || 0) + 1;
+  
+  // If category used 3+ times, keep it saved
+  // Otherwise remove it if it drops below threshold
+  if (customCategories[category] >= 3) {
+    saveData(customCategoriesFile, customCategories);
+    res.json({ success: true, saved: true, count: customCategories[category] });
+  } else {
+    res.json({ success: true, saved: false, count: customCategories[category] });
+  }
+});
+
+app.get('/api/custom-categories', (req, res) => {
+  const saved = Object.keys(customCategories).filter(cat => customCategories[cat] >= 3);
+  res.json(saved);
 });
 
 app.post('/api/learn-exclusion', express.json(), (req, res) => {
