@@ -2327,12 +2327,13 @@
       document.addEventListener('touchmove', touchMoveHandler);
       document.addEventListener('touchend', touchEndHandler);
       
+      const duration = selectionMode ? 500 : longPressDuration;
       setTimeout(() => {
-        if (touchStart > 0 && Date.now() - touchStart >= longPressDuration) {
+        if (touchStart > 0 && Date.now() - touchStart >= duration) {
           e.preventDefault();
           toggleTransactionSelection(txnId);
         }
-      }, longPressDuration);
+      }, duration);
     }
     
     let mouseDownTime = 0;
@@ -2356,10 +2357,11 @@
         lastMouseY = moveEvent.clientY;
       };
       
+      const duration = selectionMode ? 500 : longPressDuration;
       const handleMouseUp = () => {
         const moveX = Math.abs(lastMouseX - mouseStartX);
         const moveY = Math.abs(lastMouseY - mouseStartY);
-        if (Date.now() - mouseDownTime >= longPressDuration && moveX < scrollThreshold && moveY < scrollThreshold) {
+        if (Date.now() - mouseDownTime >= duration && moveX < scrollThreshold && moveY < scrollThreshold) {
           toggleTransactionSelection(txnId);
         }
         document.removeEventListener('mousemove', handleMouseMove);
