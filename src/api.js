@@ -1158,7 +1158,7 @@ app.get('/api/debts', (req, res) => {
 });
 
 app.post('/api/debts', express.json(), (req, res) => {
-  const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment } = req.body;
+  const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment, dueDay } = req.body;
   if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -1174,6 +1174,7 @@ app.post('/api/debts', express.json(), (req, res) => {
     originalBalance: parseFloat(originalBalance) || parseFloat(currentBalance),
     interestRate: parseFloat(interestRate) || 0,
     monthlyPayment: parseFloat(monthlyPayment),
+    dueDay: parseInt(dueDay) || 1,
     createdAt: new Date().toISOString()
   };
   
@@ -1198,6 +1199,35 @@ app.post('/api/debts', express.json(), (req, res) => {
   saveData(recurringBillsFile, recurringBills);
   
   res.json({ debt, recurring: recurringBill });
+});
+
+app.put('/api/debts/:id', express.json(), (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, type, currentBalance, interestRate, monthlyPayment, dueDay } = req.body;
+  if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  
+  debts = loadData(debtsFile);
+  if (!Array.isArray(debts)) debts = [];
+  
+  const debtIndex = debts.findIndex(d => d.id === id);
+  if (debtIndex === -1) {
+    return res.status(404).json({ error: 'Debt not found' });
+  }
+  
+  debts[debtIndex] = {
+    ...debts[debtIndex],
+    name,
+    type,
+    currentBalance: parseFloat(currentBalance),
+    interestRate: parseFloat(interestRate) || 0,
+    monthlyPayment: parseFloat(monthlyPayment),
+    dueDay: parseInt(dueDay) || 1
+  };
+  
+  saveData(debtsFile, debts);
+  res.json(debts[debtIndex]);
 });
 
 app.delete('/api/debts/:id', (req, res) => {
