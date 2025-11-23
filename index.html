@@ -659,6 +659,16 @@
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
     
+    function getOrdinalSuffix(day) {
+      if (day > 3 && day < 21) return day + 'th';
+      switch (day % 10) {
+        case 1: return day + 'st';
+        case 2: return day + 'nd';
+        case 3: return day + 'rd';
+        default: return day + 'th';
+      }
+    }
+    
     function showToast(message, type = 'info', duration = 3000) {
       const id = 'toast-' + Date.now();
       const toast = document.createElement('div');
@@ -935,6 +945,19 @@
             if (!b.startDate || !b.frequency) return false;
             const [startYear, startMonth, startDay] = b.startDate.split('-').map(Number);
             const startDate = new Date(startYear, startMonth - 1, startDay);
+            
+            // For monthly (30-day) frequency, match by day of month after start date
+            if (parseInt(b.frequency) === 30) {
+              const currentDay = currentDate.getDate();
+              const startDateObj = new Date(startYear, startMonth - 1, startDay);
+              // Check if current date is on or after start date AND has same day of month
+              if (currentDate >= startDateObj && currentDay === startDay) {
+                return true;
+              }
+              return false;
+            }
+            
+            // For other frequencies, use modulo arithmetic
             const daysDiff = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
             const matches = daysDiff >= 0 && daysDiff % parseInt(b.frequency) === 0;
             return matches;
@@ -1074,7 +1097,7 @@
                 <div style="display: flex; gap: 12px; margin-top: 4px;">
                   <div style="font-size: 11px; background: var(--accent-primary); color: white; padding: 3px 8px; border-radius: 4px; font-weight: 600;">${d.type || 'Other'}</div>
                   <div style="font-size: 12px; color: var(--text-secondary);">Interest Rate: ${d.interestRate}%</div>
-                  <div style="font-size: 12px; color: var(--accent-primary); font-weight: 600;">Due: Day ${d.dueDay || 1}</div>
+                  <div style="font-size: 12px; color: var(--accent-primary); font-weight: 600;">Due: ${getOrdinalSuffix(d.dueDay || 1)}</div>
                 </div>
               </div>
               <div style="display: flex; gap: 12px;">
