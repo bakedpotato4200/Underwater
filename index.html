@@ -1525,7 +1525,7 @@
         loadSpendingTrends(monthTxs);
         loadRecentTransactions(monthTxs);
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
-      } catch (e) { console.error('Dashboard load error:', e); }
+      } catch (e) { console.error('Dashboard load error:', e.message, e.stack); }
     }
     
     function getNextBillDate(bill) {
@@ -1571,24 +1571,32 @@
     }
     
     function loadSpendingTrends(transactions) {
-      const categories = {};
-      transactions.filter(t => t.type === 'expense' && !t.excluded).forEach(t => {
-        categories[t.category] = (categories[t.category] || 0) + t.amount;
-      });
-      const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
-      const totalSpend = sorted.reduce((s, [, a]) => s + a, 0);
-      if (totalSpend === 0) { document.getElementById('spendingTrends').innerHTML = '<div class="loading">No spending data for this month</div>'; return; }
-      const trendsHtml = sorted.map(([cat, amt]) => {
-        const pct = (amt / totalSpend * 100).toFixed(1);
-        return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">${formatMoney(amt)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
-      }).join('');
-      document.getElementById('spendingTrends').innerHTML = trendsHtml || '<div class="loading">No spending data</div>';
+      try {
+        const el = document.getElementById('spendingTrends');
+        if (!el) return;
+        const categories = {};
+        transactions.filter(t => t.type === 'expense' && !t.excluded).forEach(t => {
+          categories[t.category] = (categories[t.category] || 0) + t.amount;
+        });
+        const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+        const totalSpend = sorted.reduce((s, [, a]) => s + a, 0);
+        if (totalSpend === 0) { el.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No spending data for this month</div>'; return; }
+        const trendsHtml = sorted.map(([cat, amt]) => {
+          const pct = (amt / totalSpend * 100).toFixed(1);
+          return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">${formatMoney(amt)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
+        }).join('');
+        el.innerHTML = trendsHtml || '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No spending data</div>';
+      } catch (e) { console.error('Spending trends error:', e); }
     }
     
     function loadRecentTransactions(transactions) {
-      const recentTxs = transactions.slice(-10).reverse();
-      const html = recentTxs.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div></div>`).join('');
-      document.getElementById('transactionsList').innerHTML = html || '<div class="loading">No transactions</div>';
+      try {
+        const el = document.getElementById('transactionsList');
+        if (!el) return;
+        const recentTxs = transactions.slice(-10).reverse();
+        const html = recentTxs.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div></div>`).join('');
+        el.innerHTML = html || '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No transactions this month</div>';
+      } catch (e) { console.error('Recent transactions error:', e); }
     }
     
     let calendarData = {};
