@@ -2352,35 +2352,34 @@
       background: rgba(0, 217, 255, 0.35);
       backdrop-filter: blur(10px);
       color: white;
-      padding: 8px 14px;
+      padding: 10px 14px;
       border-radius: 50px;
       border: 1px solid rgba(0, 217, 255, 0.6);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-      gap: 6px;
+      gap: 8px;
       z-index: 1000;
       align-items: center;
-      justify-content: space-between;
+      justify-content: space-around;
     }
     #bulkActionsCount {
       font-weight: 700;
-      font-size: 11px;
+      font-size: 12px;
       color: #ffffff;
-      min-width: 55px;
+      flex-shrink: 0;
     }
     #bulkActionsBar button {
       background: rgba(0, 150, 200, 0.6);
       color: white;
       border: 2px solid rgba(255, 255, 255, 1);
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 5px;
       cursor: pointer;
       font-weight: 700;
-      font-size: 11px;
+      font-size: 12px;
       transition: all 0.2s;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       white-space: nowrap;
-      flex: 1;
-      text-align: center;
+      flex-shrink: 0;
     }
     #bulkActionsBar button:hover {
       background: rgba(0, 180, 230, 0.8);
