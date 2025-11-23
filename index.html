@@ -2175,7 +2175,7 @@
       formData.append('file', file);
       try {
         document.getElementById('uploadStatus').innerHTML = '<div class="loading">Processing PDF...</div>';
-        const res = await fetch(API_URL + '/api/upload', { method: 'POST', body: formData });
+        const res = await fetch(API_URL + '/api/upload-statement', { method: 'POST', body: formData });
         const data = await res.json();
         document.getElementById('uploadStatus').innerHTML = `<div style="color: var(--accent-success); padding: 12px; background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 16px;">${data.message || 'PDF processed successfully!'}</div>`;
         setTimeout(() => { closeModal('uploadModal'); loadDashboard(); document.getElementById('pdfFile').value = ''; document.getElementById('uploadStatus').innerHTML = ''; }, 2000);
