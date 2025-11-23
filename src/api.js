@@ -543,12 +543,6 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
     
     // Add new transactions to existing array
     transactions.push(...newTransactions);
-    
-    // If no transactions at all, add sample
-    if (transactions.length === 0) {
-      transactions = [{ id: 1, date: '2025-10-02', amount: -1400, category: 'Utilities', description: 'Electric Bill Payment', type: 'expense', excluded: false }];
-    }
-    
     saveData(transactionsFile, transactions);
     fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
     res.json({ success: true, transactions: transactions.length, message: `Loaded ${transactions.length} total transactions (${newTransactions.length} new)` });
