@@ -1168,6 +1168,7 @@ app.post('/api/debts', express.json(), (req, res) => {
     interestRate: parseFloat(interestRate) || 0,
     monthlyPayment: parseFloat(monthlyPayment),
     dueDay: parseInt(dueDay) || 1,
+    dueDate: dueDate || new Date().toISOString().split('T')[0],
     createdAt: new Date().toISOString()
   };
   
@@ -1216,7 +1217,8 @@ app.put('/api/debts/:id', express.json(), (req, res) => {
     currentBalance: parseFloat(currentBalance),
     interestRate: parseFloat(interestRate) || 0,
     monthlyPayment: parseFloat(monthlyPayment),
-    dueDay: parseInt(dueDay) || 1
+    dueDay: parseInt(dueDay) || 1,
+    dueDate: dueDate || debts[debtIndex].dueDate
   };
   
   saveData(debtsFile, debts);

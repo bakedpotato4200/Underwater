@@ -1139,10 +1139,15 @@
       document.getElementById('editDebtBalance').value = debt.currentBalance;
       document.getElementById('editDebtRate').value = debt.interestRate;
       document.getElementById('editDebtPayment').value = debt.monthlyPayment;
-      const dueDay = debt.dueDay || 1;
-      const today = new Date();
-      const dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
-      document.getElementById('editDebtDueDay').value = dueDate.toISOString().split('T')[0];
+      // Use the stored dueDate if available, otherwise calculate from dueDay
+      if (debt.dueDate) {
+        document.getElementById('editDebtDueDay').value = debt.dueDate;
+      } else {
+        const dueDay = debt.dueDay || 1;
+        const today = new Date();
+        const dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
+        document.getElementById('editDebtDueDay').value = dueDate.toISOString().split('T')[0];
+      }
       openModal('editDebtModal');
     }
     

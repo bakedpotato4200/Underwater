@@ -30,5 +30,13 @@
     "frequency": 30,
     "startDate": "2025-11-03",
     "type": "expense"
+  },
+  {
+    "id": 1763909282871,
+    "name": "Chase Payment",
+    "amount": 42,
+    "frequency": 30,
+    "startDate": "2025-10-09",
+    "type": "expense"
   }
 ]
