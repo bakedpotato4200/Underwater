@@ -554,9 +554,9 @@
     <button onclick="closeModal('categoryModal')" class="btn btn-secondary" style="width: 100%; margin-top: 12px;">Cancel</button>
   </div></div></div>
   
-  <div id="addDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Add Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="debtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="debtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="debtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="debtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="debtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day (1-31)</label><input type="number" id="debtDueDay" placeholder="1" step="1" min="1" max="31"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveDebt()">Add</button><button class="btn btn-secondary" onclick="closeModal('addDebtModal')">Cancel</button></div></div></div>
+  <div id="addDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Add Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="debtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="debtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="debtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="debtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="debtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day</label><input type="date" id="debtDueDay"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveDebt()">Add</button><button class="btn btn-secondary" onclick="closeModal('addDebtModal')">Cancel</button></div></div></div>
 
-  <div id="editDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="editDebtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="editDebtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="editDebtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="editDebtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="editDebtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day (1-31)</label><input type="number" id="editDebtDueDay" placeholder="1" step="1" min="1" max="31"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditDebt()">Save</button><button class="btn btn-secondary" onclick="closeModal('editDebtModal')">Cancel</button></div></div></div>
+  <div id="editDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="editDebtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="editDebtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="editDebtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="editDebtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="editDebtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day</label><input type="date" id="editDebtDueDay"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditDebt()">Save</button><button class="btn btn-secondary" onclick="closeModal('editDebtModal')">Cancel</button></div></div></div>
 
   <script>
     // Hidden data elements for bills calculation
@@ -1122,7 +1122,9 @@
       document.getElementById('debtBalance').value = '';
       document.getElementById('debtRate').value = '';
       document.getElementById('debtPayment').value = '';
-      document.getElementById('debtDueDay').value = '1';
+      const today = new Date();
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      document.getElementById('debtDueDay').value = nextMonth.toISOString().split('T')[0];
       openModal('addDebtModal');
     }
     
@@ -1137,7 +1139,10 @@
       document.getElementById('editDebtBalance').value = debt.currentBalance;
       document.getElementById('editDebtRate').value = debt.interestRate;
       document.getElementById('editDebtPayment').value = debt.monthlyPayment;
-      document.getElementById('editDebtDueDay').value = debt.dueDay || 1;
+      const dueDay = debt.dueDay || 1;
+      const today = new Date();
+      const dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
+      document.getElementById('editDebtDueDay').value = dueDate.toISOString().split('T')[0];
       openModal('editDebtModal');
     }
     
@@ -1147,7 +1152,8 @@
       const balance = parseFloat(document.getElementById('debtBalance').value);
       const rate = parseFloat(document.getElementById('debtRate').value);
       const payment = parseFloat(document.getElementById('debtPayment').value);
-      const dueDay = parseInt(document.getElementById('debtDueDay').value) || 1;
+      const dueDateStr = document.getElementById('debtDueDay').value;
+      const dueDay = dueDateStr ? new Date(dueDateStr).getDate() : 1;
       if (!name || !type || !balance || balance < 0 || !payment || payment <= 0) { showToast('Please fill all fields correctly', 'warning'); return; }
       
       try {
@@ -1171,7 +1177,8 @@
       const balance = parseFloat(document.getElementById('editDebtBalance').value);
       const rate = parseFloat(document.getElementById('editDebtRate').value);
       const payment = parseFloat(document.getElementById('editDebtPayment').value);
-      const dueDay = parseInt(document.getElementById('editDebtDueDay').value) || 1;
+      const dueDateStr = document.getElementById('editDebtDueDay').value;
+      const dueDay = dueDateStr ? new Date(dueDateStr).getDate() : 1;
       if (!name || !type || !balance || balance < 0 || !payment || payment <= 0) { showToast('Please fill all fields correctly', 'warning'); return; }
       
       try {
