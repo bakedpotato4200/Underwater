@@ -381,7 +381,7 @@
     "id": 52,
     "date": "2025-06-19",
     "amount": -1.43,
-    "category": "Food & Dining",
+    "category": "Subscription",
     "description": "Digital Card Purchase - HARPS #152 INOLA, OK US",
     "type": "expense",
     "excluded": false
@@ -408,7 +408,7 @@
     "id": 56,
     "date": "2025-06-19",
     "amount": -31.01,
-    "category": "Food & Dining",
+    "category": "Subscription",
     "description": "Digital Card Purchase - TACO BELL 7022230 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -516,7 +516,7 @@
     "id": 69,
     "date": "2025-06-24",
     "amount": -13.64,
-    "category": "Subscriptions",
+    "category": "Card/loan payment",
     "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -534,7 +534,7 @@
     "id": 71,
     "date": "2025-06-28",
     "amount": -13.41,
-    "category": "Subscriptions",
+    "category": "Card/loan payment",
     "description": "Digital Card Purchase - MCDONALD S F33834 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -543,7 +543,7 @@
     "id": 72,
     "date": "2025-06-29",
     "amount": -21.67,
-    "category": "Subscriptions",
+    "category": "Card/loan payment",
     "description": "Digital Card Purchase - BUFFALO WILD ECOM 3309 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
