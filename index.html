@@ -674,19 +674,19 @@
         return;
       }
       
+      if (!validateEmail(email)) {
+        errorEl.textContent = 'Please enter a valid email';
+        errorEl.style.display = 'block';
+        return;
+      }
+      
       try {
-        const res = await apiCall(API_URL + '/api/auth/login', {
+        const res = await safeApiCall(API_URL + '/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
-        
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Login failed';
-          errorEl.style.display = 'block';
-          return;
-        }
         
         authToken = data.token;
         currentUser = { email: data.email, userId: data.userId };
@@ -699,10 +699,11 @@
         document.getElementById('loginPassword').value = '';
         errorEl.style.display = 'none';
         
+        showSuccess('Welcome back!');
         switchTab('overview');
         loadDashboard();
       } catch (e) {
-        errorEl.textContent = 'Connection error';
+        errorEl.textContent = e.message || 'Login failed';
         errorEl.style.display = 'block';
       }
     }
@@ -715,6 +716,12 @@
       
       if (!email || !password || !password2) {
         errorEl.textContent = 'All fields required';
+        errorEl.style.display = 'block';
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        errorEl.textContent = 'Please enter a valid email';
         errorEl.style.display = 'block';
         return;
       }
@@ -732,18 +739,12 @@
       }
       
       try {
-        const res = await apiCall(API_URL + '/api/auth/signup', {
+        const res = await safeApiCall(API_URL + '/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
-        
-        if (!res.ok) {
-          errorEl.textContent = data.error || 'Signup failed';
-          errorEl.style.display = 'block';
-          return;
-        }
         
         authToken = data.token;
         currentUser = { email: data.email, userId: data.userId };
@@ -757,10 +758,11 @@
         document.getElementById('signupPassword2').value = '';
         errorEl.style.display = 'none';
         
+        showSuccess('Account created successfully!');
         switchTab('overview');
         loadDashboard();
       } catch (e) {
-        errorEl.textContent = 'Connection error';
+        errorEl.textContent = e.message || 'Signup failed';
         errorEl.style.display = 'block';
       }
     }
@@ -2667,6 +2669,52 @@
       currentUser = JSON.parse(savedUser);
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('sidebarUserEmail').textContent = currentUser.email;
+    }
+    
+    // Global error handler and notifications
+    function showError(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent-danger); color: white; padding: 16px 20px; border-radius: 8px; z-index: 3000; font-size: 13px; font-weight: 600; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 4000);
+    }
+    
+    function showSuccess(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent-success); color: white; padding: 16px 20px; border-radius: 8px; z-index: 3000; font-size: 13px; font-weight: 600; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
+    }
+    
+    function formatMoney(amount) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(amount || 0));
+    }
+    
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    
+    function showLoading(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) el.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Loading...</div>';
+    }
+    
+    async function safeApiCall(url, options, onError) {
+      try {
+        const res = await apiCall(url, options);
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Request failed');
+        }
+        return res;
+      } catch (e) {
+        const msg = e.message || 'Connection error';
+        showError(msg);
+        if (onError) onError(msg);
+        throw e;
+      }
     }
     
     async function pageInit() {

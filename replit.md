@@ -15,9 +15,10 @@ Underwater is a personal finance management application that helps users track t
 - ✅ **Transaction history with filtering**
 - ✅ **AI-powered PDF statement processing**
 - ✅ **Transaction categorization and exclusion rules**
-- ✅ **Debt management**
+- ✅ **Debt management with Avalanche/Snowball strategies**
 - ✅ **Dark/light mode theming**
 - ✅ **Premium Apple-style underwater aesthetic**
+- ✅ **Complete app polish with error handling, validation, notifications**
 
 ## Getting Started - Authentication
 
@@ -53,6 +54,9 @@ After logging in:
 - Session management with JWT tokens
 - All information stored in backend
 - Responsive design with dark/light modes
+- Global error handling and user notifications
+- Money formatting consistent across app
+- Empty states for all data views
 
 ### Backend
 - Node.js/Express REST API
@@ -79,12 +83,18 @@ After logging in:
 - **Logout**: Clear session and return to login screen
 - **Password Security**: All passwords hashed with bcrypt (10 rounds)
 - **Token Management**: JWT tokens stored in browser localStorage
+- **Email Validation**: All signup/login emails validated before submission
 
 ### Data Migration
 - Existing data automatically migrated on first server restart
 - All users get their own isolated data folder
 - Demo account (demo@example.com) created with migrated data
 - Original data files preserved for compatibility
+
+### API Authorization
+- All endpoints (except /api/auth/) require valid JWT token
+- Authorization header sent automatically with all API calls
+- Token restored on page refresh for persistent sessions
 
 ## Configuration
 
@@ -95,6 +105,26 @@ All financial settings are managed through the UI - no hardcoding required:
 - Users input their own transactions
 - Each user's data is completely private and secure
 
+## App Polish & Reliability
+
+### Error Handling
+- Global error handler with user-friendly notifications
+- All API calls wrapped with error catching
+- Form validation before submission
+- Clear error messages for all failure scenarios
+
+### User Feedback
+- Success notifications after actions (login, account creation, etc.)
+- Error toast notifications in top-right corner
+- Loading states for data fetches
+- Empty state messages when no data exists
+
+### Data Formatting
+- Consistent money formatting (USD with 2 decimals)
+- Email validation on signup/login
+- Form clearing after successful submission
+- Password strength requirements (min 6 chars)
+
 ## Important Notes
 
 - Each user's financial data is completely isolated and private
@@ -103,3 +133,4 @@ All financial settings are managed through the UI - no hardcoding required:
 - Users can create as many accounts as needed
 - All user data is backed up through file persistence
 - The demo account contains your migrated historical data
+- No external email service needed (password reset feature for future)
