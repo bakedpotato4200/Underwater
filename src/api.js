@@ -1266,7 +1266,7 @@ app.get('/api/expendable-income', (req, res) => {
   const paycheckFrequency = settings.paycheckFrequencyDays || 14;
   const estimatedMonthlyIncome = paycheckAmount * (30 / paycheckFrequency);
   
-  // Get expense bills from recurring bills
+  // Get recurring bills (debt payments, utilities, etc) from the system
   const expenseBills = recurringBills.filter(b => b.type !== 'income');
   let monthlyBillsAmount = 0;
   expenseBills.forEach(bill => {
@@ -1278,31 +1278,32 @@ app.get('/api/expendable-income', (req, res) => {
     }
   });
   
-  // Analyze transaction spending over last 3 months
-  let totalSpending = 0;
+  // Analyze ACTUAL spending from bank statements (transactions only)
+  // This shows true spending habits, not forecasts
+  let totalActualSpending = 0;
   let transactionCount = 0;
   transactions.forEach(t => {
     const txDate = new Date(t.date);
     if (txDate >= threeMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
-      totalSpending += Math.abs(t.amount);
+      totalActualSpending += Math.abs(t.amount);
       transactionCount++;
     }
   });
   
-  // Calculate average monthly from transactions
+  // Calculate average monthly actual spending from bank statements
   const monthsDifference = (today - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
-  const avgMonthlySpending = monthsDifference > 0 ? totalSpending / monthsDifference : 0;
+  const avgMonthlyActualSpending = monthsDifference > 0 ? totalActualSpending / monthsDifference : 0;
   
-  // Expendable income = estimated income - bills - discretionary spending
-  const expendableIncome = Math.max(0, estimatedMonthlyIncome - monthlyBillsAmount - avgMonthlySpending);
+  // Expendable income = estimated income - bills - actual spending (from bank statements)
+  const expendableIncome = Math.max(0, estimatedMonthlyIncome - monthlyBillsAmount - avgMonthlyActualSpending);
   
-  // Suggest conservative extra payment (50-75% of expendable)
+  // Suggest conservative extra payment (60% of expendable to keep buffer)
   const suggestedExtraPayment = Math.round(expendableIncome * 0.6);
   
   res.json({
     estimatedMonthlyIncome,
     monthlyBills: monthlyBillsAmount,
-    avgMonthlySpending,
+    avgMonthlyActualSpending,
     expendableIncome,
     suggestedExtraPayment,
     transactionSampleSize: transactionCount
