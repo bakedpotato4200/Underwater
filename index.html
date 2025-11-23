@@ -567,7 +567,7 @@
 
   <div id="actualIncomeModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">💰 Enter Actual Income</div><p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Type the actual amount you received. We'll automatically add any bonus/difference!</p><div class="form-group"><label>Amount You Actually Made</label><input type="number" id="actualIncomeAmount" placeholder="1696" step="0.01" min="0"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveActualIncome()">Add</button><button class="btn btn-secondary" onclick="closeModal('actualIncomeModal')">Cancel</button></div></div></div>
 
-  <div id="billsDetailsModal" class="modal"><div class="modal-content" style="max-width: 600px; max-height: 85vh;"><div class="modal-header">📋 Bills Breakdown</div><div style="margin-bottom: 20px; display: flex; gap: 8px;"><button id="detailPaycheckBtn" onclick="setBillsDetailView('paycheck')" style="flex: 1; padding: 10px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px;">This Paycheck</button><button id="detailMonthlyBtn" onclick="setBillsDetailView('monthly')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px;">All Month</button></div><div id="billsDetailsList" style="max-height: calc(85vh - 180px); overflow-y: auto;"><div class="loading">Loading...</div></div><div class="action-buttons"><button class="btn btn-secondary" onclick="closeModal('billsDetailsModal')">Close</button></div></div></div>
+  <div id="billsDetailsModal" class="modal"><div class="modal-content" style="max-width: 600px; max-height: 85vh;"><div class="modal-header">📋 Bills Breakdown</div><div style="margin-bottom: 20px; display: flex; gap: 8px;"><button id="detailPaycheck1Btn" onclick="setBillsDetailView('paycheck1')" style="flex: 1; padding: 10px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 1</button><button id="detailPaycheck2Btn" onclick="setBillsDetailView('paycheck2')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 2</button><button id="detailMonthlyBtn" onclick="setBillsDetailView('monthly')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">All Month</button></div><div id="billsDetailsList" style="max-height: calc(85vh - 180px); overflow-y: auto;"><div class="loading">Loading...</div></div><div class="action-buttons"><button class="btn btn-secondary" onclick="closeModal('billsDetailsModal')">Close</button></div></div></div>
 
   <script>
     // Hidden data elements for bills calculation
@@ -708,88 +708,157 @@
       }
     }
     
-    let billsModalCurrentView = 'paycheck';
+    let billsModalCurrentView = 'paycheck1';
     let allBillsData = [];
+    let paycheck1Date = null;
+    let paycheck2Date = null;
     
     async function openBillsDetailsModal() {
-      billsModalCurrentView = 'paycheck';
+      billsModalCurrentView = 'paycheck1';
       try {
         const res = await fetch(API_URL + '/api/recurring-bills');
         allBillsData = await res.json();
       } catch (e) { console.error('Error loading bills:', e); }
+      calculatePaycheckDates();
       updateBillsDetailsList();
       openModal('billsDetailsModal');
     }
     
+    function calculatePaycheckDates() {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const incomeBill = allBillsData.find(b => b.type === 'income');
+      if (!incomeBill) return;
+      
+      const [startYear, startMonth, startDay] = incomeBill.startDate.split('-').map(Number);
+      const startDate = new Date(startYear, startMonth - 1, startDay);
+      const frequency = incomeBill.frequency;
+      
+      let currentDate = new Date(startDate);
+      let pc1 = null, pc2 = null;
+      
+      while (currentDate.getFullYear() < currentYear || (currentDate.getFullYear() === currentYear && currentDate.getMonth() < currentMonth)) {
+        currentDate = new Date(currentDate.getTime() + frequency * 24 * 60 * 60 * 1000);
+      }
+      
+      if (currentDate.getMonth() === currentMonth && currentDate.getFullYear() === currentYear) {
+        pc1 = new Date(currentDate);
+      }
+      
+      currentDate = new Date(currentDate.getTime() + frequency * 24 * 60 * 60 * 1000);
+      if (currentDate.getMonth() === currentMonth && currentDate.getFullYear() === currentYear) {
+        pc2 = new Date(currentDate);
+      }
+      
+      paycheck1Date = pc1;
+      paycheck2Date = pc2;
+    }
+    
     function setBillsDetailView(view) {
       billsModalCurrentView = view;
-      const btn1 = document.getElementById('detailPaycheckBtn');
-      const btn2 = document.getElementById('detailMonthlyBtn');
+      const btn1 = document.getElementById('detailPaycheck1Btn');
+      const btn2 = document.getElementById('detailPaycheck2Btn');
+      const btn3 = document.getElementById('detailMonthlyBtn');
       
-      if (view === 'paycheck') {
-        btn1.style.background = 'var(--accent-primary)';
-        btn1.style.color = 'white';
-        btn2.style.background = 'var(--bg-tertiary)';
-        btn2.style.color = 'var(--text-secondary)';
-      } else {
-        btn1.style.background = 'var(--bg-tertiary)';
-        btn1.style.color = 'var(--text-secondary)';
-        btn2.style.background = 'var(--accent-primary)';
-        btn2.style.color = 'white';
-      }
+      [btn1, btn2, btn3].forEach(b => {
+        b.style.background = 'var(--bg-tertiary)';
+        b.style.color = 'var(--text-secondary)';
+      });
+      
+      if (view === 'paycheck1') btn1.style.background = 'var(--accent-primary)'; btn1.style.color = 'white';
+      else if (view === 'paycheck2') { btn2.style.background = 'var(--accent-primary)'; btn2.style.color = 'white'; }
+      else { btn3.style.background = 'var(--accent-primary)'; btn3.style.color = 'white'; }
+      
       updateBillsDetailsList();
     }
     
-    function updateBillsDetailsList() {
+    function getPaycheckBills(paycheckDate) {
+      if (!paycheckDate) return [];
+      const nextPaycheck = new Date(paycheckDate.getTime() + (paycheck.frequencyDays * 24 * 60 * 60 * 1000));
       const expenseBills = allBillsData.filter(b => b.type !== 'income');
-      if (!expenseBills.length) {
-        document.getElementById('billsDetailsList').innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills scheduled</div>';
-        return;
-      }
+      let billsForPaycheck = [];
       
+      expenseBills.forEach(b => {
+        const [startYear, startMonth, startDay] = b.startDate.split('-').map(Number);
+        let billDate = new Date(startYear, startMonth - 1, startDay);
+        
+        while (billDate <= paycheckDate || billDate < paycheckDate) {
+          billDate = new Date(billDate.getTime() + b.frequency * 24 * 60 * 60 * 1000);
+        }
+        
+        if (billDate < nextPaycheck) {
+          billsForPaycheck.push(b);
+        }
+      });
+      
+      return billsForPaycheck;
+    }
+    
+    function updateBillsDetailsList() {
       let html = '';
       
-      if (billsModalCurrentView === 'paycheck') {
-        html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">Bills Per Paycheck</h3>';
-        const totalPerPaycheck = expenseBills.reduce((sum, b) => sum + b.amount, 0);
-        html += '<div style="font-size: 20px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(totalPerPaycheck) + '</div>';
-        html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">Total recurring monthly bills ÷ paychecks per month</div></div>';
+      if (billsModalCurrentView === 'paycheck1' && paycheck1Date) {
+        const bills = getPaycheckBills(paycheck1Date);
+        const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
+        const spending = paycheck.amount - billsTotal;
         
-        html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Individual Bills</h4>';
-        expenseBills.forEach(b => {
-          const color = '#ff3b30';
-          const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-          html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid ' + color + '; border-radius: 6px; margin-bottom: 10px;">';
-          html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">';
-          html += '<div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div>';
-          html += '<div style="font-weight: 700; color: ' + color + ';">' + formatCurrency(b.amount) + '</div>';
-          html += '</div>';
-          html += '<div style="font-size: 11px; color: var(--text-secondary);">' + freqText + ' • Since ' + new Date(b.startDate).toLocaleDateString() + '</div>';
-          html += '</div>';
-        });
-      } else {
-        html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">All Monthly Bills</h3>';
-        const monthlyTotal = expenseBills.reduce((sum, b) => {
-          const occurrences = Math.ceil(30 / b.frequency);
-          return sum + (b.amount * occurrences);
-        }, 0);
-        html += '<div style="font-size: 20px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(monthlyTotal) + '</div>';
-        html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">Estimated monthly total for all recurring bills</div></div>';
+        html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 1: ' + paycheck1Date.toLocaleDateString() + '</h3>';
+        html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
+        html += '</div></div>';
         
-        html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Breakdown by Bill</h4>';
-        expenseBills.forEach(b => {
-          const color = '#ff3b30';
-          const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-          const occurrences = Math.ceil(30 / b.frequency);
-          const monthlyAmount = b.amount * occurrences;
-          html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid ' + color + '; border-radius: 6px; margin-bottom: 10px;">';
-          html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">';
-          html += '<div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div>';
-          html += '<div><div style="font-weight: 700; color: ' + color + '; text-align: right;">' + formatCurrency(b.amount) + '</div><div style="font-size: 10px; color: var(--text-secondary); margin-top: 2px;">× ' + occurrences + '/' + formatCurrency(monthlyAmount) + '</div></div>';
-          html += '</div>';
-          html += '<div style="font-size: 11px; color: var(--text-secondary);">' + freqText + ' • Since ' + new Date(b.startDate).toLocaleDateString() + '</div>';
-          html += '</div>';
-        });
+        if (bills.length) {
+          html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Bills Due</h4>';
+          bills.forEach(b => {
+            const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+          });
+        } else {
+          html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
+        }
+      } else if (billsModalCurrentView === 'paycheck2' && paycheck2Date) {
+        const bills = getPaycheckBills(paycheck2Date);
+        const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
+        const spending = paycheck.amount - billsTotal;
+        
+        html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 2: ' + paycheck2Date.toLocaleDateString() + '</h3>';
+        html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
+        html += '</div></div>';
+        
+        if (bills.length) {
+          html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Bills Due</h4>';
+          bills.forEach(b => {
+            const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+          });
+        } else {
+          html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
+        }
+      } else if (billsModalCurrentView === 'monthly') {
+        const expenseBills = allBillsData.filter(b => b.type !== 'income');
+        if (!expenseBills.length) {
+          html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills scheduled</div>';
+        } else {
+          html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">All Monthly Bills</h3>';
+          const monthlyTotal = expenseBills.reduce((sum, b) => {
+            const occurrences = Math.ceil(30 / b.frequency);
+            return sum + (b.amount * occurrences);
+          }, 0);
+          html += '<div style="font-size: 20px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(monthlyTotal) + '</div>';
+          html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">Total monthly expense</div></div>';
+          
+          html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Breakdown by Bill</h4>';
+          expenseBills.forEach(b => {
+            const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
+            const occurrences = Math.ceil(30 / b.frequency);
+            const monthlyAmount = b.amount * occurrences;
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="text-align: right;"><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div><div style="font-size: 10px; color: var(--text-secondary);">× ' + occurrences + ' = ' + formatCurrency(monthlyAmount) + '</div></div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+          });
+        }
       }
       
       document.getElementById('billsDetailsList').innerHTML = html;
