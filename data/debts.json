@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Amex gold",
+    "type": "Credit Card",
+    "currentBalance": 2300,
+    "originalBalance": 2300,
+    "interestRate": 27,
+    "monthlyPayment": 162
+  }
+]

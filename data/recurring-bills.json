@@ -14,5 +14,12 @@
     "frequency": 14,
     "startDate": "2025-06-06",
     "type": "expense"
+  },
+  {
+    "id": 1763868501882,
+    "name": "Social security ",
+    "amount": 967,
+    "frequency": 30,
+    "startDate": "2025-07-01"
   }
 ]
