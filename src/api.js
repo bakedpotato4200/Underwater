@@ -531,6 +531,9 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
     
     const newTransactions = [];
     parsedTransactions.forEach(t => {
+      // Only add expense transactions from PDFs, exclude income (user adds those manually)
+      if (t.type === 'income') return;
+      
       const key = `${t.date}|${t.amount}|${t.description}`;
       if (!seen.has(key)) {
         newTransactions.push(t);
