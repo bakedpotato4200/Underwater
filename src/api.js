@@ -1280,21 +1280,25 @@ app.post('/api/paycheck-settings', express.json(), (req, res) => {
 });
 
 app.get('/api/starting-balance', (req, res) => {
+  const today = new Date().toISOString().split('T')[0];
   res.json({
-    balance: settings.startingBalance || 5000
+    balance: settings.startingBalance || 5000,
+    date: settings.startingBalanceDate || today
   });
 });
 
 app.post('/api/starting-balance', express.json(), (req, res) => {
-  const { balance } = req.body;
-  if (balance === undefined) {
-    return res.status(400).json({ error: 'balance required' });
+  const { balance, date } = req.body;
+  if (balance === undefined || !date) {
+    return res.status(400).json({ error: 'balance and date required' });
   }
   
   settings.startingBalance = parseFloat(balance);
+  settings.startingBalanceDate = date;
   saveData(settingsFile, settings);
   
   res.json({
-    balance: settings.startingBalance
+    balance: settings.startingBalance,
+    date: settings.startingBalanceDate
   });
 });

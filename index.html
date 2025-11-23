@@ -547,7 +547,7 @@
   
   <div id="paycheckSettingsModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">⚙️ Paycheck Settings</div><div class="form-group"><label>Paycheck Amount</label><input type="number" id="paycheckAmountInput" placeholder="1500" step="0.01" min="0"></div><div class="form-group"><label>Frequency (Days)</label><input type="number" id="paycheckFreqInput" placeholder="14" step="1" min="1" max="365"></div><div class="action-buttons"><button class="btn btn-primary" onclick="savePaycheckSettings()">Save</button><button class="btn btn-secondary" onclick="closeModal('paycheckSettingsModal')">Cancel</button></div></div></div>
 
-  <div id="startingBalanceModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">🏦 Starting Balance</div><div class="form-group"><label>Account Starting Balance</label><input type="number" id="startingBalanceInput" placeholder="5000" step="0.01" min="0"><p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">This is the balance used for your calendar and financial projections.</p></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveStartingBalance()">Save</button><button class="btn btn-secondary" onclick="closeModal('startingBalanceModal')">Cancel</button></div></div></div>
+  <div id="startingBalanceModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">🏦 Starting Balance</div><div class="form-group"><label>Account Starting Balance</label><input type="number" id="startingBalanceInput" placeholder="5000" step="0.01" min="0"><p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">The balance at the start date.</p></div><div class="form-group"><label>Balance Start Date</label><input type="date" id="startingBalanceDateInput"><p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Calendar calculations begin from this date.</p></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveStartingBalance()">Save</button><button class="btn btn-secondary" onclick="closeModal('startingBalanceModal')">Cancel</button></div></div></div>
 
   <div id="categoryModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header" id="categoryModalHeader">Assign Category</div><div style="margin-top: 20px;">
     <div style="margin-bottom: 16px;">
@@ -592,6 +592,7 @@
     let currentBillsView = 'paycheck';
     let paycheck = { amount: 1500, frequencyDays: 14 };
     let startingBalance = 5000;
+    let startingBalanceDate = new Date().toISOString().split('T')[0];
     
     async function loadPaycheckSettings() {
       try {
@@ -605,28 +606,36 @@
         const res = await fetch(API_URL + '/api/starting-balance');
         const data = await res.json();
         startingBalance = data.balance || 5000;
+        startingBalanceDate = data.date || new Date().toISOString().split('T')[0];
       } catch (e) { console.log('Using default starting balance'); }
     }
     
     function openStartingBalanceSettings() {
       document.getElementById('startingBalanceInput').value = startingBalance;
+      document.getElementById('startingBalanceDateInput').value = startingBalanceDate;
       openModal('startingBalanceModal');
     }
     
     async function saveStartingBalance() {
       const balance = parseFloat(document.getElementById('startingBalanceInput').value);
+      const date = document.getElementById('startingBalanceDateInput').value;
       if (!balance || balance < 0) {
         showToast('Please enter a valid amount', 'warning');
+        return;
+      }
+      if (!date) {
+        showToast('Please select a start date', 'warning');
         return;
       }
       try {
         const res = await fetch(API_URL + '/api/starting-balance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ balance })
+          body: JSON.stringify({ balance, date })
         });
         const data = await res.json();
         startingBalance = data.balance;
+        startingBalanceDate = data.date;
         showToast('Starting balance saved!', 'success');
         closeModal('startingBalanceModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
@@ -963,9 +972,6 @@
         
         document.getElementById('recurringListView').style.display = 'none';
         
-        // Use the configured starting balance
-        initialBalance = startingBalance;
-        
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         document.getElementById('calendarMonth').textContent = monthNames[month] + ' ' + year;
         
@@ -973,6 +979,12 @@
         const lastDay = new Date(year, month + 1, 0);
         const prevLastDay = new Date(year, month, 0).getDate();
         const nextDays = 42 - (lastDay.getDate() + firstDay.getDay());
+        
+        // Determine starting balance: use starting balance only if we're on or after its start date
+        const [startBalYear, startBalMonth, startBalDay] = startingBalanceDate.split('-').map(Number);
+        const balanceStartDate = new Date(startBalYear, startBalMonth - 1, startBalDay);
+        const monthStart = new Date(year, month, 1);
+        initialBalance = monthStart >= balanceStartDate ? startingBalance : 0;
         
         // Calculate running balance for each day
         let runningBalance = initialBalance;
