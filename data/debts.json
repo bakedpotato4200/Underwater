@@ -18,6 +18,7 @@
     "interestRate": 26,
     "monthlyPayment": 42,
     "dueDay": 8,
-    "createdAt": "2025-11-23T14:48:02.870Z"
+    "createdAt": "2025-11-23T14:48:02.870Z",
+    "dueDate": "2025-10-09"
   }
 ]

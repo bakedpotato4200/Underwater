@@ -1158,7 +1158,7 @@
       const rate = parseFloat(document.getElementById('debtRate').value);
       const payment = parseFloat(document.getElementById('debtPayment').value);
       const dueDateStr = document.getElementById('debtDueDay').value;
-      const dueDay = dueDateStr ? new Date(dueDateStr).getDate() : 1;
+      const dueDay = dueDateStr ? parseInt(dueDateStr.split('-')[2]) : 1;
       if (!name || !type || !balance || balance < 0 || !payment || payment <= 0) { showToast('Please fill all fields correctly', 'warning'); return; }
       
       try {
@@ -1183,7 +1183,7 @@
       const rate = parseFloat(document.getElementById('editDebtRate').value);
       const payment = parseFloat(document.getElementById('editDebtPayment').value);
       const dueDateStr = document.getElementById('editDebtDueDay').value;
-      const dueDay = dueDateStr ? new Date(dueDateStr).getDate() : 1;
+      const dueDay = dueDateStr ? parseInt(dueDateStr.split('-')[2]) : 1;
       if (!name || !type || !balance || balance < 0 || !payment || payment <= 0) { showToast('Please fill all fields correctly', 'warning'); return; }
       
       try {
