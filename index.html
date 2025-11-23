@@ -416,7 +416,7 @@
 
   <div class="main-content">
     <div class="container">
-      <div class="header" id="overviewHeader">
+      <div class="header" id="overviewHeader" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 12px;">
           <div style="flex: 1; min-width: 0;">
             <h1>💼 Dashboard</h1>
@@ -446,7 +446,7 @@
         </div>
       </div>
 
-      <div class="dashboard" id="overviewContent">
+      <div class="dashboard" id="overviewContent" style="display: none;">
         <div class="card" style="cursor: pointer;" onclick="openBillsDetailsModal()">
           <h2>🎯 Bills Account Calculator</h2>
           <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
@@ -2418,10 +2418,10 @@
       await loadPaycheckSettings();
       await loadStartingBalance();
       const savedTab = localStorage.getItem('currentTab') || 'overview';
-      if (savedTab === 'overview') { await loadDashboard(); }
-      else if (savedTab === 'calendar') { document.getElementById('overviewContent').style.display = 'none'; document.getElementById('overviewHeader').style.display = 'none'; setTimeout(loadCalendar, 100); }
-      else if (savedTab === 'transactions') { document.getElementById('overviewContent').style.display = 'none'; document.getElementById('overviewHeader').style.display = 'none'; setTimeout(loadAllTransactions, 100); }
       switchTab(savedTab);
+      if (savedTab === 'overview') { await loadDashboard(); }
+      else if (savedTab === 'calendar') { setTimeout(loadCalendar, 100); }
+      else if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
     }
     
     pageInit();
