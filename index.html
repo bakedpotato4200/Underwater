@@ -1160,7 +1160,7 @@
         const res = await fetch(API_URL + '/api/debts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, type, currentBalance: balance, originalBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay })
+          body: JSON.stringify({ name, type, currentBalance: balance, originalBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay, dueDate: dueDateStr })
         });
         const data = await res.json();
         showToast('Debt added and linked to Calendar!', 'success');
@@ -1185,7 +1185,7 @@
         const res = await fetch(API_URL + `/api/debts/${currentEditDebtId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, type, currentBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay })
+          body: JSON.stringify({ name, type, currentBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay, dueDate: dueDateStr })
         });
         const data = await res.json();
         showToast('Debt updated!', 'success');

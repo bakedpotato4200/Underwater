@@ -6,6 +6,7 @@
     "currentBalance": 2300,
     "originalBalance": 2300,
     "interestRate": 27,
-    "monthlyPayment": 162
+    "monthlyPayment": 162,
+    "dueDay": 2
   }
 ]

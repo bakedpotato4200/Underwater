@@ -1158,7 +1158,7 @@ app.get('/api/debts', (req, res) => {
 });
 
 app.post('/api/debts', express.json(), (req, res) => {
-  const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment, dueDay } = req.body;
+  const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment, dueDay, dueDate } = req.body;
   if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -1185,13 +1185,13 @@ app.post('/api/debts', express.json(), (req, res) => {
   recurringBills = loadData(recurringBillsFile);
   if (!Array.isArray(recurringBills)) recurringBills = [];
   
-  const today = new Date().toISOString().split('T')[0];
+  const startDate = dueDate || new Date().toISOString().split('T')[0];
   const recurringBill = {
     id: Date.now() + 1,
     name: `${name} Payment`,
     amount: parseFloat(monthlyPayment),
     frequency: 30,
-    startDate: today,
+    startDate: startDate,
     type: 'expense'
   };
   
