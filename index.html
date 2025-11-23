@@ -2502,6 +2502,42 @@
     #deleteBtn:hover {
       background: rgba(250, 80, 100, 0.8);
     }
+    [id^="tooltip-"] {
+      display: none;
+      opacity: 0;
+      position: fixed;
+      z-index: 5000;
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--accent-primary);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      max-width: 280px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      animation: tooltipFade 0.2s ease-out;
+    }
+    @keyframes tooltipFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   </style>
+  
+  <div id="tooltip-budgetInfo" style="top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 200px;">
+    <div style="font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">Monthly Budget Breakdown</div>
+    <div><strong>Income:</strong> Your estimated monthly paycheck based on your settings</div>
+    <div style="margin-top: 6px;"><strong>Bills:</strong> Your recurring bills (rent, utilities, debt payments)</div>
+    <div style="margin-top: 6px;"><strong>Actual Spending:</strong> Real spending from your bank statements</div>
+    <div style="margin-top: 6px;"><strong>Extra Available:</strong> Income minus bills minus spending = money you could use for debt</div>
+    <div style="margin-top: 6px;"><strong>Suggested Payment:</strong> 60% of extra (keeps a safety buffer) to put toward debt</div>
+  </div>
+  
+  <div id="tooltip-spendingInfo" style="top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 200px;">
+    <div style="font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">Spending Optimization</div>
+    <div><strong>What it shows:</strong> Categories where you can cut spending by 25%</div>
+    <div style="margin-top: 6px;"><strong>Data used:</strong> Your transactions from the last 6 months</div>
+    <div style="margin-top: 6px;"><strong>Potential Savings:</strong> How much you could save monthly if you reduce that category</div>
+    <div style="margin-top: 6px;"><strong>How to use:</strong> Take the savings and add it to your debt payment each month</div>
+    <div style="margin-top: 6px;"><strong>Example:</strong> Save $99/month on Food & Dining = $1,188/year toward debt!</div>
+  </div>
+
 </body>
 </html>
