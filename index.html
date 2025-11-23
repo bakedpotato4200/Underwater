@@ -2299,12 +2299,34 @@
     }
     
     let touchStart = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
     const longPressDuration = 500;
+    const scrollThreshold = 10;
     
     function handleTransactionTouchStart(txnId, e) {
       touchStart = Date.now();
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      
+      const touchMoveHandler = (moveEvent) => {
+        const moveX = Math.abs(moveEvent.touches[0].clientX - touchStartX);
+        const moveY = Math.abs(moveEvent.touches[0].clientY - touchStartY);
+        if (moveX > scrollThreshold || moveY > scrollThreshold) {
+          touchStart = -1;
+        }
+      };
+      
+      const touchEndHandler = () => {
+        document.removeEventListener('touchmove', touchMoveHandler);
+        document.removeEventListener('touchend', touchEndHandler);
+      };
+      
+      document.addEventListener('touchmove', touchMoveHandler);
+      document.addEventListener('touchend', touchEndHandler);
+      
       setTimeout(() => {
-        if (Date.now() - touchStart >= longPressDuration) {
+        if (touchStart > 0 && Date.now() - touchStart >= longPressDuration) {
           e.preventDefault();
           toggleTransactionSelection(txnId);
         }
@@ -2312,11 +2334,19 @@
     }
     
     let mouseDownTime = 0;
+    let mouseStartX = 0;
+    let mouseStartY = 0;
+    
     function handleTransactionMouseDown(txnId, e) {
       if (e.button !== 0) return;
       mouseDownTime = Date.now();
+      mouseStartX = e.clientX;
+      mouseStartY = e.clientY;
+      
       const handleMouseUp = () => {
-        if (Date.now() - mouseDownTime >= longPressDuration) {
+        const moveX = Math.abs(e.clientX - mouseStartX);
+        const moveY = Math.abs(e.clientY - mouseStartY);
+        if (Date.now() - mouseDownTime >= longPressDuration && moveX < scrollThreshold && moveY < scrollThreshold) {
           toggleTransactionSelection(txnId);
         }
         document.removeEventListener('mouseup', handleMouseUp);
