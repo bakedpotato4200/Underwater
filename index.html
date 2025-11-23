@@ -719,9 +719,9 @@
       try {
         const res = await fetch(API_URL + '/api/recurring-bills?t=' + Date.now());
         allBillsData = await res.json();
-        const incomeRes = await fetch(API_URL + '/api/actual-income');
+        const incomeRes = await fetch(API_URL + '/api/actual-income?t=' + Date.now());
         actualIncomeData = await incomeRes.json();
-        console.log('Bills Calculator loaded:', allBillsData.length, 'bills', allBillsData);
+        console.log('Bills Calculator loaded:', allBillsData.length, 'bills', allBillsData, 'actual income:', actualIncomeData);
       } catch (e) { console.error('Error loading bills:', e); }
       calculatePaycheckDates();
       updateBillsDetailsList();
@@ -1717,6 +1717,13 @@
         showToast(`Actual income ${formatCurrency(actualAmount)} set for ${dateStr}!`, 'success');
         closeModal('actualIncomeModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+        // Refresh Bills Calculator if modal is open to show actual income
+        const modal = document.getElementById('billsDetailsModal');
+        if (modal && modal.style.display !== 'none') {
+          const freshRes = await fetch(API_URL + '/api/actual-income');
+          actualIncomeData = await freshRes.json();
+          updateBillsDetailsList();
+        }
       } catch (e) { showToast('Error adding income', 'error'); }
     }
     
@@ -1742,6 +1749,13 @@
         const res = await fetch(API_URL + `/api/actual-income/${dateStr}`, { method: 'DELETE' });
         showToast('Actual income cleared!', 'success');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+        // Refresh Bills Calculator if modal is open
+        const modal = document.getElementById('billsDetailsModal');
+        if (modal && modal.style.display !== 'none') {
+          const freshRes = await fetch(API_URL + '/api/actual-income');
+          actualIncomeData = await freshRes.json();
+          updateBillsDetailsList();
+        }
       } catch (e) { showToast('Error clearing income', 'error'); }
     }
     
