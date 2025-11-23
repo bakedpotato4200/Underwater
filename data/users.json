@@ -1,13 +1,8 @@
 {
   "demo@example.com": {
     "userId": "demo_user",
-    "hashedPassword": "$2b$10$/.kn0vAOkfkRo/4CSANZJOUZZTgvtmmyfhweljBCMl8nv7pSDQUSO",
-    "createdAt": "2025-11-23T19:56:43.037Z",
+    "hashedPassword": "$2b$10$ZQZhnr2FyhkeHgy8RX.fpO4WWZO2IQBmmDGYKGExL91nHPh.umENW",
+    "createdAt": "2025-11-23T20:01:34.616Z",
     "migrated": true
-  },
-  "jacobemmer@gmail.com": {
-    "userId": "jacobemmer_gmail_com",
-    "hashedPassword": "$2b$10$gHSnYwX.LoTDPFQZg/ovOuRCMD0BheOv3zFSr8m6yQ6b9WsTm9qcW",
-    "createdAt": "2025-11-23T19:58:40.131Z"
   }
 }
