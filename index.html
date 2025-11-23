@@ -1800,7 +1800,9 @@
     async function loadDebtManager() {
       try {
         const res = await fetch(API_URL + '/api/debts');
+        const analysisRes = await fetch(API_URL + '/api/debts/analysis');
         allDebts = await res.json();
+        const analysis = await analysisRes.json();
         
         const debtListHtml = allDebts.map(d => {
           const monthsToPayoff = d.monthlyPayment > 0 ? Math.ceil(d.currentBalance / d.monthlyPayment) : 999;
@@ -1839,8 +1841,9 @@
         const totalDebt = allDebts.reduce((sum, d) => sum + d.currentBalance, 0);
         const totalPayment = allDebts.reduce((sum, d) => sum + d.monthlyPayment, 0);
         const avgRate = allDebts.length > 0 ? (allDebts.reduce((sum, d) => sum + d.interestRate, 0) / allDebts.length) : 0;
+        const monthlyInterest = allDebts.reduce((sum, d) => sum + (d.currentBalance * (d.interestRate / 100 / 12)), 0);
         
-        document.getElementById('debtSummary').innerHTML = `
+        let analysisHtml = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div><div style="font-size: 12px; color: var(--text-secondary);">Total Debt</div><div style="font-size: 22px; font-weight: 800; color: #ff3b30;">${formatCurrency(totalDebt)}</div></div>
             <div><div style="font-size: 12px; color: var(--text-secondary);">Total Monthly Payment</div><div style="font-size: 22px; font-weight: 800; color: #34C759;">${formatCurrency(totalPayment)}</div></div>
@@ -1849,10 +1852,45 @@
           </div>
           <div style="margin-top: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid var(--accent-gold);">
             <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Monthly Interest Charge</div>
-            <div style="font-size: 18px; font-weight: 700; color: var(--accent-danger);">${formatCurrency(allDebts.reduce((sum, d) => sum + (d.currentBalance * (d.interestRate / 100 / 12)), 0))}</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--accent-danger);">${formatCurrency(monthlyInterest)}</div>
             <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">This much goes to interest, not principal</div>
           </div>
         `;
+        
+        if (allDebts.length > 0 && analysis.recommendation) {
+          analysisHtml += `
+            <div style="margin-top: 16px; padding: 16px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-gold)); border-radius: 10px; color: white;">
+              <div style="font-weight: 800; font-size: 16px; margin-bottom: 12px;">🎯 ${analysis.recommendationLabel}</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                  <div style="font-size: 11px; opacity: 0.9; margin-bottom: 4px;">Payoff Time</div>
+                  <div style="font-size: 18px; font-weight: 700;">${analysis[analysis.recommendation].years} years</div>
+                </div>
+                <div>
+                  <div style="font-size: 11px; opacity: 0.9; margin-bottom: 4px;">Total Interest</div>
+                  <div style="font-size: 18px; font-weight: 700;">${formatCurrency(analysis[analysis.recommendation].totalInterest)}</div>
+                </div>
+              </div>
+              <div style="font-size: 12px; opacity: 0.95; margin-bottom: 12px;">💰 Save ${formatCurrency(analysis.savingsVsMinimum)} vs. minimum payments</div>
+              
+              <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px; margin-top: 12px;">
+                <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">📊 Strategy Comparison</div>
+                <div style="display: grid; gap: 8px; font-size: 12px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>${analysis.avalanche.strategy === 'avalanche' ? '⭐ ' : ''}Debt Avalanche</span>
+                    <span>${analysis.avalanche.years} years • ${formatCurrency(analysis.avalanche.totalInterest)}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>${analysis.snowball.strategy === 'snowball' ? '⭐ ' : ''}Debt Snowball</span>
+                    <span>${analysis.snowball.years} years • ${formatCurrency(analysis.snowball.totalInterest)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        
+        document.getElementById('debtSummary').innerHTML = analysisHtml;
       } catch (e) { console.error('Debt error:', e); }
     }
     

@@ -1251,6 +1251,91 @@ app.delete('/api/debts/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// Debt Analysis Endpoint
+app.get('/api/debts/analysis', (req, res) => {
+  debts = loadData(debtsFile);
+  if (!Array.isArray(debts) || debts.length === 0) {
+    return res.json({ avalanche: null, snowball: null, currentPath: null, recommendation: 'Add debts to see analysis' });
+  }
+
+  function simulatePayoff(sortedDebts, strategy) {
+    let debtsToSimulate = JSON.parse(JSON.stringify(sortedDebts));
+    let totalInterest = 0;
+    let totalMonths = 0;
+    const paymentSchedule = [];
+    
+    while (debtsToSimulate.some(d => d.currentBalance > 0.01)) {
+      totalMonths++;
+      if (totalMonths > 600) break; // Safety limit (50 years)
+      
+      // Add interest to each debt
+      debtsToSimulate.forEach(d => {
+        const monthlyInterest = (d.currentBalance * d.interestRate) / 100 / 12;
+        d.currentBalance += monthlyInterest;
+        totalInterest += monthlyInterest;
+      });
+      
+      // Apply payments (minimum on all, extra on target)
+      debtsToSimulate.forEach((d, idx) => {
+        let payment = d.monthlyPayment;
+        if (idx === 0 && debtsToSimulate[0].currentBalance > 0.01) {
+          // Pay extra on highest priority debt
+          const extraAvailable = debtsToSimulate.reduce((sum, debt, i) => {
+            if (i === 0) return sum;
+            return sum + (debt.monthlyPayment - Math.min(debt.monthlyPayment, debt.currentBalance));
+          }, 0);
+          payment = Math.min(d.monthlyPayment + extraAvailable, d.currentBalance);
+        }
+        d.currentBalance = Math.max(0, d.currentBalance - payment);
+      });
+      
+      // Remove paid off debts
+      debtsToSimulate = debtsToSimulate.filter(d => d.currentBalance > 0.01);
+      if (debtsToSimulate.length === 0) break;
+    }
+    
+    return {
+      months: totalMonths,
+      years: (totalMonths / 12).toFixed(1),
+      totalInterest: totalInterest,
+      strategy: strategy
+    };
+  }
+
+  // Avalanche: Sort by interest rate (highest first)
+  const avalancheDebts = JSON.parse(JSON.stringify(debts)).sort((a, b) => b.interestRate - a.interestRate);
+  const avalanche = simulatePayoff(avalancheDebts, 'avalanche');
+
+  // Snowball: Sort by balance (smallest first)
+  const snowballDebts = JSON.parse(JSON.stringify(debts)).sort((a, b) => a.currentBalance - b.currentBalance);
+  const snowball = simulatePayoff(snowballDebts, 'snowball');
+
+  // Current path (paying minimums only)
+  const currentDebts = JSON.parse(JSON.stringify(debts));
+  const currentPath = simulatePayoff(currentDebts, 'minimum');
+
+  // Determine recommendation
+  let recommendation = 'avalanche';
+  let recommendationLabel = 'Debt Avalanche - Saves Most Money';
+  let savingsVsMinimum = currentPath.totalInterest - avalanche.totalInterest;
+
+  if (snowball.totalInterest < avalanche.totalInterest) {
+    recommendation = 'snowball';
+    recommendationLabel = 'Debt Snowball - Fastest Wins';
+    savingsVsMinimum = currentPath.totalInterest - snowball.totalInterest;
+  }
+
+  res.json({
+    avalanche,
+    snowball,
+    currentPath,
+    recommendation,
+    recommendationLabel,
+    savingsVsMinimum: Math.max(0, savingsVsMinimum),
+    debts: debts.map(d => ({ name: d.name, balance: d.currentBalance, rate: d.interestRate }))
+  });
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 // Initialize settings
