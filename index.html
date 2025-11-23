@@ -1046,12 +1046,20 @@
     async function loadDashboard() {
       try {
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
+        const txRes = await fetch(API_URL + '/api/transactions');
         const bills = await billsRes.json();
+        const transactions = await txRes.json();
         
-        // Calculate current paycheck period
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
+        const monthStart = new Date(currentYear, currentMonth, 1);
+        const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+        
+        const monthTxs = transactions.filter(t => {
+          const txDate = new Date(t.date);
+          return txDate >= monthStart && txDate <= monthEnd;
+        });
         
         // Find current paycheck dates
         let paycheck1 = null, paycheck2 = null;
@@ -1154,8 +1162,8 @@
         function countOccurrencesInMonth(startDate, frequencyDays) {
           let count = 0;
           let currentDate = new Date(startDate);
-          while (currentDate <= end) {
-            if (currentDate >= start) count++;
+          while (currentDate <= monthEnd) {
+            if (currentDate >= monthStart) count++;
             currentDate = new Date(currentDate.getTime() + frequencyDays * 24 * 60 * 60 * 1000);
           }
           return count;
