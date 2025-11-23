@@ -682,7 +682,7 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('sidebarUserEmail').textContent = '👤 ' + currentUser.email;
+        document.getElementById('sidebarUserEmail').textContent = currentUser.email;
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
         errorEl.style.display = 'none';
@@ -738,7 +738,7 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('sidebarUserEmail').textContent = '👤 ' + currentUser.email;
+        document.getElementById('sidebarUserEmail').textContent = currentUser.email;
         document.getElementById('signupEmail').value = '';
         document.getElementById('signupPassword').value = '';
         document.getElementById('signupPassword2').value = '';
@@ -2652,7 +2652,7 @@
       authToken = savedToken;
       currentUser = JSON.parse(savedUser);
       document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('sidebarUserEmail').textContent = '👤 ' + currentUser.email;
+      document.getElementById('sidebarUserEmail').textContent = currentUser.email;
     }
     
     async function pageInit() {
