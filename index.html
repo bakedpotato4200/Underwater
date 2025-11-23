@@ -2336,21 +2336,33 @@
     let mouseDownTime = 0;
     let mouseStartX = 0;
     let mouseStartY = 0;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
     
     function handleTransactionMouseDown(txnId, e) {
       if (e.button !== 0) return;
       mouseDownTime = Date.now();
       mouseStartX = e.clientX;
       mouseStartY = e.clientY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      
+      const handleMouseMove = (moveEvent) => {
+        lastMouseX = moveEvent.clientX;
+        lastMouseY = moveEvent.clientY;
+      };
       
       const handleMouseUp = () => {
-        const moveX = Math.abs(e.clientX - mouseStartX);
-        const moveY = Math.abs(e.clientY - mouseStartY);
+        const moveX = Math.abs(lastMouseX - mouseStartX);
+        const moveY = Math.abs(lastMouseY - mouseStartY);
         if (Date.now() - mouseDownTime >= longPressDuration && moveX < scrollThreshold && moveY < scrollThreshold) {
           toggleTransactionSelection(txnId);
         }
+        document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
+      
+      document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
     
