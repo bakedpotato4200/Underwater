@@ -54,7 +54,18 @@ const JWT_SECRET = 'underwater-secret-key-change-in-production';
 
 const upload = multer({ dest: uploadDir });
 
-// Data files
+// User-specific file path helper
+function getUserDataDir(userId) {
+  const userDir = path.join(usersDir, userId);
+  if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
+  return userDir;
+}
+
+function getFileForUser(userId, fileName) {
+  return path.join(getUserDataDir(userId), fileName);
+}
+
+// Data files (legacy - now per-user)
 const transactionsFile = path.join(dataDir, 'transactions.json');
 const debtsFile = path.join(dataDir, 'debts.json');
 const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
@@ -524,7 +535,8 @@ function extractTransactions(text) {
   return transactions;
 }
 
-app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
+app.post('/api/upload-statement', verifyToken, upload.single('file'), async (req, res) => {
+  const userId = req.user.userId;
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const pdfBuffer = fs.readFileSync(req.file.path);
@@ -573,32 +585,40 @@ app.post('/api/upload-statement', upload.single('file'), async (req, res) => {
   }
 });
 
-app.get('/api/transactions', (req, res) => {
-  const fresh = getTransactions();
-  res.json(fresh);
+app.get('/api/transactions', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const txns = loadData(userTxnFile) || [];
+  res.json(txns);
 });
-app.post('/api/transactions', express.json(), (req, res) => {
-  const newTransaction = { id: Math.max(...transactions.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0], excluded: false };
-  transactions.push(newTransaction);
-  saveData(transactionsFile, transactions);
+app.post('/api/transactions', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const txns = loadData(userTxnFile) || [];
+  const newTransaction = { id: Math.max(...txns.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0], excluded: false };
+  txns.push(newTransaction);
+  saveData(userTxnFile, txns);
   res.json(newTransaction);
 });
 
-app.post('/api/transactions/:id/toggle-exclude', express.json(), (req, res) => {
-  const txn = transactions.find(t => t.id == req.params.id);
+app.post('/api/transactions/:id/toggle-exclude', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userRulesFile = getFileForUser(userId, 'exclusion-rules.json');
+  const txns = loadData(userTxnFile) || [];
+  const rules = loadData(userRulesFile) || [];
+  const txn = txns.find(t => t.id == req.params.id);
   if (txn) {
     txn.excluded = !txn.excluded;
-    
     if (txn.excluded && req.body.learnRule) {
       const merchant = txn.description.split(' ')[0];
-      const existingRule = exclusionRules.find(r => r.pattern === merchant);
+      const existingRule = rules.find(r => r.pattern === merchant);
       if (!existingRule) {
-        exclusionRules.push({ type: 'merchant', pattern: merchant });
-        saveData(exclusionRulesFile, exclusionRules);
+        rules.push({ type: 'merchant', pattern: merchant });
+        saveData(userRulesFile, rules);
       }
     }
-    
-    saveData(transactionsFile, transactions);
+    saveData(userTxnFile, txns);
     res.json({ success: true, excluded: txn.excluded });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
