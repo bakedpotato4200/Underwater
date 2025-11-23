@@ -1253,10 +1253,42 @@
       } catch (e) { console.error('Dashboard load error:', e); }
     }
     
+    function getNextBillDate(bill) {
+      const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
+      const startDate = new Date(startYear, startMonth - 1, startDay);
+      const today = new Date();
+      
+      let nextDate = new Date(startDate);
+      
+      // For monthly (30-day) frequency, match by day-of-month
+      if (bill.frequency === 30) {
+        nextDate = new Date(today.getFullYear(), today.getMonth(), startDay);
+        if (nextDate < today) {
+          nextDate = new Date(today.getFullYear(), today.getMonth() + 1, startDay);
+        }
+      } else {
+        // For other frequencies, add days from start date
+        while (nextDate < today) {
+          nextDate = new Date(nextDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+        }
+      }
+      
+      return nextDate;
+    }
+    
+    function formatBillDate(date) {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return monthNames[date.getMonth()] + ' ' + date.getDate();
+    }
+    
     function loadUpcomingBills(bills) {
       const billsList = document.getElementById('upcomingBillsList');
       if (!bills.length) { billsList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills scheduled</div>'; return; }
-      billsList.innerHTML = bills.map(b => `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">Every ${b.frequency} days</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? '#34C759' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div></div>`).join('');
+      billsList.innerHTML = bills.map(b => {
+        const nextDate = getNextBillDate(b);
+        const dateStr = formatBillDate(nextDate);
+        return `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">${dateStr}</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? '#34C759' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div></div>`;
+      }).join('');
     }
     
     function loadSpendingTrends(transactions) {
