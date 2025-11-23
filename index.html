@@ -1186,14 +1186,6 @@
         return;
       }
       
-      const projectedIncome = calendarData[calendarCurrentDay].income;
-      const difference = actualAmount - projectedIncome;
-      
-      if (difference === 0) {
-        showToast('Amount matches projected income', 'info');
-        return;
-      }
-      
       try {
         const date = new Date(calendarCurrentYear, calendarCurrentMonth, calendarCurrentDay);
         const dateStr = date.toISOString().split('T')[0];
@@ -1202,15 +1194,15 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             date: dateStr,
-            amount: Math.abs(difference),
-            type: difference > 0 ? 'income' : 'expense',
-            category: difference > 0 ? 'Bonus' : 'Adjustment',
-            description: difference > 0 ? 'Actual income adjustment' : 'Income adjustment',
+            amount: actualAmount,
+            type: 'income',
+            category: 'Actual Income',
+            description: 'Actual income received',
             excluded: false
           })
         });
         const data = await res.json();
-        showToast(`${difference > 0 ? '+' : ''}${formatCurrency(difference)} added!`, 'success');
+        showToast(`Actual income ${formatCurrency(actualAmount)} added!`, 'success');
         closeModal('actualIncomeModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { showToast('Error adding income', 'error'); }
