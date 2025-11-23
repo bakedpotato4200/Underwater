@@ -1365,9 +1365,19 @@
         const transactions = await txRes.json();
         const actualIncomeData = await incomeRes.json();
         
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
+        // Get selected month from input or use current month
+        const dashboardMonthInput = document.getElementById('dashboardMonth');
+        let currentMonth, currentYear;
+        if (dashboardMonthInput && dashboardMonthInput.value) {
+          const [year, month] = dashboardMonthInput.value.split('-').map(Number);
+          currentYear = year;
+          currentMonth = month - 1;
+        } else {
+          const now = new Date();
+          currentMonth = now.getMonth();
+          currentYear = now.getFullYear();
+          if (dashboardMonthInput) dashboardMonthInput.value = currentYear + '-' + String(currentMonth + 1).padStart(2, '0');
+        }
         const monthStart = new Date(currentYear, currentMonth, 1);
         const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
         
