@@ -410,6 +410,7 @@
       <button onclick="switchTab('insights'); toggleSidebar();">Insights</button>
       <button onclick="switchTab('debt'); toggleSidebar();">Debt Manager</button>
       <button onclick="switchTab('transactions'); toggleSidebar();">All Transactions</button>
+      <button onclick="switchTab('settings'); toggleSidebar();">⚙️ Settings</button>
     </div>
   </div>
 
@@ -423,10 +424,6 @@
           </div>
           <div style="display: flex; gap: 8px; flex-shrink: 0;">
             <input type="month" id="dashboardMonth" style="padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 14px;" onchange="loadDashboard()">
-            <button onclick="openPaycheckSettings()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;" title="Paycheck Settings">⚙️</button>
-            <button onclick="toggleDarkMode()" style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
-              <span id="themeIcon">🌙</span>
-            </button>
           </div>
         </div>
         <div class="stats">
@@ -514,6 +511,21 @@
           </select>
         </div>
         <div id="allTransactionsList" style="display: grid; gap: 0;"><div class="loading">Loading transactions...</div></div></div></div></div>
+
+      <div id="settingsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>⚙️ Settings</h2><div style="margin-top: 20px; display: grid; gap: 20px;">
+        <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+          <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 16px; font-weight: 700;">💰 Paycheck Settings</h3>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Configure your paycheck amount and frequency for bills calculation.</p>
+          <button class="btn btn-primary" style="width: 100%;" onclick="openPaycheckSettings()">Edit Paycheck Settings</button>
+        </div>
+        <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+          <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 16px; font-weight: 700;">🌓 Theme</h3>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Choose between dark mode and light mode for your interface.</p>
+          <button class="btn btn-primary" style="width: 100%;" onclick="toggleDarkMode()">
+            <span id="themeToggleText">Toggle Dark/Light Mode</span>
+          </button>
+        </div>
+      </div></div></div>
     </div>
   </div>
 
