@@ -1284,8 +1284,12 @@
     function loadUpcomingBills(bills) {
       const billsList = document.getElementById('upcomingBillsList');
       if (!bills.length) { billsList.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills scheduled</div>'; return; }
-      billsList.innerHTML = bills.map(b => {
-        const nextDate = getNextBillDate(b);
+      
+      // Sort bills by next occurrence date (closest first)
+      const billsWithDates = bills.map(b => ({ bill: b, nextDate: getNextBillDate(b) }));
+      billsWithDates.sort((a, b) => a.nextDate - b.nextDate);
+      
+      billsList.innerHTML = billsWithDates.map(({ bill: b, nextDate }) => {
         const dateStr = formatBillDate(nextDate);
         return `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">${dateStr}</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? '#34C759' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div></div>`;
       }).join('');
