@@ -746,8 +746,11 @@
       let sources = [];
       let total = 0;
       
+      console.log(`\nPaycheck ${paycheckIndex} period: ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`);
+      
       // Get all income recurring bills between start and end date
       const incomeBills = allBillsData.filter(b => b.type === 'income');
+      console.log(`Income bills: ${incomeBills.map(b => b.name).join(', ')}`);
       
       incomeBills.forEach(bill => {
         const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
@@ -761,6 +764,8 @@
           }
           billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
         }
+        
+        console.log(`${bill.name}: found ${billsThisPeriod.length} occurrence(s)`, billsThisPeriod.map(d => d.toLocaleDateString()));
         
         // Add each occurrence
         billsThisPeriod.forEach(occurrenceDate => {
@@ -778,6 +783,7 @@
         });
       });
       
+      console.log(`Paycheck ${paycheckIndex} total: $${total}`);
       return { total: total || paycheck.amount, sources: sources.length > 0 ? sources : [{ name: 'Paycheck', amount: paycheck.amount }] };
     }
     
@@ -785,7 +791,7 @@
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
-      const incomeBill = allBillsData.find(b => b.type === 'income');
+      const incomeBill = allBillsData.find(b => b.type === 'income' && b.frequency === 14);
       if (!incomeBill) return;
       
       const [startYear, startMonth, startDay] = incomeBill.startDate.split('-').map(Number);
@@ -810,6 +816,7 @@
       
       paycheck1Date = pc1;
       paycheck2Date = pc2;
+      console.log('Paycheck dates calculated:', paycheck1Date?.toLocaleDateString(), paycheck2Date?.toLocaleDateString());
     }
     
     function setBillsDetailView(view) {
