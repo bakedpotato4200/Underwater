@@ -507,7 +507,7 @@
     "id": 68,
     "date": "2025-06-23",
     "amount": -1177,
-    "category": "Other",
+    "category": "Food & Dining",
     "description": "Withdrawal to Savings XXXXXXX0688",
     "type": "expense",
     "excluded": false
@@ -516,7 +516,7 @@
     "id": 69,
     "date": "2025-06-24",
     "amount": -13.64,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -525,7 +525,7 @@
     "id": 70,
     "date": "2025-06-24",
     "amount": -5.29,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - WALGREENS 7821 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -534,7 +534,7 @@
     "id": 71,
     "date": "2025-06-28",
     "amount": -13.41,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - MCDONALD S F33834 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -543,7 +543,7 @@
     "id": 72,
     "date": "2025-06-29",
     "amount": -21.67,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - BUFFALO WILD ECOM 3309 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -552,7 +552,7 @@
     "id": 73,
     "date": "2025-06-30",
     "amount": -100,
-    "category": "Other",
+    "category": "Food & Dining",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false
