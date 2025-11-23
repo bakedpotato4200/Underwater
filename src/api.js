@@ -1315,7 +1315,7 @@ app.post('/api/paycheck-settings', express.json(), (req, res) => {
 app.get('/api/starting-balance', (req, res) => {
   const today = new Date().toISOString().split('T')[0];
   res.json({
-    balance: settings.startingBalance || 5000,
+    balance: settings.startingBalance || 0,
     date: settings.startingBalanceDate || today
   });
 });
