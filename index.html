@@ -766,9 +766,16 @@
         b.style.color = 'var(--text-secondary)';
       });
       
-      if (view === 'paycheck1') btn1.style.background = 'var(--accent-primary)'; btn1.style.color = 'white';
-      else if (view === 'paycheck2') { btn2.style.background = 'var(--accent-primary)'; btn2.style.color = 'white'; }
-      else { btn3.style.background = 'var(--accent-primary)'; btn3.style.color = 'white'; }
+      if (view === 'paycheck1') {
+        btn1.style.background = 'var(--accent-primary)';
+        btn1.style.color = 'white';
+      } else if (view === 'paycheck2') {
+        btn2.style.background = 'var(--accent-primary)';
+        btn2.style.color = 'white';
+      } else {
+        btn3.style.background = 'var(--accent-primary)';
+        btn3.style.color = 'white';
+      }
       
       updateBillsDetailsList();
     }
