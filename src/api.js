@@ -1251,11 +1251,10 @@ app.delete('/api/debts/:id', (req, res) => {
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
-
-// Paycheck settings endpoints
-const settingsFile = path.join(dataDir, 'settings.json');
+// Initialize settings
 let settings = loadData(settingsFile) || { paycheckAmount: 1500, paycheckFrequencyDays: 14 };
+
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
 app.get('/api/paycheck-settings', (req, res) => {
   res.json({
