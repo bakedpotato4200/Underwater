@@ -864,8 +864,6 @@ app.post('/api/goals', express.json(), (req, res) => {
 
 app.get('/api/goals', (req, res) => res.json(goals));
 
-app.get('/api/debts', (req, res) => res.json(debts));
-
 app.post('/api/payoff-strategy', express.json(), (req, res) => {
   const { strategy, extraPayment } = req.body;
   const extra = extraPayment || 0;
