@@ -731,17 +731,16 @@
       if (!paycheck1Date || !paycheck2Date) return { total: paycheck.amount, sources: [{ name: 'Paycheck', amount: paycheck.amount }] };
       
       let startDate, endDate;
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
       
       if (paycheckIndex === 1) {
-        // Paycheck 1: From start of month to day before Paycheck 2
-        startDate = new Date(currentYear, currentMonth, 1);
-        endDate = paycheck2Date;
+        // Paycheck 1: From start of month to day BEFORE Paycheck 2
+        startDate = new Date(paycheck1Date.getFullYear(), paycheck1Date.getMonth(), 1, 0, 0, 0);
+        endDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth(), paycheck2Date.getDate(), 0, 0, 0);
       } else {
         // Paycheck 2: From Paycheck 2 date to end of month
-        startDate = paycheck2Date;
-        endDate = new Date(currentYear, currentMonth + 1, 1);
+        startDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth(), paycheck2Date.getDate(), 0, 0, 0);
+        const lastDay = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth() + 1, 0);
+        endDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth(), lastDay.getDate() + 1, 0, 0, 0);
       }
       
       let sources = [];
@@ -752,7 +751,7 @@
       
       incomeBills.forEach(bill => {
         const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
-        let billDate = new Date(startYear, startMonth - 1, startDay);
+        let billDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0);
         
         // Find first occurrence on or after period start
         while (billDate < startDate) {
@@ -861,7 +860,7 @@
     function updateBillsDetailsList() {
       let html = '';
       
-      if (billsModalCurrentView === 'paycheck1' && paycheck1Date) {
+      if (billsModalCurrentView === 'paycheck1' && paycheck1Date && paycheck1Date !== null) {
         const bills = getPaycheckBills(paycheck1Date);
         const incomeInfo = getPaycheckIncomeSources(1);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
@@ -892,7 +891,7 @@
         } else {
           html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
         }
-      } else if (billsModalCurrentView === 'paycheck2' && paycheck2Date) {
+      } else if (billsModalCurrentView === 'paycheck2' && paycheck2Date && paycheck2Date !== null) {
         const bills = getPaycheckBills(paycheck2Date);
         const incomeInfo = getPaycheckIncomeSources(2);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
