@@ -570,7 +570,7 @@
 
   <div id="billsDetailsModal" class="modal"><div class="modal-content" style="max-width: 600px; max-height: 85vh;"><div class="modal-header">📋 Bills Breakdown</div><div style="margin-bottom: 20px; display: flex; gap: 8px;"><button id="detailPaycheck1Btn" onclick="setBillsDetailView('paycheck1')" style="flex: 1; padding: 10px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 1</button><button id="detailPaycheck2Btn" onclick="setBillsDetailView('paycheck2')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 2</button><button id="detailMonthlyBtn" onclick="setBillsDetailView('monthly')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">All Month</button></div><div id="billsDetailsList" style="max-height: calc(85vh - 180px); overflow-y: auto;"><div class="loading">Loading...</div></div><div class="action-buttons"><button class="btn btn-secondary" onclick="closeModal('billsDetailsModal')">Close</button></div></div></div>
 
-  <div id="bulkActionsBar"><span id="bulkActionsCount"></span><button onclick="selectAllTransactions()">Select All</button><button onclick="bulkExclude()">Mark Excluded</button><button onclick="bulkDelete()" style="background: rgba(239, 68, 68, 0.2);">Delete</button><button onclick="selectionMode = false; selectedTransactions.clear(); updateBulkActionsBar(); filterTransactions();">Cancel</button></div>
+  <div id="bulkActionsBar"><span id="bulkActionsCount"></span><button onclick="selectAllTransactions()">Select All</button><button onclick="bulkExclude()">Mark Excluded</button><button id="deleteBtn" onclick="bulkDelete()">Delete</button><button onclick="selectionMode = false; selectedTransactions.clear(); updateBulkActionsBar(); filterTransactions();">Cancel</button></div>
 
   <script>
     // Hidden data elements for bills calculation
@@ -2349,39 +2349,48 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
+      max-width: 90vw;
       background: rgba(0, 217, 255, 0.35);
       backdrop-filter: blur(10px);
       color: white;
-      padding: 14px 24px;
+      padding: 10px 16px;
       border-radius: 50px;
       border: 1px solid rgba(0, 217, 255, 0.6);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-      gap: 16px;
+      gap: 8px;
       z-index: 1000;
       align-items: center;
       justify-content: center;
+      flex-wrap: wrap;
     }
     #bulkActionsCount {
       font-weight: 700;
-      font-size: 14px;
+      font-size: 12px;
       color: #ffffff;
-      min-width: 80px;
+      min-width: 60px;
     }
     #bulkActionsBar button {
       background: rgba(0, 150, 200, 0.6);
       color: white;
       border: 2px solid rgba(255, 255, 255, 1);
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12px;
       transition: all 0.2s;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
     }
     #bulkActionsBar button:hover {
       background: rgba(0, 180, 230, 0.8);
       border-color: rgba(255, 255, 255, 1);
+    }
+    #deleteBtn {
+      background: rgba(220, 60, 80, 0.6);
+    }
+    #deleteBtn:hover {
+      background: rgba(250, 80, 100, 0.8);
     }
   </style>
 </body>
