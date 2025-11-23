@@ -565,6 +565,8 @@
 
   <div id="editDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="editDebtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="editDebtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="editDebtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="editDebtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="editDebtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day</label><input type="date" id="editDebtDueDay"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditDebt()">Save</button><button class="btn btn-secondary" onclick="closeModal('editDebtModal')">Cancel</button></div></div></div>
 
+  <div id="actualIncomeModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">💰 Enter Actual Income</div><p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Type the actual amount you received. We'll automatically add any bonus/difference!</p><div class="form-group"><label>Amount You Actually Made</label><input type="number" id="actualIncomeAmount" placeholder="1696" step="0.01" min="0"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveActualIncome()">Add</button><button class="btn btn-secondary" onclick="closeModal('actualIncomeModal')">Cancel</button></div></div></div>
+
   <script>
     // Hidden data elements for bills calculation
     document.addEventListener('DOMContentLoaded', () => {
@@ -593,6 +595,7 @@
     let paycheck = { amount: 1500, frequencyDays: 14 };
     let startingBalance = 5000;
     let startingBalanceDate = new Date().toISOString().split('T')[0];
+    let currentDayForActualIncome = null;
     
     async function loadPaycheckSettings() {
       try {
@@ -1081,6 +1084,7 @@
     }
     
     window.showDay = function(day) {
+      calendarCurrentDay = day;
       const data = calendarData[day];
       if (!data) return;
       
@@ -1124,11 +1128,58 @@
         html += `</div>`;
       }
       
+      html += `<button class="btn btn-primary" style="width: 100%; margin-bottom: 8px;" onclick="openActualIncomeModal(${calendarCurrentDay})">💰 Add Actual Income</button>`;
       html += `<button class="btn btn-secondary" style="width: 100%;" onclick="goBackCalendar()">← Back to Calendar</button>`;
       html += `</div>`;
       
       document.getElementById('calendarView').innerHTML = html;
     };
+    
+    let calendarCurrentDay = null;
+    
+    function openActualIncomeModal(day) {
+      calendarCurrentDay = day;
+      document.getElementById('actualIncomeAmount').value = '';
+      openModal('actualIncomeModal');
+    }
+    
+    async function saveActualIncome() {
+      if (calendarCurrentDay === null) return;
+      const actualAmount = parseFloat(document.getElementById('actualIncomeAmount').value);
+      if (isNaN(actualAmount) || actualAmount < 0) {
+        showToast('Please enter a valid amount', 'warning');
+        return;
+      }
+      
+      const projectedIncome = calendarData[calendarCurrentDay].income;
+      const difference = actualAmount - projectedIncome;
+      
+      if (difference === 0) {
+        showToast('Amount matches projected income', 'info');
+        return;
+      }
+      
+      try {
+        const date = new Date(calendarCurrentYear, calendarCurrentMonth, calendarCurrentDay);
+        const dateStr = date.toISOString().split('T')[0];
+        const res = await fetch(API_URL + '/api/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: dateStr,
+            amount: Math.abs(difference),
+            type: difference > 0 ? 'income' : 'expense',
+            category: difference > 0 ? 'Bonus' : 'Adjustment',
+            description: difference > 0 ? 'Actual income adjustment' : 'Income adjustment',
+            excluded: false
+          })
+        });
+        const data = await res.json();
+        showToast(`${difference > 0 ? '+' : ''}${formatCurrency(difference)} added!`, 'success');
+        closeModal('actualIncomeModal');
+        loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+      } catch (e) { showToast('Error adding income', 'error'); }
+    }
     
     function goBackCalendar() {
       loadCalendar(calendarCurrentYear, calendarCurrentMonth);
