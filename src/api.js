@@ -1252,6 +1252,63 @@ app.delete('/api/debts/:id', (req, res) => {
 });
 
 // Debt Analysis Endpoint
+app.get('/api/expendable-income', (req, res) => {
+  const transactions = getTransactions();
+  const recurringBills = loadData(recurringBillsFile) || [];
+  const settings = loadData(settingsFile) || {};
+  
+  // Get last 3 months of data
+  const today = new Date();
+  const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+  
+  // Calculate monthly income from paycheck settings
+  const paycheckAmount = settings.paycheckAmount || 1500;
+  const paycheckFrequency = settings.paycheckFrequencyDays || 14;
+  const estimatedMonthlyIncome = paycheckAmount * (30 / paycheckFrequency);
+  
+  // Get expense bills from recurring bills
+  const expenseBills = recurringBills.filter(b => b.type !== 'income');
+  let monthlyBillsAmount = 0;
+  expenseBills.forEach(bill => {
+    // Estimate monthly for 30-day bills, otherwise calculate by frequency
+    if (bill.frequency === 30) {
+      monthlyBillsAmount += bill.amount;
+    } else {
+      monthlyBillsAmount += (bill.amount * 30 / bill.frequency);
+    }
+  });
+  
+  // Analyze transaction spending over last 3 months
+  let totalSpending = 0;
+  let transactionCount = 0;
+  transactions.forEach(t => {
+    const txDate = new Date(t.date);
+    if (txDate >= threeMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
+      totalSpending += Math.abs(t.amount);
+      transactionCount++;
+    }
+  });
+  
+  // Calculate average monthly from transactions
+  const monthsDifference = (today - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
+  const avgMonthlySpending = monthsDifference > 0 ? totalSpending / monthsDifference : 0;
+  
+  // Expendable income = estimated income - bills - discretionary spending
+  const expendableIncome = Math.max(0, estimatedMonthlyIncome - monthlyBillsAmount - avgMonthlySpending);
+  
+  // Suggest conservative extra payment (50-75% of expendable)
+  const suggestedExtraPayment = Math.round(expendableIncome * 0.6);
+  
+  res.json({
+    estimatedMonthlyIncome,
+    monthlyBills: monthlyBillsAmount,
+    avgMonthlySpending,
+    expendableIncome,
+    suggestedExtraPayment,
+    transactionSampleSize: transactionCount
+  });
+});
+
 app.get('/api/debts/analysis', (req, res) => {
   debts = loadData(debtsFile);
   if (!Array.isArray(debts) || debts.length === 0) {
