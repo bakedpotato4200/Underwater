@@ -859,13 +859,6 @@ app.post('/api/goals', express.json(), (req, res) => {
 
 app.get('/api/goals', (req, res) => res.json(goals));
 
-app.post('/api/debts', express.json(), (req, res) => {
-  const newDebt = { id: Math.max(...debts.map(d => d.id || 0), 0) + 1, ...req.body };
-  debts.push(newDebt);
-  saveData(debtsFile, debts);
-  res.json(newDebt);
-});
-
 app.get('/api/debts', (req, res) => res.json(debts));
 
 app.post('/api/payoff-strategy', express.json(), (req, res) => {
@@ -1203,7 +1196,7 @@ app.post('/api/debts', express.json(), (req, res) => {
 
 app.put('/api/debts/:id', express.json(), (req, res) => {
   const id = parseInt(req.params.id);
-  const { name, type, currentBalance, interestRate, monthlyPayment, dueDay } = req.body;
+  const { name, type, currentBalance, interestRate, monthlyPayment, dueDay, dueDate } = req.body;
   if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -1227,6 +1220,20 @@ app.put('/api/debts/:id', express.json(), (req, res) => {
   };
   
   saveData(debtsFile, debts);
+  
+  // Update corresponding recurring bill
+  recurringBills = loadData(recurringBillsFile);
+  if (!Array.isArray(recurringBills)) recurringBills = [];
+  const recurringIndex = recurringBills.findIndex(b => b.name === `${debts[debtIndex].name} Payment`);
+  if (recurringIndex !== -1) {
+    recurringBills[recurringIndex] = {
+      ...recurringBills[recurringIndex],
+      amount: parseFloat(monthlyPayment),
+      startDate: dueDate || recurringBills[recurringIndex].startDate
+    };
+    saveData(recurringBillsFile, recurringBills);
+  }
+  
   res.json(debts[debtIndex]);
 });
 
