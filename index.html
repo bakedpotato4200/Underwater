@@ -15,6 +15,12 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="underwater-logo.png">
   
+  <script>
+    if (localStorage.getItem('authToken') && localStorage.getItem('currentUser')) {
+      document.documentElement.style.visibility = 'hidden';
+    }
+  </script>
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -2663,9 +2669,10 @@
       if (savedTab === 'overview') { await loadDashboard(); }
       else if (savedTab === 'calendar') { setTimeout(loadCalendar, 100); }
       else if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
+      document.documentElement.style.visibility = 'visible';
     }
     
-    if (authToken) { pageInit(); }
+    if (authToken) { pageInit(); } else { document.documentElement.style.visibility = 'visible'; }
     setInterval(loadDashboard, 30000);
   </script>
   
