@@ -901,7 +901,11 @@
     let editingRecurringId = null;
     
     function displayAllRecurring() {
-      const html = calendarBills.map(b => {
+      let html = '';
+      if (highlightedRecurringId) {
+        html += `<div style="text-align: center; padding: 12px; background: var(--accent-primary); color: white; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600;">Calendar highlighted</span><button onclick="highlightedRecurringId = null; clearCalendarHighlight(); displayAllRecurring();" style="padding: 6px 10px; background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">✕ Clear</button></div>`;
+      }
+      html += calendarBills.map(b => {
         const color = b.type === 'income' ? '#34c759' : '#ff3b30';
         const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : `Every ${b.frequency} days`;
         const isHighlighted = highlightedRecurringId === b.id;
@@ -1156,11 +1160,7 @@
           runningBalance = endingBalance;
         }
         
-        let calendarHtml = '<div style="position: relative;">';
-        if (highlightedRecurringId) {
-          calendarHtml += `<div style="text-align: center; padding: 8px; background: var(--accent-primary); color: white; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span>Click calendar to clear highlight</span><button onclick="clearCalendarHighlight(); displayAllRecurring();" style="padding: 4px 8px; background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">✕ Clear</button></div>`;
-        }
-        calendarHtml += '<div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar" onclick="if(highlightedRecurringId) { highlightedRecurringId = null; clearCalendarHighlight(); displayAllRecurring(); }">';
+        let calendarHtml = '<div style="position: relative;"><div class="weekdays"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div><div class="calendar" onclick="if(highlightedRecurringId) { highlightedRecurringId = null; clearCalendarHighlight(); displayAllRecurring(); }">';
         
         for (let i = prevLastDay - firstDay.getDay() + 1; i <= prevLastDay; i++) {
           calendarHtml += `<div class="calendar-day other-month"><div class="calendar-day-date">${i}</div></div>`;
