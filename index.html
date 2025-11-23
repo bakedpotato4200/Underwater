@@ -594,7 +594,9 @@
     let currentBillsView = 'paycheck';
     let paycheck = { amount: 1500, frequencyDays: 14 };
     let startingBalance = 0;
-    let startingBalanceDate = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let startingBalanceDate = firstOfMonth.toISOString().split('T')[0];
     let currentDayForActualIncome = null;
     
     async function loadPaycheckSettings() {
@@ -1055,11 +1057,14 @@
               type: 'income',
               isActualOverride: true
             }];
+            // Add expenses to display
+            const expenses = dayBills.filter(b => b.type === 'expense');
+            displayBills = displayBills.concat(expenses);
           } else {
             // Use recurring bills
+            displayBills = dayBills;
             const recurringIncome = dayBills.filter(b => b.type === 'income');
             dayIncome = recurringIncome.reduce((s, b) => s + b.amount, 0);
-            displayBills = dayBills;
           }
           
           // Always include expenses from recurring
@@ -1153,7 +1158,11 @@
           const color = b.type === 'income' ? '#34c759' : '#ff3b30';
           html += `<div style="padding: 10px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${color};">`;
           html += `<div style="flex: 1;"><span style="color: var(--text-primary); font-weight: 500;">${b.name}</span><br><span style="color: ${color}; font-weight: 700; font-size: 14px;">${b.type === 'income' ? '+' : '-'}${formatCurrency(b.amount)}</span></div>`;
-          html += `<button onclick="deleteRecurringTransaction(${b.id})" style="padding: 6px 10px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>`;
+          if (!b.isActualOverride) {
+            html += `<button onclick="deleteRecurringTransaction(${b.id})" style="padding: 6px 10px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>`;
+          } else {
+            html += `<button onclick="deleteActualIncome('${dateStr}')" style="padding: 6px 10px; background: #ff9500; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Clear</button>`;
+          }
           html += `</div>`;
         });
         html += `</div>`;
@@ -1210,6 +1219,15 @@
           loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         }
       } catch (e) { showToast('Error deleting transaction', 'error'); }
+    }
+    
+    async function deleteActualIncome(dateStr) {
+      if (!confirm('Clear actual income for this day?')) return;
+      try {
+        const res = await fetch(API_URL + `/api/actual-income/${dateStr}`, { method: 'DELETE' });
+        showToast('Actual income cleared!', 'success');
+        loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+      } catch (e) { showToast('Error clearing income', 'error'); }
     }
     
     let allDebts = [];

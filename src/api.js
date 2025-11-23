@@ -1313,10 +1313,12 @@ app.post('/api/paycheck-settings', express.json(), (req, res) => {
 });
 
 app.get('/api/starting-balance', (req, res) => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const defaultDate = firstOfMonth.toISOString().split('T')[0];
   res.json({
     balance: settings.startingBalance || 0,
-    date: settings.startingBalanceDate || today
+    date: settings.startingBalanceDate || defaultDate
   });
 });
 
