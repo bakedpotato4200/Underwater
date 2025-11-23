@@ -1,0 +1,60 @@
+{
+  "name": "Underwater - Smart Budget",
+  "short_name": "Underwater",
+  "description": "A comprehensive smart budget app for tracking transactions, managing bills, and monitoring financial health",
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#00d9ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "underwater-logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "underwater-logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "underwater-logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your financial overview",
+      "url": "/?tab=overview",
+      "icons": [
+        {
+          "src": "underwater-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "short_name": "Calendar",
+      "description": "View your recurring transactions calendar",
+      "url": "/?tab=calendar",
+      "icons": [
+        {
+          "src": "underwater-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

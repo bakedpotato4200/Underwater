@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Underwater - Smart Budget</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#00d9ff">
+  <meta name="description" content="A comprehensive smart budget app for tracking transactions, managing bills, and monitoring financial health">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Underwater">
+  <link rel="apple-touch-icon" href="underwater-logo.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="underwater-logo.png">
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -532,6 +543,15 @@
   <div id="addDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Add Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="debtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="debtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="debtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="debtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="debtPayment" placeholder="0.00" step="0.01"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveDebt()">Add</button><button class="btn btn-secondary" onclick="closeModal('addDebtModal')">Cancel</button></div></div></div>
 
   <script>
+    // Register Service Worker for PWA offline support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then((reg) => {
+        console.log('Service Worker registered:', reg);
+      }).catch((err) => {
+        console.log('Service Worker registration failed:', err);
+      });
+    }
+    
     const API_URL = window.location.origin;
     
     function formatCurrency(num) {
