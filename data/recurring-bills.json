@@ -22,5 +22,13 @@
     "frequency": 30,
     "startDate": "2025-07-01",
     "type": "income"
+  },
+  {
+    "id": 1763900000001,
+    "name": "Amex gold Payment",
+    "amount": 162,
+    "frequency": 30,
+    "startDate": "2025-11-03",
+    "type": "expense"
   }
 ]
