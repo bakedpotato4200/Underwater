@@ -699,6 +699,7 @@
         document.getElementById('loginPassword').value = '';
         errorEl.style.display = 'none';
         
+        switchTab('overview');
         loadDashboard();
       } catch (e) {
         errorEl.textContent = 'Connection error';
@@ -756,6 +757,7 @@
         document.getElementById('signupPassword2').value = '';
         errorEl.style.display = 'none';
         
+        switchTab('overview');
         loadDashboard();
       } catch (e) {
         errorEl.textContent = 'Connection error';
