@@ -737,11 +737,11 @@
       if (paycheckIndex === 1) {
         // Paycheck 1: From start of month to day before Paycheck 2
         startDate = new Date(currentYear, currentMonth, 1);
-        endDate = new Date(paycheck2Date.getTime() - 1);
+        endDate = paycheck2Date;
       } else {
         // Paycheck 2: From Paycheck 2 date to end of month
-        startDate = new Date(paycheck2Date);
-        endDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+        startDate = paycheck2Date;
+        endDate = new Date(currentYear, currentMonth + 1, 1);
       }
       
       let sources = [];
@@ -759,8 +759,8 @@
           billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
         }
         
-        // Collect all occurrences within period
-        while (billDate <= endDate) {
+        // Collect all occurrences within period (strictly within range)
+        while (billDate < endDate) {
           const dateStr = billDate.getFullYear() + '-' + String(billDate.getMonth() + 1).padStart(2, '0') + '-' + String(billDate.getDate()).padStart(2, '0');
           const actualAmount = actualIncomeData[dateStr];
           const amount = actualAmount || bill.amount;
