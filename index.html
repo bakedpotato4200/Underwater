@@ -909,36 +909,30 @@
     function displayAllRecurring() {
       let html = '';
       if (highlightedRecurringId) {
-        html += `<div style="text-align: center; padding: 12px; background: var(--accent-primary); color: white; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600;">Calendar highlighted</span><button onclick="highlightedRecurringId = null; clearCalendarHighlight(); displayAllRecurring();" style="padding: 6px 10px; background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">✕ Clear</button></div>`;
+        html += '<div style="text-align: center; padding: 12px; background: var(--accent-primary); color: white; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><span style="font-weight: 600;">Calendar highlighted</span><button onclick="highlightedRecurringId = null; clearCalendarHighlight(); displayAllRecurring();" style="padding: 6px 10px; background: rgba(255,255,255,0.3); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">✕ Clear</button></div>';
       }
-      html += calendarBills.map(b => {
+      calendarBills.forEach(b => {
         const color = b.type === 'income' ? '#34c759' : '#ff3b30';
-        const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : `Every ${b.frequency} days`;
+        const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
         const isHighlighted = highlightedRecurringId === b.id;
         const isExpanded = expandedRecurringId === b.id;
-        return `<div style="padding: 12px; background: ${isHighlighted ? color + '20' : 'var(--bg-secondary)'}; border-radius: 8px; border-left: 4px solid ${color}; ${isHighlighted ? `border: 2px solid ${color};` : ''}">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer;" onclick="viewRecurringOnCalendar(${b.id})">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-weight: 600; color: var(--text-primary);">${b.name}</div>
-              ${isHighlighted ? `<div style="font-size: 11px; color: ${color}; margin-top: 4px; font-weight: 600;">Highlighting calendar dates...</div>` : ''}
-            </div>
-            <div style="text-align: right; flex-shrink: 0;">
-              <div style="font-weight: 700; font-size: 16px; color: ${color}; margin-bottom: 0;">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div>
-            </div>
-          </div>
-          ${isExpanded ? `
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid ${color}40;">
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">${freqText} • Started ${new Date(b.startDate).toLocaleDateString()}</div>
-              <div style="display: flex; gap: 4px;">
-                <button onclick="event.stopPropagation(); openEditRecurringModal(${b.id})" style="padding: 4px 8px; background: var(--accent-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; flex: 1;">Edit</button>
-                <button onclick="event.stopPropagation(); deleteRecurringBill(${b.id})" style="padding: 4px 8px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; flex: 1;">Delete</button>
-              </div>
-            </div>
-          ` : `
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; cursor: pointer;" onclick="event.stopPropagation(); toggleRecurringExpanded(${b.id})">▼ Details</div>
-          `}
-        </div>`;
-      }).join('');
+        const bgColor = isHighlighted ? color + '20' : 'var(--bg-secondary)';
+        const border = isHighlighted ? '2px solid ' + color : 'none';
+        let card = '<div style="padding: 12px; background: ' + bgColor + '; border-radius: 8px; border-left: 4px solid ' + color + '; border: ' + border + ';">';
+        card += '<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer;" onclick="viewRecurringOnCalendar(' + b.id + ')">';
+        card += '<div style="flex: 1; min-width: 0;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div>';
+        if (isHighlighted) {
+          card += '<div style="font-size: 11px; color: ' + color + '; margin-top: 4px; font-weight: 600;">Highlighting calendar dates...</div>';
+        }
+        card += '</div><div style="text-align: right; flex-shrink: 0;"><div style="font-weight: 700; font-size: 16px; color: ' + color + '; margin-bottom: 0;">' + (b.type === 'income' ? '+' : '') + formatCurrency(b.amount) + '</div></div></div>';
+        if (isExpanded) {
+          card += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid ' + color + '40;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">' + freqText + ' • Started ' + new Date(b.startDate).toLocaleDateString() + '</div><div style="display: flex; gap: 4px;"><button onclick="event.stopPropagation(); openEditRecurringModal(' + b.id + ')" style="padding: 4px 8px; background: var(--accent-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; flex: 1;">Edit</button><button onclick="event.stopPropagation(); deleteRecurringBill(' + b.id + ')" style="padding: 4px 8px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; flex: 1;">Delete</button></div></div>';
+        } else {
+          card += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; cursor: pointer;" onclick="event.stopPropagation(); toggleRecurringExpanded(' + b.id + ')">▼ Details</div>';
+        }
+        card += '</div>';
+        html += card;
+      });
       document.getElementById('recurringTransactionsList').innerHTML = html || '<div style="color: var(--text-secondary);">No recurring transactions</div>';
     }
     
