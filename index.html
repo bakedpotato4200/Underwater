@@ -2413,7 +2413,18 @@
     if (localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); }
     
     loadCustomCategories();
-    loadDashboard();
+    
+    async function pageInit() {
+      await loadPaycheckSettings();
+      await loadStartingBalance();
+      await loadDashboard();
+      const savedTab = localStorage.getItem('currentTab') || 'overview';
+      switchTab(savedTab);
+      if (savedTab === 'calendar') { setTimeout(loadCalendar, 100); }
+      if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
+    }
+    
+    pageInit();
     setInterval(loadDashboard, 30000);
   </script>
   
