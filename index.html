@@ -2570,14 +2570,13 @@
       if (!confirm(`Delete ${selectedTransactions.size} transactions? This cannot be undone.`)) return;
       const count = selectedTransactions.size;
       try {
-        for (const txnId of selectedTransactions) {
-          const res = await apiCall(API_URL + `/api/transactions/${txnId}`, { method: 'DELETE' });
-          if (!res.ok) {
-            const error = await res.json();
-            console.error('Delete failed for', txnId, ':', error);
-            throw new Error(`Delete failed: ${error.error || res.statusText}`);
-          }
-        }
+        const deletePromises = Array.from(selectedTransactions).map(txnId =>
+          apiCall(API_URL + `/api/transactions/${txnId}`, { method: 'DELETE' }).then(res => {
+            if (!res.ok) throw new Error(`Delete failed for ${txnId}`);
+            return res;
+          })
+        );
+        await Promise.all(deletePromises);
         selectedTransactions.clear();
         selectionMode = false;
         updateBulkActionsBar();
