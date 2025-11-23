@@ -980,18 +980,35 @@
         const prevLastDay = new Date(year, month, 0).getDate();
         const nextDays = 42 - (lastDay.getDate() + firstDay.getDay());
         
-        // Determine starting balance: use starting balance only if we're on or after its start date
+        // Parse starting balance date
         const [startBalYear, startBalMonth, startBalDay] = startingBalanceDate.split('-').map(Number);
         const balanceStartDate = new Date(startBalYear, startBalMonth - 1, startBalDay);
-        const monthStart = new Date(year, month, 1);
-        initialBalance = monthStart >= balanceStartDate ? startingBalance : 0;
         
         // Calculate running balance for each day
-        let runningBalance = initialBalance;
+        let runningBalance = startingBalance;
         calendarData = {};
         
         for (let i = 1; i <= lastDay.getDate(); i++) {
           const currentDate = new Date(year, month, i);
+          
+          // Show $0 for dates before starting balance date
+          if (currentDate < balanceStartDate) {
+            calendarData[i] = {
+              startBalance: 0,
+              income: 0,
+              expense: 0,
+              endBalance: 0,
+              bills: [],
+              dayNum: i
+            };
+            continue;
+          }
+          
+          // On first day after start date, use starting balance
+          if (i === startBalDay && month === startBalMonth - 1 && year === startBalYear) {
+            runningBalance = startingBalance;
+          }
+          
           const dayBills = calendarBills.filter(b => {
             if (!b.startDate || !b.frequency) return false;
             const [startYear, startMonth, startDay] = b.startDate.split('-').map(Number);
