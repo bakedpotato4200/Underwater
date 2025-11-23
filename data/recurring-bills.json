@@ -17,9 +17,10 @@
   },
   {
     "id": 1763868501882,
-    "name": "Social security ",
+    "name": "Social security",
     "amount": 967,
     "frequency": 30,
-    "startDate": "2025-07-01"
+    "startDate": "2025-07-01",
+    "type": "income"
   }
 ]
