@@ -2709,7 +2709,9 @@
         const res = await apiCall(API_URL + '/api/upload-statement', { method: 'POST', body: formData });
         const data = await res.json();
         document.getElementById('uploadStatus').innerHTML = `<div style="color: var(--accent-success); padding: 12px; background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%); border-radius: 8px; margin-bottom: 16px;">${data.message || 'PDF processed successfully!'}</div>`;
-        setTimeout(() => { closeModal('uploadModal'); loadDashboard(); document.getElementById('pdfFile').value = ''; document.getElementById('uploadStatus').innerHTML = ''; }, 2000);
+        await loadAllTransactions();
+        await loadDashboard();
+        setTimeout(() => { closeModal('uploadModal'); document.getElementById('pdfFile').value = ''; document.getElementById('uploadStatus').innerHTML = ''; }, 1000);
       } catch (e) {
         document.getElementById('uploadStatus').innerHTML = '<div style="color: var(--accent-danger); padding: 12px; background: linear-gradient(90deg, #fff5f3 0%, #ffffff 100%); border-radius: 8px;">Error processing PDF</div>';
       }
