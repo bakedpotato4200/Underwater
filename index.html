@@ -2568,16 +2568,25 @@
     async function bulkDelete() {
       if (selectedTransactions.size === 0) return;
       if (!confirm(`Delete ${selectedTransactions.size} transactions? This cannot be undone.`)) return;
+      const count = selectedTransactions.size;
       try {
         for (const txnId of selectedTransactions) {
-          await apiCall(API_URL + `/api/transactions/${txnId}`, { method: 'DELETE' });
+          const res = await apiCall(API_URL + `/api/transactions/${txnId}`, { method: 'DELETE' });
+          if (!res.ok) {
+            const error = await res.json();
+            console.error('Delete failed for', txnId, ':', error);
+            throw new Error(`Delete failed: ${error.error || res.statusText}`);
+          }
         }
         selectedTransactions.clear();
         selectionMode = false;
         updateBulkActionsBar();
-        showSuccess('Deleted!');
+        showSuccess(`${count} deleted!`);
         await loadAllTransactions();
-      } catch (e) { showError('Error deleting transactions: ' + e.message); }
+      } catch (e) { 
+        console.error('Bulk delete error:', e);
+        showError('Error deleting transactions: ' + e.message);
+      }
     }
     
     function selectAllTransactions() {
