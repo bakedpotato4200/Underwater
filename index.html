@@ -544,22 +544,15 @@
   <script>
     // Hidden data elements for bills calculation
     document.addEventListener('DOMContentLoaded', () => {
-      if (!document.getElementById('billsPerPaycheckData')) {
-        const div1 = document.createElement('div');
-        div1.id = 'billsPerPaycheckData';
-        div1.style.display = 'none';
-        document.body.appendChild(div1);
-        
-        const div2 = document.createElement('div');
-        div2.id = 'billsMonthlyData';
-        div2.style.display = 'none';
-        document.body.appendChild(div2);
-        
-        const div3 = document.createElement('div');
-        div3.id = 'billsFreqData';
-        div3.style.display = 'none';
-        document.body.appendChild(div3);
-      }
+      const dataElements = ['billsPerPaycheckData', 'billsMonthlyData', 'billsFreqData', 'toBillsPaycheckData', 'toBillsMonthlyData', 'spendingPaycheckData', 'spendingMonthlyData'];
+      dataElements.forEach(id => {
+        if (!document.getElementById(id)) {
+          const div = document.createElement('div');
+          div.id = id;
+          div.style.display = 'none';
+          document.body.appendChild(div);
+        }
+      });
     });
     
     // Register Service Worker for PWA offline support
@@ -581,6 +574,8 @@
       const label = document.getElementById('billsViewLabel');
       const subtitle = document.getElementById('billsSubtitle');
       const amount = document.getElementById('billsAmount');
+      const toBills = document.getElementById('toBillsAmount');
+      const spending = document.getElementById('spendingAmount');
       
       if (view === 'paycheck') {
         btn1.style.background = 'var(--accent-primary)';
@@ -590,6 +585,8 @@
         label.textContent = 'Per Paycheck';
         subtitle.textContent = 'Every 14 days';
         amount.textContent = document.getElementById('billsPerPaycheckData')?.textContent || '$0.00';
+        toBills.textContent = document.getElementById('toBillsPaycheckData')?.textContent || '$0.00';
+        spending.textContent = document.getElementById('spendingPaycheckData')?.textContent || '$0.00';
       } else {
         btn1.style.background = 'var(--bg-tertiary)';
         btn1.style.color = 'var(--text-secondary)';
@@ -598,6 +595,8 @@
         label.textContent = 'All Paychecks (Monthly)';
         subtitle.textContent = document.getElementById('billsFreqData')?.textContent || '2.1 paychecks/month';
         amount.textContent = document.getElementById('billsMonthlyData')?.textContent || '$0.00';
+        toBills.textContent = document.getElementById('toBillsMonthlyData')?.textContent || '$0.00';
+        spending.textContent = document.getElementById('spendingMonthlyData')?.textContent || '$0.00';
       }
     }
     
@@ -694,19 +693,27 @@
         
         const billsPerPaycheckAmt = monthlyBillsAmount / paychecksPerMonth;
         const billsMonthlyAmt = monthlyBillsAmount;
+        const spendingPerPaycheckAmt = paycheckAmount - billsPerPaycheckAmt;
+        const totalMonthlyIncome = paycheckAmount * paychecksPerMonth;
+        const spendingMonthlyAmt = totalMonthlyIncome - billsMonthlyAmt;
         
         document.getElementById('billsPerPaycheckData').textContent = formatCurrency(billsPerPaycheckAmt);
         document.getElementById('billsMonthlyData').textContent = formatCurrency(billsMonthlyAmt);
         document.getElementById('billsFreqData').textContent = paychecksPerMonth.toFixed(1) + ' paychecks/month';
+        document.getElementById('toBillsPaycheckData').textContent = formatCurrency(billsPerPaycheckAmt);
+        document.getElementById('toBillsMonthlyData').textContent = formatCurrency(billsMonthlyAmt);
+        document.getElementById('spendingPaycheckData').textContent = formatCurrency(spendingPerPaycheckAmt);
+        document.getElementById('spendingMonthlyData').textContent = formatCurrency(spendingMonthlyAmt);
         
         if (currentBillsView === 'paycheck') {
           document.getElementById('billsAmount').textContent = formatCurrency(billsPerPaycheckAmt);
+          document.getElementById('toBillsAmount').textContent = formatCurrency(billsPerPaycheckAmt);
+          document.getElementById('spendingAmount').textContent = formatCurrency(spendingPerPaycheckAmt);
         } else {
           document.getElementById('billsAmount').textContent = formatCurrency(billsMonthlyAmt);
+          document.getElementById('toBillsAmount').textContent = formatCurrency(billsMonthlyAmt);
+          document.getElementById('spendingAmount').textContent = formatCurrency(spendingMonthlyAmt);
         }
-        
-        document.getElementById('toBillsAmount').textContent = formatCurrency(billsPerPaycheckAmt);
-        document.getElementById('spendingAmount').textContent = formatCurrency(paycheckAmount - billsPerPaycheckAmt);
         
         loadUpcomingBills(bills);
         loadSpendingTrends(monthTxs);
