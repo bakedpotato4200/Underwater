@@ -2305,6 +2305,8 @@
     const scrollThreshold = 10;
     
     function handleTransactionTouchStart(txnId, e) {
+      if (e.target.tagName === 'BUTTON') return;
+      
       touchStart = Date.now();
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
@@ -2341,6 +2343,8 @@
     
     function handleTransactionMouseDown(txnId, e) {
       if (e.button !== 0) return;
+      if (e.target.tagName === 'BUTTON') return;
+      
       mouseDownTime = Date.now();
       mouseStartX = e.clientX;
       mouseStartY = e.clientY;
