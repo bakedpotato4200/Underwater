@@ -904,10 +904,12 @@
       const html = calendarBills.map(b => {
         const color = b.type === 'income' ? '#34c759' : '#ff3b30';
         const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : `Every ${b.frequency} days`;
-        return `<div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid ${color}; display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer;" onclick="viewRecurringOnCalendar(${b.id})">
+        const isHighlighted = highlightedRecurringId === b.id;
+        return `<div style="padding: 12px; background: ${isHighlighted ? color + '20' : 'var(--bg-secondary)'}; border-radius: 8px; border-left: 4px solid ${color}; display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; ${isHighlighted ? `border: 2px solid ${color};` : ''}" onclick="viewRecurringOnCalendar(${b.id})">
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 600; color: var(--text-primary);">${b.name}</div>
             <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">${freqText} • Started ${new Date(b.startDate).toLocaleDateString()}</div>
+            ${isHighlighted ? `<div style="font-size: 11px; color: ${color}; margin-top: 4px; font-weight: 600;">Highlighting calendar dates...</div>` : ''}
           </div>
           <div style="text-align: right; flex-shrink: 0;">
             <div style="font-weight: 700; font-size: 16px; color: ${color}; margin-bottom: 6px;">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div>
@@ -921,15 +923,25 @@
       document.getElementById('recurringTransactionsList').innerHTML = html || '<div style="color: var(--text-secondary);">No recurring transactions</div>';
     }
     
+    let highlightedRecurringId = null;
+    
     function viewRecurringOnCalendar(billId) {
       const bill = calendarBills.find(b => b.id === billId);
       if (!bill) return;
+      
+      // Toggle off if clicking same bill
+      if (highlightedRecurringId === billId) {
+        highlightedRecurringId = null;
+        clearCalendarHighlight();
+        return;
+      }
+      
+      highlightedRecurringId = billId;
       
       // Calculate all occurrences in current month
       const occurrences = [];
       const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
       const startDate = new Date(startYear, startMonth - 1, startDay);
-      const currentMonth = new Date(calendarCurrentYear, calendarCurrentMonth, 1);
       const lastDay = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0).getDate();
       
       for (let i = 1; i <= lastDay; i++) {
@@ -937,12 +949,10 @@
         let matches = false;
         
         if (parseInt(bill.frequency) === 30) {
-          // Monthly: match by day of month
           if (currentDate >= startDate && currentDate.getDate() === startDay) {
             matches = true;
           }
         } else {
-          // Other frequencies: use modulo
           const daysDiff = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
           if (daysDiff >= 0 && daysDiff % parseInt(bill.frequency) === 0) {
             matches = true;
@@ -952,49 +962,24 @@
         if (matches) occurrences.push(i);
       }
       
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const color = bill.type === 'income' ? '#34c759' : '#ff3b30';
-      const freqText = bill.frequency === 7 ? 'Weekly' : bill.frequency === 14 ? 'Biweekly' : bill.frequency === 30 ? 'Monthly' : `Every ${bill.frequency} days`;
       
-      let html = `<div style="padding: 20px; background: var(--bg-tertiary); border-radius: 12px; max-width: 500px; margin: 0 auto;">`;
-      html += `<h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 18px;">${bill.name}</h3>`;
-      
-      html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 12px;">`;
-      html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Amount</div>`;
-      html += `<div style="font-size: 20px; font-weight: 700; color: ${color};">${bill.type === 'income' ? '+' : '-'}${formatCurrency(bill.amount)}</div>`;
-      html += `</div>`;
-      
-      html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 12px;">`;
-      html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Schedule</div>`;
-      html += `<div style="font-size: 14px; color: var(--text-secondary);">${freqText} • Started ${new Date(bill.startDate).toLocaleDateString()}</div>`;
-      html += `</div>`;
-      
-      html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 16px;">`;
-      html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Dates in ${monthNames[calendarCurrentMonth]} ${calendarCurrentYear}:</div>`;
-      if (occurrences.length > 0) {
-        html += `<div style="display: flex; flex-wrap: wrap; gap: 8px;">`;
-        occurrences.forEach(day => {
-          html += `<div style="padding: 8px 12px; background: ${color}; color: white; border-radius: 6px; font-weight: 600; font-size: 14px;">${monthNames[calendarCurrentMonth]} ${day}</div>`;
-        });
-        html += `</div>`;
-      } else {
-        html += `<div style="color: var(--text-secondary); font-size: 14px;">No occurrences this month</div>`;
-      }
-      html += `</div>`;
-      
-      html += `<button class="btn btn-secondary" style="width: 100%;" onclick="goBackCalendar()">← Back to Calendar</button>`;
-      html += `</div>`;
-      
-      document.getElementById('calendarView').innerHTML = html;
-      
-      // Highlight the occurrence days on calendar
+      // Highlight days on calendar
       const calendarDays = document.querySelectorAll('.calendar-day');
-      calendarDays.forEach((day, idx) => {
+      calendarDays.forEach((day) => {
         const dayNum = parseInt(day.textContent.trim().split('\n')[0]);
         if (occurrences.includes(dayNum)) {
-          day.style.background = color + '30';
+          day.style.boxShadow = `0 0 0 3px ${color}, inset 0 0 8px ${color}40`;
           day.style.border = `2px solid ${color}`;
         }
+      });
+    }
+    
+    function clearCalendarHighlight() {
+      const calendarDays = document.querySelectorAll('.calendar-day');
+      calendarDays.forEach((day) => {
+        day.style.boxShadow = '';
+        day.style.border = '';
       });
     }
     
@@ -1040,6 +1025,7 @@
       try {
         await fetch(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
         showToast('Recurring transaction deleted!', 'success');
+        highlightedRecurringId = null;
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { showToast('Error deleting transaction', 'error'); }
     }
