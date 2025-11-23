@@ -1063,10 +1063,21 @@
       else { document.getElementById(tab + 'Content').style.display = 'grid'; }
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
+      localStorage.setItem('currentTab', tab);
       if (tab === 'calendar') { setTimeout(loadCalendar, 100); }
       if (tab === 'debt') { setTimeout(loadDebtManager, 100); }
       if (tab === 'trends') { setTimeout(loadTrends, 100); }
       if (tab === 'transactions') { setTimeout(loadAllTransactions, 100); }
+    }
+    
+    function restoreTab() {
+      const savedTab = localStorage.getItem('currentTab') || 'overview';
+      const tabButton = Array.from(document.querySelectorAll('.nav-tabs button')).find(b => b.textContent.toLowerCase().includes(savedTab.replace('overview', 'dashboard').replace('calendar', 'calendar').replace('transactions', 'transactions')));
+      if (tabButton) {
+        tabButton.click();
+      } else {
+        switchTab(savedTab);
+      }
     }
     
     let currentTransactionId = null;
@@ -1082,6 +1093,7 @@
       await loadPaycheckSettings();
       await loadStartingBalance();
       loadDashboard();
+      restoreTab();
     }
     
     async function loadDashboard() {
