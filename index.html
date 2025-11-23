@@ -499,6 +499,7 @@
       <div id="debtContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>💳 Debt Manager</h2><div style="margin-top: 20px;"><button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="openAddDebtModal()">+ Add Debt</button><div id="debtList" style="display: grid; gap: 12px;"><div class="loading">Loading debts...</div></div><div style="margin-top: 20px; padding: 20px; background: var(--bg-tertiary); border-radius: 12px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary);">Debt Summary</h3><div id="debtSummary" style="display: grid; gap: 12px;"></div></div></div></div></div>
       
       <div id="transactionsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><h2>🔍 All Transactions</h2><div style="margin-top: 20px;">
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="openModal('uploadModal')">Upload Bank Statement PDF</button>
         <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
           <input type="text" id="transactionSearch" class="search-box" placeholder="Search transactions..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px; margin: 0;">
           <select id="categoryFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 13px;" onchange="filterTransactions()">
