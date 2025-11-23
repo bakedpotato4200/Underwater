@@ -2642,6 +2642,16 @@
     
     loadCustomCategories();
     
+    // Restore user session from localStorage
+    const savedUser = localStorage.getItem('currentUser');
+    const savedToken = localStorage.getItem('authToken');
+    if (savedUser && savedToken) {
+      authToken = savedToken;
+      currentUser = JSON.parse(savedUser);
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'flex';
+    }
+    
     async function pageInit() {
       await loadPaycheckSettings();
       await loadStartingBalance();
@@ -2652,7 +2662,7 @@
       else if (savedTab === 'transactions') { setTimeout(loadAllTransactions, 100); }
     }
     
-    pageInit();
+    if (authToken) { pageInit(); }
     setInterval(loadDashboard, 30000);
   </script>
   
