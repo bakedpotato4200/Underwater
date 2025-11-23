@@ -873,7 +873,7 @@
         const data = await res.json();
         startingBalance = data.balance;
         startingBalanceDate = data.date;
-        showSuccess("Saved successfully!")');
+        showSuccess('Balance saved!');
         closeModal('startingBalanceModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { showToast('Error saving balance', 'error'); }
@@ -899,7 +899,7 @@
           body: JSON.stringify({ amount, frequencyDays: freq })
         });
         paycheck = await res.json();
-        showSuccess("Saved successfully!")');
+        showSuccess('Settings saved!');
         closeModal('paycheckSettingsModal');
         loadDashboard();
       } catch (e) { showToast('Error saving settings', 'error'); }
@@ -1746,7 +1746,7 @@
           body: JSON.stringify({ name, amount, type, frequency, startDate })
         });
         const data = await res.json();
-        showSuccess("Transaction updated successfully!")');
+        showSuccess('Transaction updated!');
         closeModal('editRecurringModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         // Refresh Bills Calculator if modal is open
@@ -1762,7 +1762,7 @@
       if (!confirm('Delete this recurring transaction?')) return;
       try {
         await apiCall(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
-        showSuccess("Deleted successfully!")');
+        showSuccess('Deleted!');
         highlightedRecurringId = null;
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         // Refresh Bills Calculator if modal is open
@@ -2043,7 +2043,7 @@
         const res = await apiCall(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
-          showSuccess("Deleted successfully!")');
+          showSuccess('Deleted!');
           loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         }
       } catch (e) { showToast('Error deleting transaction', 'error'); }
