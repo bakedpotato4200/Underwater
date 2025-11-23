@@ -1306,8 +1306,8 @@ app.get('/api/expendable-income', (req, res) => {
   const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
   
   // Calculate monthly income from paycheck settings
-  const paycheckAmount = settings.paycheckAmount || 1500;
-  const paycheckFrequency = settings.paycheckFrequencyDays || 14;
+  const paycheckAmount = settings.paycheckAmount || 0;
+  const paycheckFrequency = settings.paycheckFrequencyDays || 1;
   const estimatedMonthlyIncome = paycheckAmount * (30 / paycheckFrequency);
   
   // Get recurring bills (debt payments, utilities, etc) from the system
@@ -1507,7 +1507,7 @@ app.get('/api/debts/analysis', (req, res) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 // Initialize settings
-let settings = loadData(settingsFile) || { paycheckAmount: 1500, paycheckFrequencyDays: 14 };
+let settings = loadData(settingsFile) || { paycheckAmount: 0, paycheckFrequencyDays: 1 };
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
@@ -1545,8 +1545,8 @@ app.delete('/api/actual-income/:dateStr', (req, res) => {
 
 app.get('/api/paycheck-settings', (req, res) => {
   res.json({
-    amount: settings.paycheckAmount || 1500,
-    frequencyDays: settings.paycheckFrequencyDays || 14
+    amount: settings.paycheckAmount || 0,
+    frequencyDays: settings.paycheckFrequencyDays || 1
   });
 });
 
