@@ -727,10 +727,50 @@
       openModal('billsDetailsModal');
     }
     
-    function getPaycheckAmount(date) {
-      if (!date) return paycheck.amount;
-      const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-      return actualIncomeData[dateStr]?.amount || paycheck.amount;
+    function getPaycheckIncomeSources(startDate, endDate) {
+      if (!startDate) return { total: paycheck.amount, sources: [{ name: 'Paycheck', amount: paycheck.amount }] };
+      
+      let sources = [];
+      let total = 0;
+      
+      // Get all income recurring bills between start and end date
+      const incomeBills = allBillsData.filter(b => b.type === 'income');
+      
+      incomeBills.forEach(bill => {
+        const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
+        let billDate = new Date(startYear, startMonth - 1, startDay);
+        
+        while (billDate < startDate) {
+          billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+        }
+        
+        while (billDate < endDate) {
+          const dateStr = billDate.getFullYear() + '-' + String(billDate.getMonth() + 1).padStart(2, '0') + '-' + String(billDate.getDate()).padStart(2, '0');
+          const actualAmount = actualIncomeData[dateStr];
+          
+          if (actualAmount) {
+            const existingSource = sources.find(s => s.name === bill.name);
+            if (existingSource) {
+              existingSource.amount += actualAmount;
+            } else {
+              sources.push({ name: bill.name, amount: actualAmount, date: billDate.toLocaleDateString() });
+            }
+            total += actualAmount;
+          } else {
+            const existingSource = sources.find(s => s.name === bill.name);
+            if (existingSource) {
+              existingSource.amount += bill.amount;
+            } else {
+              sources.push({ name: bill.name, amount: bill.amount, date: billDate.toLocaleDateString() });
+            }
+            total += bill.amount;
+          }
+          
+          billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+        }
+      });
+      
+      return { total: total || paycheck.amount, sources: sources.length > 0 ? sources : [{ name: 'Paycheck', amount: paycheck.amount }] };
     }
     
     function calculatePaycheckDates() {
@@ -816,12 +856,22 @@
       
       if (billsModalCurrentView === 'paycheck1' && paycheck1Date) {
         const bills = getPaycheckBills(paycheck1Date);
-        const paycheckAmount = getPaycheckAmount(paycheck1Date);
+        const nextPaycheck = new Date(paycheck1Date.getTime() + (paycheck.frequencyDays * 24 * 60 * 60 * 1000));
+        const incomeInfo = getPaycheckIncomeSources(paycheck1Date, nextPaycheck);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
-        const spending = paycheckAmount - billsTotal;
+        const spending = incomeInfo.total - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 1: ' + paycheck1Date.toLocaleDateString() + '</h3>';
-        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheckAmount) + '</div>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 8px;">' + formatCurrency(incomeInfo.total) + '</div>';
+        if (incomeInfo.sources.length > 1) {
+          html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; padding: 8px; background: var(--bg-secondary); border-radius: 4px;">';
+          incomeInfo.sources.forEach(src => {
+            html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>' + src.name + (src.date ? ' (' + src.date + ')' : '') + '</span><span style="font-weight: 600; color: var(--accent-success);">' + formatCurrency(src.amount) + '</span></div>';
+          });
+          html += '</div>';
+        } else if (incomeInfo.sources.length === 1 && incomeInfo.sources[0].date) {
+          html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">' + incomeInfo.sources[0].date + '</div>';
+        }
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
@@ -838,12 +888,22 @@
         }
       } else if (billsModalCurrentView === 'paycheck2' && paycheck2Date) {
         const bills = getPaycheckBills(paycheck2Date);
-        const paycheckAmount = getPaycheckAmount(paycheck2Date);
+        const nextPaycheck = new Date(paycheck2Date.getTime() + (paycheck.frequencyDays * 24 * 60 * 60 * 1000));
+        const incomeInfo = getPaycheckIncomeSources(paycheck2Date, nextPaycheck);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
-        const spending = paycheckAmount - billsTotal;
+        const spending = incomeInfo.total - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 2: ' + paycheck2Date.toLocaleDateString() + '</h3>';
-        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheckAmount) + '</div>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 8px;">' + formatCurrency(incomeInfo.total) + '</div>';
+        if (incomeInfo.sources.length > 1) {
+          html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; padding: 8px; background: var(--bg-secondary); border-radius: 4px;">';
+          incomeInfo.sources.forEach(src => {
+            html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>' + src.name + (src.date ? ' (' + src.date + ')' : '') + '</span><span style="font-weight: 600; color: var(--accent-success);">' + formatCurrency(src.amount) + '</span></div>';
+          });
+          html += '</div>';
+        } else if (incomeInfo.sources.length === 1 && incomeInfo.sources[0].date) {
+          html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">' + incomeInfo.sources[0].date + '</div>';
+        }
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
