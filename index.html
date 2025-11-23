@@ -2516,6 +2516,19 @@
       } catch (e) { showToast('Error excluding transactions', 'error'); }
     }
     
+    async function deleteTransaction(txnId) {
+      if (!confirm('Delete this transaction?')) return;
+      try {
+        const res = await apiCall(API_URL + `/api/transactions/${txnId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showSuccess('Deleted!');
+        await loadAllTransactions();
+      } catch (e) { 
+        console.error('Delete error:', e);
+        showError('Error deleting transaction: ' + e.message);
+      }
+    }
+    
     async function bulkDelete() {
       if (selectedTransactions.size === 0) return;
       if (!confirm(`Delete ${selectedTransactions.size} transactions? This cannot be undone.`)) return;
@@ -2528,7 +2541,7 @@
         updateBulkActionsBar();
         showSuccess('Deleted!');
         await loadAllTransactions();
-      } catch (e) { showToast('Error deleting transactions', 'error'); }
+      } catch (e) { showError('Error deleting transactions: ' + e.message); }
     }
     
     function selectAllTransactions() {
@@ -2561,7 +2574,7 @@
       
       const html = filtered.map(t => {
         const isSelected = selectedTransactions.has(t.id);
-        return `<div class="transaction-item" data-txn-id="${t.id}" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative; background: ${isSelected ? 'rgba(0, 217, 255, 0.1)' : 'transparent'}; border: 2px solid ${isSelected ? 'rgba(0, 217, 255, 0.4)' : 'transparent'}; border-radius: 8px; padding: 8px; transition: all 0.2s; user-select: none;" ontouchstart="handleTransactionTouchStart(${t.id}, event)" onmousedown="handleTransactionMouseDown(${t.id}, event)"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">${t.category || 'No Category'}</button></div></div>`;
+        return `<div class="transaction-item" data-txn-id="${t.id}" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative; background: ${isSelected ? 'rgba(0, 217, 255, 0.1)' : 'transparent'}; border: 2px solid ${isSelected ? 'rgba(0, 217, 255, 0.4)' : 'transparent'}; border-radius: 8px; padding: 8px; transition: all 0.2s; user-select: none;" ontouchstart="handleTransactionTouchStart(${t.id}, event)" onmousedown="handleTransactionMouseDown(${t.id}, event)"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div><div style="display: flex; gap: 4px;"><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; flex: 1;">${t.category || 'No Category'}</button><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); deleteTransaction(${t.id})" style="font-size: 11px; padding: 4px 8px; background: #ff3b30; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Delete</button></div></div></div>`;
       }).join('');
       document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No matching transactions</div>';
     }

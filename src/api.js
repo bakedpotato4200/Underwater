@@ -648,7 +648,7 @@ app.post('/api/transactions/:id/note', express.json(), (req, res) => {
   }
 });
 
-app.delete('/api/transactions/:id', verifyToken, express.json(), (req, res) => {
+app.delete('/api/transactions/:id', verifyToken, (req, res) => {
   const userId = req.user.userId;
   const userFile = getFileForUser(userId, 'transactions.json');
   let transactions = loadData(userFile) || [];
