@@ -1,0 +1,58 @@
+[
+  {
+    "type": "merchant",
+    "pattern": "Deposit"
+  },
+  {
+    "type": "merchant",
+    "pattern": "Withdrawal"
+  },
+  {
+    "type": "merchant",
+    "pattern": "motorcycle"
+  },
+  {
+    "type": "merchant",
+    "pattern": "storage"
+  },
+  {
+    "type": "merchant",
+    "pattern": "aroura"
+  },
+  {
+    "type": "merchant",
+    "pattern": "phone"
+  },
+  {
+    "type": "merchant",
+    "pattern": "trading"
+  },
+  {
+    "type": "merchant",
+    "pattern": "skool"
+  },
+  {
+    "type": "merchant",
+    "pattern": "crunchy"
+  },
+  {
+    "type": "merchant",
+    "pattern": "car"
+  },
+  {
+    "type": "merchant",
+    "pattern": "amex"
+  },
+  {
+    "type": "merchant",
+    "pattern": "ke"
+  },
+  {
+    "type": "merchant",
+    "pattern": "Wells"
+  },
+  {
+    "type": "merchant",
+    "pattern": "discover"
+  }
+]

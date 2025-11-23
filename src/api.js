@@ -1674,3 +1674,58 @@ app.post('/api/auth/login', express.json(), async (req, res) => {
 app.get('/api/auth/verify', verifyToken, (req, res) => {
   res.json({ valid: true, user: req.user });
 });
+
+// Data migration for existing users
+async function migrateExistingData() {
+  const users = getUsers();
+  const demoEmail = 'demo@example.com';
+  
+  // Check if data files exist in root data directory
+  const rootDataFiles = [
+    transactionsFile, debtsFile, recurringBillsFile, settingsFile,
+    bankBalanceFile, exclusionRulesFile, learnedPatternsFile,
+    customCategoriesFile, actualIncomeFile
+  ];
+  
+  const hasExistingData = rootDataFiles.some(file => {
+    try {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (Array.isArray(data)) return data.length > 0;
+      if (typeof data === 'object') return Object.keys(data).length > 0;
+      return false;
+    } catch (e) {
+      return false;
+    }
+  });
+  
+  if (hasExistingData && !users[demoEmail]) {
+    console.log('Migrating existing data to demo account...');
+    try {
+      const hashedPassword = await bcrypt.hash('demo', 10);
+      const userId = 'demo_user';
+      const userDir = createUserDataDir(userId);
+      
+      // Copy all data files to user directory
+      rootDataFiles.forEach(file => {
+        try {
+          const fileName = path.basename(file);
+          const newPath = path.join(userDir, fileName);
+          if (fs.existsSync(file)) {
+            fs.copyFileSync(file, newPath);
+          }
+        } catch (e) {
+          console.log(`Skipped ${file}:`, e.message);
+        }
+      });
+      
+      users[demoEmail] = { userId, hashedPassword, createdAt: new Date().toISOString(), migrated: true };
+      saveUsers(users);
+      console.log('✅ Data migrated! Log in with demo@example.com / demo');
+    } catch (e) {
+      console.error('Migration failed:', e.message);
+    }
+  }
+}
+
+// Run migration on startup
+migrateExistingData();

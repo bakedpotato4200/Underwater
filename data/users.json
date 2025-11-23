@@ -1,0 +1,8 @@
+{
+  "demo@example.com": {
+    "userId": "demo_user",
+    "hashedPassword": "$2b$10$/.kn0vAOkfkRo/4CSANZJOUZZTgvtmmyfhweljBCMl8nv7pSDQUSO",
+    "createdAt": "2025-11-23T19:56:43.037Z",
+    "migrated": true
+  }
+}

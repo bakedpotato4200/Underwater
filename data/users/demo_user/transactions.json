@@ -1,0 +1,569 @@
+[
+  {
+    "id": 1,
+    "date": "2025-06-02",
+    "amount": -100,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 2,
+    "date": "2025-06-03",
+    "amount": -1150,
+    "category": "Other",
+    "description": "Withdrawal from LynCo, Inc. RESIDENT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 3,
+    "date": "2025-06-10",
+    "amount": -10.83,
+    "category": "Utilities",
+    "description": "Withdrawal from CRUNCH FIT CLUB FEES",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 4,
+    "date": "2025-06-12",
+    "amount": -47,
+    "category": "Utilities",
+    "description": "Withdrawal from DISCOVER E-PAYMENT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 6,
+    "date": "2025-06-14",
+    "amount": -40,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 7,
+    "date": "2025-06-17",
+    "amount": -204.21,
+    "category": "Other",
+    "description": "Withdrawal from Acceptance CAC",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 8,
+    "date": "2025-06-17",
+    "amount": -200,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 9,
+    "date": "2025-06-17",
+    "amount": -34,
+    "category": "Utilities",
+    "description": "Withdrawal from CAPITAL ONE CRCARDPMT",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 10,
+    "date": "2025-06-18",
+    "amount": -20,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 11,
+    "date": "2025-06-18",
+    "amount": -50,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 12,
+    "date": "2025-06-19",
+    "amount": -200,
+    "category": "Other",
+    "description": "Withdrawal to Spending XXXXXXX7828",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 16,
+    "date": "2025-06-03",
+    "amount": -100,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 17,
+    "date": "2025-06-04",
+    "amount": -2,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 19,
+    "date": "2025-06-06",
+    "amount": -25,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 20,
+    "date": "2025-06-07",
+    "amount": -3,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP KERI GRACE AD OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 21,
+    "date": "2025-06-07",
+    "amount": -44,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP KERI GRACE AD OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 22,
+    "date": "2025-06-07",
+    "amount": -198.37,
+    "category": "Utilities",
+    "description": "Card Purchase - BROKEN ARROW UTILITIES 9182592400 OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 23,
+    "date": "2025-06-07",
+    "amount": -39.99,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - AURORA SUBSCRIPTION TEMPE AZ",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 24,
+    "date": "2025-06-07",
+    "amount": -199,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP KERI GRACE AD OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 25,
+    "date": "2025-06-07",
+    "amount": -50,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP KERI GRACE AD OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 26,
+    "date": "2025-06-08",
+    "amount": -11,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP KERI GRACE AD OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 27,
+    "date": "2025-06-09",
+    "amount": -27.61,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - DOLLAR GENERAL # DG 18 WAGONER, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 28,
+    "date": "2025-06-09",
+    "amount": -24.01,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - 251 BRAUMS STORE WAGONER OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 29,
+    "date": "2025-06-09",
+    "amount": -80,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 30,
+    "date": "2025-06-09",
+    "amount": -100,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP KERI GRACE AD OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 31,
+    "date": "2025-06-10",
+    "amount": -11.25,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - QT 43 INSIDE CHOUTEAU OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 32,
+    "date": "2025-06-10",
+    "amount": -18.58,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 33,
+    "date": "2025-06-11",
+    "amount": -41.4,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - STAXX BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 34,
+    "date": "2025-06-13",
+    "amount": -7.85,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 35,
+    "date": "2025-06-13",
+    "amount": -20,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 36,
+    "date": "2025-06-13",
+    "amount": -10,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 37,
+    "date": "2025-06-14",
+    "amount": -632,
+    "category": "Other",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 38,
+    "date": "2025-06-14",
+    "amount": -10,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 39,
+    "date": "2025-06-14",
+    "amount": -7,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 41,
+    "date": "2025-06-15",
+    "amount": -20,
+    "category": "Utilities",
+    "description": "Card Purchase - CASH APP JACOB EMMER A OAKLAND CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 42,
+    "date": "2025-06-15",
+    "amount": -85.99,
+    "category": "Utilities",
+    "description": "Card Purchase - COX TULSA COMM 800 234 3993 OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 43,
+    "date": "2025-06-15",
+    "amount": -28.36,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - DD DOORDASH DAYLIGHTD SAN FRANCISC CA",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 44,
+    "date": "2025-06-16",
+    "amount": -34,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - QT 80 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 46,
+    "date": "2025-06-17",
+    "amount": -17.43,
+    "category": "Groceries",
+    "description": "Card Purchase - WM SUPERC WAL-MART SUP BROKEN ARROW, OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 47,
+    "date": "2025-06-17",
+    "amount": -14.42,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - DOLLAR GE DG 243833611 BROKEN ARROW, OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 48,
+    "date": "2025-06-17",
+    "amount": -32.76,
+    "category": "Utilities",
+    "description": "Card Purchase - WAL-MART #4637 BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 51,
+    "date": "2025-06-18",
+    "amount": -15.69,
+    "category": "Utilities",
+    "description": "Card Purchase - SQ NEVERIA Y PALETERI BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 52,
+    "date": "2025-06-19",
+    "amount": -1.43,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - HARPS #152 INOLA, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 54,
+    "date": "2025-06-19",
+    "amount": -7.24,
+    "category": "Utilities",
+    "description": "Card Purchase - MURPHY7561ATWAL BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 55,
+    "date": "2025-06-19",
+    "amount": -84.48,
+    "category": "Groceries",
+    "description": "Card Purchase - WM SUPERC 3900 E HILLS BROKEN ARROW, OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 56,
+    "date": "2025-06-19",
+    "amount": -31.01,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - TACO BELL 7022230 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 57,
+    "date": "2025-06-19",
+    "amount": -92,
+    "category": "Utilities",
+    "description": "Card Purchase - SAVE MONEY CAR INSURAN TULSAP OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 58,
+    "date": "2025-06-19",
+    "amount": -4.05,
+    "category": "Utilities",
+    "description": "Card Purchase - MCDONALD S F6613 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 59,
+    "date": "2025-06-19",
+    "amount": -11.95,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - MCDONALD S F6613 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 60,
+    "date": "2025-06-19",
+    "amount": -35,
+    "category": "Groceries",
+    "description": "Digital Card Purchase - MURPHY6587ATWALMART BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 62,
+    "date": "2025-06-20",
+    "amount": -3.23,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - QT 80 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 63,
+    "date": "2025-06-21",
+    "amount": -15.34,
+    "category": "Food & Dining",
+    "description": "Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 64,
+    "date": "2025-06-21",
+    "amount": -11.39,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 65,
+    "date": "2025-06-21",
+    "amount": -41.4,
+    "category": "Utilities",
+    "description": "Digital Card Purchase - STAXX BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 66,
+    "date": "2025-06-22",
+    "amount": -40.88,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - MURPHY6587ATWAL BROKEN ARROW, OK US",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 67,
+    "date": "2025-06-22",
+    "amount": -84.05,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - OLIVE GARDEN ZK 002181 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 68,
+    "date": "2025-06-23",
+    "amount": -1177,
+    "category": "Food & Dining",
+    "description": "Withdrawal to Savings XXXXXXX0688",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 69,
+    "date": "2025-06-24",
+    "amount": -13.64,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 70,
+    "date": "2025-06-24",
+    "amount": -5.29,
+    "category": "Food & Dining",
+    "description": "Card Purchase - WALGREENS 7821 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 71,
+    "date": "2025-06-28",
+    "amount": -13.41,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - MCDONALD S F33834 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 72,
+    "date": "2025-06-29",
+    "amount": -21.67,
+    "category": "Food & Dining",
+    "description": "Digital Card Purchase - BUFFALO WILD ECOM 3309 BROKEN ARROW OK",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 73,
+    "date": "2025-06-30",
+    "amount": -100,
+    "category": "Food & Dining",
+    "description": "Withdrawal to Bills XXXXXXX5600",
+    "type": "expense",
+    "excluded": false
+  },
+  {
+    "id": 76,
+    "date": "2025-06-24",
+    "amount": -1177,
+    "category": "Food & Dining",
+    "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
+    "type": "expense",
+    "excluded": false
+  }
+]

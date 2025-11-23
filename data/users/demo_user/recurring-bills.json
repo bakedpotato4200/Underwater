@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1763868501882,
+    "name": "Social security",
+    "amount": 967,
+    "frequency": 30,
+    "startDate": "2025-11-01",
+    "type": "income"
+  },
+  {
+    "id": 1763900000001,
+    "name": "Amex gold Payment",
+    "amount": 162,
+    "frequency": 30,
+    "startDate": "2025-11-03",
+    "type": "expense"
+  },
+  {
+    "id": 1763909282871,
+    "name": "Chase Payment",
+    "amount": 42,
+    "frequency": 30,
+    "startDate": "2025-10-09",
+    "type": "expense"
+  },
+  {
+    "id": 1763909871196,
+    "name": "Motorcycle payment Payment",
+    "amount": 210,
+    "frequency": 30,
+    "startDate": "2025-10-05",
+    "type": "expense"
+  },
+  {
+    "id": 1763838928034,
+    "name": "Rent",
+    "amount": 400,
+    "frequency": 14,
+    "startDate": "2025-06-06",
+    "type": "expense"
+  },
+  {
+    "id": 1763918017377,
+    "name": "Paycheck ",
+    "amount": 1500,
+    "type": "income",
+    "frequency": 14,
+    "startDate": "2025-11-07"
+  }
+]
