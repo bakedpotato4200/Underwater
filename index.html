@@ -712,16 +712,25 @@
     let allBillsData = [];
     let paycheck1Date = null;
     let paycheck2Date = null;
+    let actualIncomeData = {};
     
     async function openBillsDetailsModal() {
       billsModalCurrentView = 'paycheck1';
       try {
         const res = await fetch(API_URL + '/api/recurring-bills');
         allBillsData = await res.json();
+        const incomeRes = await fetch(API_URL + '/api/actual-income');
+        actualIncomeData = await incomeRes.json();
       } catch (e) { console.error('Error loading bills:', e); }
       calculatePaycheckDates();
       updateBillsDetailsList();
       openModal('billsDetailsModal');
+    }
+    
+    function getPaycheckAmount(date) {
+      if (!date) return paycheck.amount;
+      const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+      return actualIncomeData[dateStr]?.amount || paycheck.amount;
     }
     
     function calculatePaycheckDates() {
@@ -807,11 +816,12 @@
       
       if (billsModalCurrentView === 'paycheck1' && paycheck1Date) {
         const bills = getPaycheckBills(paycheck1Date);
+        const paycheckAmount = getPaycheckAmount(paycheck1Date);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
-        const spending = paycheck.amount - billsTotal;
+        const spending = paycheckAmount - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 1: ' + paycheck1Date.toLocaleDateString() + '</h3>';
-        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheck.amount) + '</div>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheckAmount) + '</div>';
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
@@ -828,11 +838,12 @@
         }
       } else if (billsModalCurrentView === 'paycheck2' && paycheck2Date) {
         const bills = getPaycheckBills(paycheck2Date);
+        const paycheckAmount = getPaycheckAmount(paycheck2Date);
         const billsTotal = bills.reduce((sum, b) => sum + b.amount, 0);
-        const spending = paycheck.amount - billsTotal;
+        const spending = paycheckAmount - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 2: ' + paycheck2Date.toLocaleDateString() + '</h3>';
-        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheck.amount) + '</div>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 16px;">' + formatCurrency(paycheckAmount) + '</div>';
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
         html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
