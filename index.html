@@ -740,7 +740,12 @@
         document.getElementById('netBalance').textContent = formatCurrency(balance);
         document.getElementById('financialScore').textContent = formatNumber((95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0));
         
-        const monthlyBillsAmount = bills.filter(b => b.type !== 'income').reduce((s, b) => s + b.amount, 0);
+        // Calculate monthly bills amount by accounting for frequency of each bill
+        const monthlyBillsAmount = bills.filter(b => b.type !== 'income').reduce((s, b) => {
+          const occurrencesPerMonth = 30.44 / b.frequency;
+          return s + (b.amount * occurrencesPerMonth);
+        }, 0);
+        
         const paycheckAmount = paycheck.amount;
         const daysPerPaycheck = paycheck.frequencyDays;
         const paychecksPerMonth = 30.44 / daysPerPaycheck;
