@@ -12,7 +12,7 @@
     "id": 2,
     "date": "2025-06-03",
     "amount": -1150,
-    "category": "Card/loan payment",
+    "category": "Utilities",
     "description": "Withdrawal from LynCo, Inc. RESIDENT",
     "type": "expense",
     "excluded": false
@@ -156,7 +156,7 @@
     "id": 23,
     "date": "2025-06-07",
     "amount": -39.99,
-    "category": "Card/loan payment",
+    "category": "Utilities",
     "description": "Digital Card Purchase - AURORA SUBSCRIPTION TEMPE AZ",
     "type": "expense",
     "excluded": false

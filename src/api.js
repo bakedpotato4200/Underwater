@@ -664,7 +664,8 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
     }
     
     // Consolidate: if there are other transactions with different case variations, update them too
-    const oldCategory = req.body.category;
+    // Use the oldCategory passed from frontend (the transaction's previous category)
+    const oldCategory = req.body.oldCategory;
     if (oldCategory && oldCategory !== finalCategory) {
       transactions.forEach(t => {
         if (t.category && t.category.toLowerCase() === oldCategory.toLowerCase()) {

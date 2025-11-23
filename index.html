@@ -2156,13 +2156,16 @@
         return; 
       }
       
-      console.log('Assigning category:', category, 'to transaction:', currentCategoryTransactionId);
+      const txn = allTransactionsData.find(t => t.id === currentCategoryTransactionId);
+      const oldCategory = txn ? txn.category : null;
+      
+      console.log('Assigning category:', category, 'to transaction:', currentCategoryTransactionId, 'old category:', oldCategory);
       
       try {
         const res = await fetch(API_URL + `/api/transactions/${currentCategoryTransactionId}/category`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ category })
+          body: JSON.stringify({ category, oldCategory })
         });
         const data = await res.json();
         console.log('Category save response:', data);
