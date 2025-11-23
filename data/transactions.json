@@ -498,7 +498,7 @@
     "id": 67,
     "date": "2025-06-22",
     "amount": -84.05,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - OLIVE GARDEN ZK 002181 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -561,7 +561,7 @@
     "id": 76,
     "date": "2025-06-24",
     "amount": -1177,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Withdrawal from AMEX EPAYMENT ACH PMT",
     "type": "expense",
     "excluded": false
