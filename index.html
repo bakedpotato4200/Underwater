@@ -2126,17 +2126,37 @@
       document.getElementById('categoryModalHeader').textContent = 'Assign Category: ' + txn.description.substring(0, 40) + ' (Current: ' + (txn.category || 'None') + ')';
       document.getElementById('customCategory').value = '';
       document.getElementById('customCategory').placeholder = 'Type new category...';
+      document.getElementById('customCategory').focus();
       
-      document.getElementById('quickCategoryButtons').innerHTML = commonCategories.map(cat => 
-        `<button onclick="assignTransactionCategory('${cat}')" class="btn" style="background: ${txn.category === cat ? getCategoryColor(cat) : 'var(--bg-tertiary)'}; color: ${txn.category === cat ? '#ffffff' : 'var(--text-primary)'}; font-size: 12px; padding: 10px; border: none; cursor: pointer; font-weight: 500;">${cat}</button>`
+      document.getElementById('quickCategoryButtons').innerHTML = commonCategories.map((cat, idx) => 
+        `<button class="btn quick-cat-btn" data-category="${cat}" style="background: ${txn.category === cat ? getCategoryColor(cat) : 'var(--bg-tertiary)'}; color: ${txn.category === cat ? '#ffffff' : 'var(--text-primary)'}; font-size: 12px; padding: 10px; border: none; cursor: pointer; font-weight: 500;">${cat}</button>`
       ).join('');
+      
+      // Attach event listeners to quick category buttons
+      document.querySelectorAll('.quick-cat-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const cat = btn.getAttribute('data-category');
+          assignTransactionCategory(cat);
+        });
+      });
       
       openModal('categoryModal');
     }
     
     async function assignTransactionCategory(category) {
-      if (!category) category = document.getElementById('customCategory').value.trim();
-      if (!category) { showToast('Please enter a category', 'warning'); return; }
+      // If no category passed, read from the input field
+      if (!category) {
+        category = document.getElementById('customCategory').value.trim();
+      }
+      
+      // Ensure we have a category
+      if (!category) { 
+        showToast('Please enter a category', 'warning'); 
+        return; 
+      }
+      
+      console.log('Assigning category:', category, 'to transaction:', currentCategoryTransactionId);
       
       try {
         const res = await fetch(API_URL + `/api/transactions/${currentCategoryTransactionId}/category`, {
@@ -2145,6 +2165,8 @@
           body: JSON.stringify({ category })
         });
         const data = await res.json();
+        console.log('Category save response:', data);
+        
         if (data.success || data.category) {
           await fetch(API_URL + '/api/learn-category', {
             method: 'POST',
@@ -2164,7 +2186,7 @@
           await loadCustomCategories();
           loadAllTransactions();
         }
-      } catch (e) { showToast('Error updating category', 'error'); }
+      } catch (e) { console.error('Category error:', e); showToast('Error updating category', 'error'); }
     }
     
     function filterTransactions() {

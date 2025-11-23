@@ -12,7 +12,7 @@
     "id": 2,
     "date": "2025-06-03",
     "amount": -1150,
-    "category": "Other",
+    "category": "Card/loan payment",
     "description": "Withdrawal from LynCo, Inc. RESIDENT",
     "type": "expense",
     "excluded": false
@@ -30,7 +30,7 @@
     "id": 4,
     "date": "2025-06-12",
     "amount": -47,
-    "category": "Transfer",
+    "category": "Card/loan payment",
     "description": "Withdrawal from DISCOVER E-PAYMENT",
     "type": "expense",
     "excluded": false
@@ -48,7 +48,7 @@
     "id": 7,
     "date": "2025-06-17",
     "amount": -204.21,
-    "category": "Other",
+    "category": "Card/loan payment",
     "description": "Withdrawal from Acceptance CAC",
     "type": "expense",
     "excluded": false
@@ -156,7 +156,7 @@
     "id": 23,
     "date": "2025-06-07",
     "amount": -39.99,
-    "category": "Utilities",
+    "category": "Card/loan payment",
     "description": "Digital Card Purchase - AURORA SUBSCRIPTION TEMPE AZ",
     "type": "expense",
     "excluded": false
