@@ -1341,7 +1341,7 @@ app.get('/api/spending-suggestions', (req, res) => {
   if (!Array.isArray(transactions)) transactions = [];
   
   const today = new Date();
-  const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
   
   // Ensure all transactions have categories assigned
   transactions = transactions.map(t => {
@@ -1359,7 +1359,7 @@ app.get('/api/spending-suggestions', (req, res) => {
   const categorySpending = {};
   transactions.forEach(t => {
     const txDate = new Date(t.date);
-    if (txDate >= threeMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
+    if (txDate >= sixMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
       if (!categorySpending[t.category]) {
         categorySpending[t.category] = 0;
       }
@@ -1368,7 +1368,7 @@ app.get('/api/spending-suggestions', (req, res) => {
   });
   
   // Calculate average monthly by category
-  const monthsDifference = (today - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
+  const monthsDifference = (today - sixMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
   const avgByCat = {};
   Object.entries(categorySpending).forEach(([cat, total]) => {
     avgByCat[cat] = monthsDifference > 0 ? total / monthsDifference : 0;

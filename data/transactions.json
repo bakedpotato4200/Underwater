@@ -462,7 +462,7 @@
     "id": 63,
     "date": "2025-06-21",
     "amount": -15.34,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -471,7 +471,7 @@
     "id": 64,
     "date": "2025-06-21",
     "amount": -11.39,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - QT 33 BROKEN ARROW OK",
     "type": "expense",
     "excluded": false
@@ -489,7 +489,7 @@
     "id": 66,
     "date": "2025-06-22",
     "amount": -40.88,
-    "category": "Utilities",
+    "category": "Food & Dining",
     "description": "Digital Card Purchase - MURPHY6587ATWAL BROKEN ARROW, OK US",
     "type": "expense",
     "excluded": false
