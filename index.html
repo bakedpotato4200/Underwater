@@ -2327,7 +2327,7 @@
       document.addEventListener('touchmove', touchMoveHandler);
       document.addEventListener('touchend', touchEndHandler);
       
-      const duration = selectionMode ? 500 : longPressDuration;
+      const duration = selectionMode ? 300 : longPressDuration;
       setTimeout(() => {
         if (touchStart > 0 && Date.now() - touchStart >= duration) {
           e.preventDefault();
@@ -2357,7 +2357,7 @@
         lastMouseY = moveEvent.clientY;
       };
       
-      const duration = selectionMode ? 500 : longPressDuration;
+      const duration = selectionMode ? 300 : longPressDuration;
       const handleMouseUp = () => {
         const moveX = Math.abs(lastMouseX - mouseStartX);
         const moveY = Math.abs(lastMouseY - mouseStartY);
