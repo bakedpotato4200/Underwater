@@ -1336,9 +1336,17 @@ app.get('/api/expendable-income', (req, res) => {
 });
 
 app.get('/api/spending-suggestions', (req, res) => {
-  const transactions = getTransactions();
+  let transactions = getTransactions();
   const today = new Date();
   const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+  
+  // Ensure all transactions have categories assigned
+  transactions = transactions.map(t => {
+    if (!t.category || t.category === 'Other') {
+      t.category = categorizeTransaction(t.description);
+    }
+    return t;
+  });
   
   // Categorize as essential vs discretionary
   const essentialCategories = ['Utilities', 'Groceries', 'Transportation', 'Health & Fitness'];
