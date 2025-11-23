@@ -2499,6 +2499,7 @@
     
     async function bulkExclude() {
       if (selectedTransactions.size === 0) return;
+      const count = selectedTransactions.size;
       try {
         for (const txnId of selectedTransactions) {
           await apiCall(API_URL + `/api/transactions/${txnId}/toggle-exclude`, {
@@ -2510,7 +2511,7 @@
         selectedTransactions.clear();
         selectionMode = false;
         updateBulkActionsBar();
-        showToast(`${selectedTransactions.size} transactions excluded!`, 'success');
+        showSuccess(`${count} excluded!`);
         await loadAllTransactions();
       } catch (e) { showToast('Error excluding transactions', 'error'); }
     }

@@ -648,11 +648,14 @@ app.post('/api/transactions/:id/note', express.json(), (req, res) => {
   }
 });
 
-app.delete('/api/transactions/:id', express.json(), (req, res) => {
+app.delete('/api/transactions/:id', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userFile = getFileForUser(userId, 'transactions.json');
+  let transactions = loadData(userFile) || [];
   const index = transactions.findIndex(t => t.id == req.params.id);
   if (index !== -1) {
     transactions.splice(index, 1);
-    saveData(transactionsFile, transactions);
+    saveData(userFile, transactions);
     res.json({ success: true, message: 'Transaction deleted' });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
