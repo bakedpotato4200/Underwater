@@ -1200,19 +1200,24 @@ app.post('/api/learn-exclusion', express.json(), (req, res) => {
 });
 
 // Debt endpoints
-app.get('/api/debts', (req, res) => {
-  debts = loadData(debtsFile);
-  res.json(debts || []);
+app.get('/api/debts', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  const userDebts = loadData(userDebtsFile) || [];
+  res.json(userDebts || []);
 });
 
-app.post('/api/debts', express.json(), (req, res) => {
+app.post('/api/debts', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
   const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment, dueDay, dueDate } = req.body;
   if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   
-  debts = loadData(debtsFile);
-  if (!Array.isArray(debts)) debts = [];
+  let userDebts = loadData(userDebtsFile) || [];
+  if (!Array.isArray(userDebts)) userDebts = [];
   
   const debt = {
     id: Date.now(),
@@ -1227,12 +1232,11 @@ app.post('/api/debts', express.json(), (req, res) => {
     createdAt: new Date().toISOString()
   };
   
-  debts.push(debt);
-  saveData(debtsFile, debts);
+  userDebts.push(debt);
+  saveData(userDebtsFile, userDebts);
   
-  // Automatically create recurring bill for monthly payment
-  recurringBills = loadData(recurringBillsFile);
-  if (!Array.isArray(recurringBills)) recurringBills = [];
+  let userBills = loadData(userBillsFile) || [];
+  if (!Array.isArray(userBills)) userBills = [];
   
   const startDate = dueDate || new Date().toISOString().split('T')[0];
   const recurringBill = {
@@ -1244,85 +1248,89 @@ app.post('/api/debts', express.json(), (req, res) => {
     type: 'expense'
   };
   
-  recurringBills.push(recurringBill);
-  saveData(recurringBillsFile, recurringBills);
+  userBills.push(recurringBill);
+  saveData(userBillsFile, userBills);
   
   res.json({ debt, recurring: recurringBill });
 });
 
-app.put('/api/debts/:id', express.json(), (req, res) => {
+app.put('/api/debts/:id', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
   const id = parseInt(req.params.id);
   const { name, type, currentBalance, interestRate, monthlyPayment, dueDay, dueDate } = req.body;
   if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   
-  debts = loadData(debtsFile);
-  if (!Array.isArray(debts)) debts = [];
+  let userDebts = loadData(userDebtsFile) || [];
+  if (!Array.isArray(userDebts)) userDebts = [];
   
-  const debtIndex = debts.findIndex(d => d.id === id);
+  const debtIndex = userDebts.findIndex(d => d.id === id);
   if (debtIndex === -1) {
     return res.status(404).json({ error: 'Debt not found' });
   }
   
-  debts[debtIndex] = {
-    ...debts[debtIndex],
+  userDebts[debtIndex] = {
+    ...userDebts[debtIndex],
     name,
     type,
     currentBalance: parseFloat(currentBalance),
     interestRate: parseFloat(interestRate) || 0,
     monthlyPayment: parseFloat(monthlyPayment),
     dueDay: parseInt(dueDay) || 1,
-    dueDate: dueDate || debts[debtIndex].dueDate
+    dueDate: dueDate || userDebts[debtIndex].dueDate
   };
   
-  saveData(debtsFile, debts);
+  saveData(userDebtsFile, userDebts);
   
-  // Update corresponding recurring bill
-  recurringBills = loadData(recurringBillsFile);
-  if (!Array.isArray(recurringBills)) recurringBills = [];
-  const recurringIndex = recurringBills.findIndex(b => b.name === `${debts[debtIndex].name} Payment`);
+  let userBills = loadData(userBillsFile) || [];
+  if (!Array.isArray(userBills)) userBills = [];
+  const recurringIndex = userBills.findIndex(b => b.name === `${userDebts[debtIndex].name} Payment`);
   if (recurringIndex !== -1) {
-    recurringBills[recurringIndex] = {
-      ...recurringBills[recurringIndex],
+    userBills[recurringIndex] = {
+      ...userBills[recurringIndex],
       amount: parseFloat(monthlyPayment),
-      startDate: dueDate || recurringBills[recurringIndex].startDate
+      startDate: dueDate || userBills[recurringIndex].startDate
     };
-    saveData(recurringBillsFile, recurringBills);
+    saveData(userBillsFile, userBills);
   }
   
-  res.json(debts[debtIndex]);
+  res.json(userDebts[debtIndex]);
 });
 
-app.delete('/api/debts/:id', (req, res) => {
+app.delete('/api/debts/:id', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
   const id = parseInt(req.params.id);
-  debts = loadData(debtsFile);
-  if (!Array.isArray(debts)) debts = [];
-  debts = debts.filter(d => d.id !== id);
-  saveData(debtsFile, debts);
+  let userDebts = loadData(userDebtsFile) || [];
+  if (!Array.isArray(userDebts)) userDebts = [];
+  userDebts = userDebts.filter(d => d.id !== id);
+  saveData(userDebtsFile, userDebts);
   res.json({ success: true });
 });
 
 // Debt Analysis Endpoint
-app.get('/api/expendable-income', (req, res) => {
-  const transactions = getTransactions();
-  const recurringBills = loadData(recurringBillsFile) || [];
-  const settings = loadData(settingsFile) || {};
+app.get('/api/expendable-income', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
+  const userSettingsFile = getFileForUser(userId, 'settings.json');
+  const userTransactions = loadData(userTxnFile) || [];
+  const userBills = loadData(userBillsFile) || [];
+  const userSettings = loadData(userSettingsFile) || {};
   
-  // Get last 6 months of data for better accuracy
   const today = new Date();
   const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
   
-  // Calculate monthly income from paycheck settings
-  const paycheckAmount = settings.paycheckAmount || 0;
-  const paycheckFrequency = settings.paycheckFrequencyDays || 1;
+  const paycheckAmount = userSettings.paycheckAmount || 0;
+  const paycheckFrequency = userSettings.paycheckFrequencyDays || 1;
   const estimatedMonthlyIncome = paycheckAmount * (30 / paycheckFrequency);
   
-  // Get recurring bills (debt payments, utilities, etc) from the system
-  const expenseBills = recurringBills.filter(b => b.type !== 'income');
+  const expenseBills = userBills.filter(b => b.type !== 'income');
   let monthlyBillsAmount = 0;
   expenseBills.forEach(bill => {
-    // Estimate monthly for 30-day bills, otherwise calculate by frequency
     if (bill.frequency === 30) {
       monthlyBillsAmount += bill.amount;
     } else {
@@ -1330,11 +1338,9 @@ app.get('/api/expendable-income', (req, res) => {
     }
   });
   
-  // Analyze ACTUAL spending from bank statements (transactions only)
-  // This shows true spending habits, not forecasts
   let totalActualSpending = 0;
   let transactionCount = 0;
-  transactions.forEach(t => {
+  userTransactions.forEach(t => {
     const txDate = new Date(t.date);
     if (txDate >= sixMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
       totalActualSpending += Math.abs(t.amount);
@@ -1342,14 +1348,10 @@ app.get('/api/expendable-income', (req, res) => {
     }
   });
   
-  // Calculate average monthly actual spending from bank statements
   const monthsDifference = (today - sixMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
   const avgMonthlyActualSpending = monthsDifference > 0 ? totalActualSpending / monthsDifference : 0;
   
-  // Expendable income = estimated income - bills - actual spending (from bank statements)
   const expendableIncome = Math.max(0, estimatedMonthlyIncome - monthlyBillsAmount - avgMonthlyActualSpending);
-  
-  // Suggest conservative extra payment (60% of expendable to keep buffer)
   const suggestedExtraPayment = Math.round(expendableIncome * 0.6);
   
   res.json({
@@ -1362,9 +1364,10 @@ app.get('/api/expendable-income', (req, res) => {
   });
 });
 
-app.get('/api/spending-suggestions', (req, res) => {
-  // Force fresh load from file to get updated categories
-  transactions = loadData(transactionsFile);
+app.get('/api/spending-suggestions', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userTransactions = loadData(userTxnFile);
   if (!Array.isArray(transactions)) transactions = [];
   
   const today = new Date();
@@ -1520,83 +1523,100 @@ let settings = loadData(settingsFile) || { paycheckAmount: 0, paycheckFrequencyD
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
 // Actual Income Override Endpoints
-app.get('/api/actual-income', (req, res) => {
-  const overrides = loadData(actualIncomeFile) || {};
+app.get('/api/actual-income', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userIncomeFile = getFileForUser(userId, 'actual-income-overrides.json');
+  const overrides = loadData(userIncomeFile) || {};
   res.json(overrides);
 });
 
-app.post('/api/actual-income/:dateStr', express.json(), (req, res) => {
+app.post('/api/actual-income/:dateStr', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userIncomeFile = getFileForUser(userId, 'actual-income-overrides.json');
   const { dateStr } = req.params;
   const { amount } = req.body;
   if (amount === undefined || amount < 0) {
     return res.status(400).json({ error: 'amount required and must be >= 0' });
   }
   
-  const overrides = loadData(actualIncomeFile) || {};
+  let overrides = loadData(userIncomeFile) || {};
   if (amount === 0) {
     delete overrides[dateStr];
   } else {
     overrides[dateStr] = parseFloat(amount);
   }
-  saveData(actualIncomeFile, overrides);
-  
+  saveData(userIncomeFile, overrides);
   res.json(overrides);
 });
 
-app.delete('/api/actual-income/:dateStr', (req, res) => {
+app.delete('/api/actual-income/:dateStr', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userIncomeFile = getFileForUser(userId, 'actual-income-overrides.json');
   const { dateStr } = req.params;
-  const overrides = loadData(actualIncomeFile) || {};
+  let overrides = loadData(userIncomeFile) || {};
   delete overrides[dateStr];
-  saveData(actualIncomeFile, overrides);
+  saveData(userIncomeFile, overrides);
   res.json(overrides);
 });
 
-app.get('/api/paycheck-settings', (req, res) => {
+app.get('/api/paycheck-settings', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userSettingsFile = getFileForUser(userId, 'settings.json');
+  const userSettings = loadData(userSettingsFile) || {};
   res.json({
-    amount: settings.paycheckAmount || 0,
-    frequencyDays: settings.paycheckFrequencyDays || 1
+    amount: userSettings.paycheckAmount || 0,
+    frequencyDays: userSettings.paycheckFrequencyDays || 1
   });
 });
 
-app.post('/api/paycheck-settings', express.json(), (req, res) => {
+app.post('/api/paycheck-settings', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userSettingsFile = getFileForUser(userId, 'settings.json');
   const { amount, frequencyDays } = req.body;
   if (amount === undefined || frequencyDays === undefined) {
     return res.status(400).json({ error: 'amount and frequencyDays required' });
   }
   
-  settings.paycheckAmount = parseFloat(amount);
-  settings.paycheckFrequencyDays = parseInt(frequencyDays);
-  saveData(settingsFile, settings);
+  let userSettings = loadData(userSettingsFile) || {};
+  userSettings.paycheckAmount = parseFloat(amount);
+  userSettings.paycheckFrequencyDays = parseInt(frequencyDays);
+  saveData(userSettingsFile, userSettings);
   
   res.json({
-    amount: settings.paycheckAmount,
-    frequencyDays: settings.paycheckFrequencyDays
+    amount: userSettings.paycheckAmount,
+    frequencyDays: userSettings.paycheckFrequencyDays
   });
 });
 
-app.get('/api/starting-balance', (req, res) => {
+app.get('/api/starting-balance', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userSettingsFile = getFileForUser(userId, 'settings.json');
+  const userSettings = loadData(userSettingsFile) || {};
   const today = new Date();
   const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const defaultDate = firstOfMonth.toISOString().split('T')[0];
   res.json({
-    balance: settings.startingBalance || 0,
-    date: settings.startingBalanceDate || defaultDate
+    balance: userSettings.startingBalance || 0,
+    date: userSettings.startingBalanceDate || defaultDate
   });
 });
 
-app.post('/api/starting-balance', express.json(), (req, res) => {
+app.post('/api/starting-balance', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userSettingsFile = getFileForUser(userId, 'settings.json');
   const { balance, date } = req.body;
   if (balance === undefined || !date) {
     return res.status(400).json({ error: 'balance and date required' });
   }
   
-  settings.startingBalance = parseFloat(balance);
-  settings.startingBalanceDate = date;
-  saveData(settingsFile, settings);
+  let userSettings = loadData(userSettingsFile) || {};
+  userSettings.startingBalance = parseFloat(balance);
+  userSettings.startingBalanceDate = date;
+  saveData(userSettingsFile, userSettings);
   
   res.json({
-    balance: settings.startingBalance,
-    date: settings.startingBalanceDate
+    balance: userSettings.startingBalance,
+    date: userSettings.startingBalanceDate
   });
 });
 
