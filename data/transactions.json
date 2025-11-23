@@ -30,7 +30,7 @@
     "id": 4,
     "date": "2025-06-12",
     "amount": -47,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "Withdrawal from DISCOVER E-PAYMENT",
     "type": "expense",
     "excluded": false
@@ -39,7 +39,7 @@
     "id": 6,
     "date": "2025-06-14",
     "amount": -40,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -57,7 +57,7 @@
     "id": 8,
     "date": "2025-06-17",
     "amount": -200,
-    "category": "Utilities",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -93,7 +93,7 @@
     "id": 12,
     "date": "2025-06-19",
     "amount": -200,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Spending XXXXXXX7828",
     "type": "expense",
     "excluded": false
@@ -282,7 +282,7 @@
     "id": 37,
     "date": "2025-06-14",
     "amount": -632,
-    "category": "Other",
+    "category": "Transfer",
     "description": "Withdrawal to Bills XXXXXXX5600",
     "type": "expense",
     "excluded": false

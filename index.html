@@ -2123,8 +2123,9 @@
     function openCategorySelector(transactionId) {
       currentCategoryTransactionId = transactionId;
       const txn = allTransactionsData.find(t => t.id === transactionId);
-      document.getElementById('categoryModalHeader').textContent = 'Assign Category: ' + txn.description.substring(0, 40);
-      document.getElementById('customCategory').value = txn.category || '';
+      document.getElementById('categoryModalHeader').textContent = 'Assign Category: ' + txn.description.substring(0, 40) + ' (Current: ' + (txn.category || 'None') + ')';
+      document.getElementById('customCategory').value = '';
+      document.getElementById('customCategory').placeholder = 'Type new category...';
       
       document.getElementById('quickCategoryButtons').innerHTML = commonCategories.map(cat => 
         `<button onclick="assignTransactionCategory('${cat}')" class="btn" style="background: ${txn.category === cat ? getCategoryColor(cat) : 'var(--bg-tertiary)'}; color: ${txn.category === cat ? '#ffffff' : 'var(--text-primary)'}; font-size: 12px; padding: 10px; border: none; cursor: pointer; font-weight: 500;">${cat}</button>`
