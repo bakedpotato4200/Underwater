@@ -45,6 +45,7 @@ const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
 const recurringBillsFile = path.join(dataDir, 'recurring-bills.json');
 const bankBalanceFile = path.join(dataDir, 'bank-balance.json');
 const settingsFile = path.join(dataDir, 'settings.json');
+const actualIncomeFile = path.join(dataDir, 'actual-income-overrides.json');
 
 // Load/Save functions
 function loadData(file) {
@@ -1255,6 +1256,38 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Dat
 let settings = loadData(settingsFile) || { paycheckAmount: 1500, paycheckFrequencyDays: 14 };
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+
+// Actual Income Override Endpoints
+app.get('/api/actual-income', (req, res) => {
+  const overrides = loadData(actualIncomeFile) || {};
+  res.json(overrides);
+});
+
+app.post('/api/actual-income/:dateStr', express.json(), (req, res) => {
+  const { dateStr } = req.params;
+  const { amount } = req.body;
+  if (amount === undefined || amount < 0) {
+    return res.status(400).json({ error: 'amount required and must be >= 0' });
+  }
+  
+  const overrides = loadData(actualIncomeFile) || {};
+  if (amount === 0) {
+    delete overrides[dateStr];
+  } else {
+    overrides[dateStr] = parseFloat(amount);
+  }
+  saveData(actualIncomeFile, overrides);
+  
+  res.json(overrides);
+});
+
+app.delete('/api/actual-income/:dateStr', (req, res) => {
+  const { dateStr } = req.params;
+  const overrides = loadData(actualIncomeFile) || {};
+  delete overrides[dateStr];
+  saveData(actualIncomeFile, overrides);
+  res.json(overrides);
+});
 
 app.get('/api/paycheck-settings', (req, res) => {
   res.json({

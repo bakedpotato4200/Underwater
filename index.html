@@ -973,8 +973,8 @@
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
         calendarBills = await billsRes.json();
         
-        const txRes = await fetch(API_URL + '/api/transactions');
-        const allTransactions = await txRes.json();
+        const overridesRes = await fetch(API_URL + '/api/actual-income');
+        const actualIncomeOverrides = await overridesRes.json();
         
         document.getElementById('recurringListView').style.display = 'none';
         
@@ -1038,37 +1038,33 @@
             return matches;
           });
           
-          // Get transactions for this day
-          const dayTransactions = allTransactions.filter(t => {
-            const txDate = typeof t.date === 'string' ? t.date : new Date(t.date).toISOString().split('T')[0];
-            return txDate === dateStr && !t.excluded;
-          });
-          
-          // Calculate income: use transactions only if they exist on this day, otherwise use recurring
+          // Calculate income using overrides if available
           let dayIncome = 0;
           let dayExpense = 0;
           let displayBills = [];
           
-          // Check if there are actual income transactions for this day
-          const actualIncomeOnDay = dayTransactions.filter(t => t.type === 'income');
-          if (actualIncomeOnDay.length > 0) {
-            // Replace recurring income with actual transactions
-            dayIncome = actualIncomeOnDay.reduce((s, t) => s + parseFloat(t.amount), 0);
-            displayBills = actualIncomeOnDay;
+          // Check if there's an actual income override for this day
+          if (actualIncomeOverrides[dateStr] !== undefined) {
+            // Use actual income override
+            dayIncome = actualIncomeOverrides[dateStr];
+            // Create a display object for the override
+            displayBills = [{
+              id: 'actual-' + dateStr,
+              name: 'Actual Income',
+              amount: dayIncome,
+              type: 'income',
+              isActualOverride: true
+            }];
           } else {
             // Use recurring bills
-            dayIncome = dayBills.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
+            const recurringIncome = dayBills.filter(b => b.type === 'income');
+            dayIncome = recurringIncome.reduce((s, b) => s + b.amount, 0);
             displayBills = dayBills;
           }
           
-          // Always include expenses from both recurring and transactions
+          // Always include expenses from recurring
           const recurringExpense = dayBills.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0);
-          const transactionExpense = dayTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + parseFloat(t.amount), 0);
-          dayExpense = recurringExpense + transactionExpense;
-          
-          if (transactionExpense > 0 && displayBills.length === 0) {
-            displayBills = dayBills;
-          }
+          dayExpense = recurringExpense;
           
           const endingBalance = runningBalance + dayIncome - dayExpense;
           
@@ -1189,20 +1185,13 @@
       try {
         const date = new Date(calendarCurrentYear, calendarCurrentMonth, calendarCurrentDay);
         const dateStr = date.toISOString().split('T')[0];
-        const res = await fetch(API_URL + '/api/transactions', {
+        const res = await fetch(API_URL + `/api/actual-income/${dateStr}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            date: dateStr,
-            amount: actualAmount,
-            type: 'income',
-            category: 'Actual Income',
-            description: 'Actual income received',
-            excluded: false
-          })
+          body: JSON.stringify({ amount: actualAmount })
         });
         const data = await res.json();
-        showToast(`Actual income ${formatCurrency(actualAmount)} added!`, 'success');
+        showToast(`Actual income ${formatCurrency(actualAmount)} set for ${dateStr}!`, 'success');
         closeModal('actualIncomeModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { showToast('Error adding income', 'error'); }
