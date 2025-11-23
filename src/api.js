@@ -662,13 +662,22 @@ app.delete('/api/transactions/:id', verifyToken, (req, res) => {
   }
 });
 
-app.post('/api/transactions/:id/category', express.json(), (req, res) => {
-  const txn = transactions.find(t => t.id == req.params.id);
+app.post('/api/transactions/:id/category', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userLearnedFile = getFileForUser(userId, 'learned-patterns.json');
+  const userCategoriesFile = getFileForUser(userId, 'custom-categories.json');
+  
+  let txns = loadData(userTxnFile) || [];
+  let learned = loadData(userLearnedFile) || { merchants: {} };
+  let customCats = loadData(userCategoriesFile) || {};
+  
+  const txn = txns.find(t => t.id == req.params.id);
   if (txn) {
     const newCategory = (req.body.category || txn.category).trim();
     
     // Normalize category: check for existing similar categories (case-insensitive exact match)
-    const existingCategory = transactions
+    const existingCategory = txns
       .map(t => t.category)
       .filter(cat => cat && cat.toLowerCase() === newCategory.toLowerCase())
       .find(cat => cat); // Get the first exact match (case-insensitive)
@@ -682,18 +691,18 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
     // Learn from this category change - extract merchant name and remember the category
     const merchant = txn.description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
     if (merchant && finalCategory) {
-      if (!learnedPatterns.merchants) learnedPatterns.merchants = {};
-      learnedPatterns.merchants[merchant] = finalCategory;
-      saveData(learnedPatternsFile, learnedPatterns);
+      if (!learned.merchants) learned.merchants = {};
+      learned.merchants[merchant] = finalCategory;
+      saveData(userLearnedFile, learned);
     }
     
     // Track custom category usage (for auto-saving after 3 uses)
-    customCategories[finalCategory] = (customCategories[finalCategory] || 0) + 1;
-    if (customCategories[finalCategory] >= 3) {
-      saveData(customCategoriesFile, customCategories);
+    customCats[finalCategory] = (customCats[finalCategory] || 0) + 1;
+    if (customCats[finalCategory] >= 3) {
+      saveData(userCategoriesFile, customCats);
     }
     
-    saveData(transactionsFile, transactions);
+    saveData(userTxnFile, txns);
     res.json({ success: true, category: finalCategory });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
