@@ -1310,6 +1310,61 @@ app.get('/api/expendable-income', (req, res) => {
   });
 });
 
+app.get('/api/spending-suggestions', (req, res) => {
+  const transactions = getTransactions();
+  const today = new Date();
+  const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+  
+  // Categorize as essential vs discretionary
+  const essentialCategories = ['Utilities', 'Groceries', 'Transportation', 'Health & Fitness'];
+  const discretionaryCategories = ['Food & Dining', 'Entertainment', 'Shopping'];
+  
+  // Analyze spending by category
+  const categorySpending = {};
+  transactions.forEach(t => {
+    const txDate = new Date(t.date);
+    if (txDate >= threeMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
+      if (!categorySpending[t.category]) {
+        categorySpending[t.category] = 0;
+      }
+      categorySpending[t.category] += Math.abs(t.amount);
+    }
+  });
+  
+  // Calculate average monthly by category
+  const monthsDifference = (today - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
+  const avgByCat = {};
+  Object.entries(categorySpending).forEach(([cat, total]) => {
+    avgByCat[cat] = monthsDifference > 0 ? total / monthsDifference : 0;
+  });
+  
+  // Generate suggestions for discretionary spending
+  const suggestions = [];
+  discretionaryCategories.forEach(cat => {
+    if (avgByCat[cat] && avgByCat[cat] > 0) {
+      const currentSpend = avgByCat[cat];
+      // Suggest 25% reduction for discretionary categories
+      const potentialSavings = Math.round(currentSpend * 0.25);
+      if (potentialSavings > 5) { // Only show if savings > $5
+        suggestions.push({
+          category: cat,
+          currentMonthly: currentSpend,
+          potentialSavings,
+          suggestedAmount: Math.round(currentSpend * 0.75)
+        });
+      }
+    }
+  });
+  
+  // Sort by savings potential (highest first)
+  suggestions.sort((a, b) => b.potentialSavings - a.potentialSavings);
+  
+  res.json({
+    suggestions,
+    totalPotentialSavings: suggestions.reduce((sum, s) => sum + s.potentialSavings, 0)
+  });
+});
+
 app.get('/api/debts/analysis', (req, res) => {
   debts = loadData(debtsFile);
   if (!Array.isArray(debts) || debts.length === 0) {
