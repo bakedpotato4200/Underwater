@@ -1282,9 +1282,9 @@ app.get('/api/expendable-income', (req, res) => {
   const recurringBills = loadData(recurringBillsFile) || [];
   const settings = loadData(settingsFile) || {};
   
-  // Get last 3 months of data
+  // Get last 6 months of data for better accuracy
   const today = new Date();
-  const threeMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
   
   // Calculate monthly income from paycheck settings
   const paycheckAmount = settings.paycheckAmount || 1500;
@@ -1309,14 +1309,14 @@ app.get('/api/expendable-income', (req, res) => {
   let transactionCount = 0;
   transactions.forEach(t => {
     const txDate = new Date(t.date);
-    if (txDate >= threeMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
+    if (txDate >= sixMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
       totalActualSpending += Math.abs(t.amount);
       transactionCount++;
     }
   });
   
   // Calculate average monthly actual spending from bank statements
-  const monthsDifference = (today - threeMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
+  const monthsDifference = (today - sixMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
   const avgMonthlyActualSpending = monthsDifference > 0 ? totalActualSpending / monthsDifference : 0;
   
   // Expendable income = estimated income - bills - actual spending (from bank statements)
