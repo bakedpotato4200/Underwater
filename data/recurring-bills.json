@@ -1,13 +1,5 @@
 [
   {
-    "id": 1763837678083,
-    "name": "Paycheck",
-    "amount": 1500,
-    "frequency": 14,
-    "startDate": "2025-06-07",
-    "type": "income"
-  },
-  {
     "id": 1763868501882,
     "name": "Social security",
     "amount": 967,
@@ -46,5 +38,12 @@
     "frequency": 14,
     "startDate": "2025-06-06",
     "type": "expense"
+  },
+  {
+    "id": 1763917840181,
+    "name": "Paycheck ",
+    "amount": 1500,
+    "frequency": 14,
+    "startDate": "2025-11-07"
   }
 ]
