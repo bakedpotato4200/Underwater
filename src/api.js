@@ -961,7 +961,7 @@ app.get('/api/subscriptions', (req, res) => res.json(subscriptions));
 app.get('/api/recurring-bills', (req, res) => res.json(Array.isArray(recurringBills) ? recurringBills : []));
 
 app.post('/api/recurring-bills', express.json(), (req, res) => {
-  const { name, amount, frequency, startDate } = req.body;
+  const { name, amount, type, frequency, startDate } = req.body;
   if (!name || !amount || !frequency || !startDate) {
     return res.status(400).json({ error: 'name, amount, frequency, and startDate required' });
   }
@@ -970,6 +970,7 @@ app.post('/api/recurring-bills', express.json(), (req, res) => {
     id: Date.now(),
     name,
     amount: parseFloat(amount),
+    type: type || 'expense',
     frequency: parseInt(frequency),
     startDate
   };
