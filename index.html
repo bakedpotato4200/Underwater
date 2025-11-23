@@ -1060,6 +1060,23 @@
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     
+    function showInfoTooltip(id) {
+      const tooltip = document.getElementById('tooltip-' + id);
+      if (!tooltip) return;
+      const isVisible = tooltip.style.display === 'block';
+      document.querySelectorAll('[id^="tooltip-"]').forEach(t => t.style.display = 'none');
+      if (!isVisible) {
+        tooltip.style.display = 'block';
+        setTimeout(() => tooltip.style.opacity = '1', 10);
+      }
+    }
+    
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[onclick*="showInfoTooltip"]') && !e.target.closest('[id^="tooltip-"]')) {
+        document.querySelectorAll('[id^="tooltip-"]').forEach(t => { t.style.opacity = '0'; setTimeout(() => t.style.display = 'none', 200); });
+      }
+    });
+    
     function switchTab(tab) {
       document.querySelectorAll('[id$="Content"]').forEach(el => { el.style.opacity = '0'; setTimeout(() => el.style.display = 'none', 150); });
       setTimeout(() => {
