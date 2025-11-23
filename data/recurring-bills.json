@@ -38,5 +38,13 @@
     "frequency": 30,
     "startDate": "2025-10-09",
     "type": "expense"
+  },
+  {
+    "id": 1763909871196,
+    "name": "Motorcycle payment Payment",
+    "amount": 210,
+    "frequency": 30,
+    "startDate": "2025-10-05",
+    "type": "expense"
   }
 ]

@@ -44,6 +44,7 @@ const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
 const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
 const recurringBillsFile = path.join(dataDir, 'recurring-bills.json');
 const bankBalanceFile = path.join(dataDir, 'bank-balance.json');
+const settingsFile = path.join(dataDir, 'settings.json');
 
 // Load/Save functions
 function loadData(file) {
@@ -1276,5 +1277,25 @@ app.post('/api/paycheck-settings', express.json(), (req, res) => {
   res.json({
     amount: settings.paycheckAmount,
     frequencyDays: settings.paycheckFrequencyDays
+  });
+});
+
+app.get('/api/starting-balance', (req, res) => {
+  res.json({
+    balance: settings.startingBalance || 5000
+  });
+});
+
+app.post('/api/starting-balance', express.json(), (req, res) => {
+  const { balance } = req.body;
+  if (balance === undefined) {
+    return res.status(400).json({ error: 'balance required' });
+  }
+  
+  settings.startingBalance = parseFloat(balance);
+  saveData(settingsFile, settings);
+  
+  res.json({
+    balance: settings.startingBalance
   });
 });

@@ -519,6 +519,11 @@
           <button class="btn btn-primary" style="width: 100%;" onclick="openPaycheckSettings()">Edit Paycheck Settings</button>
         </div>
         <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+          <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 16px; font-weight: 700;">🏦 Starting Balance</h3>
+          <p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Set your account's starting balance for calendar calculations. This is used when viewing your balance projections.</p>
+          <button class="btn btn-primary" style="width: 100%;" onclick="openStartingBalanceSettings()">Edit Starting Balance</button>
+        </div>
+        <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
           <h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 16px; font-weight: 700;">🌓 Theme</h3>
           <p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Choose between dark mode and light mode for your interface.</p>
           <button class="btn btn-primary" style="width: 100%;" onclick="toggleDarkMode()">
@@ -541,6 +546,8 @@
   <div id="categoryTransactionsModal" class="modal"><div class="modal-content" style="max-width: 700px; max-height: 85vh;"><div class="modal-header">Category Transactions</div><div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;"><div class="loading">Loading...</div></div></div></div>
   
   <div id="paycheckSettingsModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">⚙️ Paycheck Settings</div><div class="form-group"><label>Paycheck Amount</label><input type="number" id="paycheckAmountInput" placeholder="1500" step="0.01" min="0"></div><div class="form-group"><label>Frequency (Days)</label><input type="number" id="paycheckFreqInput" placeholder="14" step="1" min="1" max="365"></div><div class="action-buttons"><button class="btn btn-primary" onclick="savePaycheckSettings()">Save</button><button class="btn btn-secondary" onclick="closeModal('paycheckSettingsModal')">Cancel</button></div></div></div>
+
+  <div id="startingBalanceModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">🏦 Starting Balance</div><div class="form-group"><label>Account Starting Balance</label><input type="number" id="startingBalanceInput" placeholder="5000" step="0.01" min="0"><p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">This is the balance used for your calendar and financial projections.</p></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveStartingBalance()">Save</button><button class="btn btn-secondary" onclick="closeModal('startingBalanceModal')">Cancel</button></div></div></div>
 
   <div id="categoryModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header" id="categoryModalHeader">Assign Category</div><div style="margin-top: 20px;">
     <div style="margin-bottom: 16px;">
@@ -584,12 +591,46 @@
     const API_URL = window.location.origin;
     let currentBillsView = 'paycheck';
     let paycheck = { amount: 1500, frequencyDays: 14 };
+    let startingBalance = 5000;
     
     async function loadPaycheckSettings() {
       try {
         const res = await fetch(API_URL + '/api/paycheck-settings');
         paycheck = await res.json();
       } catch (e) { console.log('Using default paycheck settings'); }
+    }
+    
+    async function loadStartingBalance() {
+      try {
+        const res = await fetch(API_URL + '/api/starting-balance');
+        const data = await res.json();
+        startingBalance = data.balance || 5000;
+      } catch (e) { console.log('Using default starting balance'); }
+    }
+    
+    function openStartingBalanceSettings() {
+      document.getElementById('startingBalanceInput').value = startingBalance;
+      openModal('startingBalanceModal');
+    }
+    
+    async function saveStartingBalance() {
+      const balance = parseFloat(document.getElementById('startingBalanceInput').value);
+      if (!balance || balance < 0) {
+        showToast('Please enter a valid amount', 'warning');
+        return;
+      }
+      try {
+        const res = await fetch(API_URL + '/api/starting-balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ balance })
+        });
+        const data = await res.json();
+        startingBalance = data.balance;
+        showToast('Starting balance saved!', 'success');
+        closeModal('startingBalanceModal');
+        loadCalendar(calendarCurrentYear, calendarCurrentMonth);
+      } catch (e) { showToast('Error saving balance', 'error'); }
     }
     
     function openPaycheckSettings() {
@@ -718,6 +759,7 @@
     
     async function initDashboard() {
       await loadPaycheckSettings();
+      await loadStartingBalance();
       loadDashboard();
     }
     
@@ -918,14 +960,11 @@
         
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
         calendarBills = await billsRes.json();
-        const balanceRes = await fetch(API_URL + '/api/balance');
-        const balanceData = await balanceRes.json();
         
         document.getElementById('recurringListView').style.display = 'none';
         
-        // Use only non-excluded income for starting balance
-        const nonExcludedIncome = balanceData.income || 0;
-        initialBalance = nonExcludedIncome > 0 ? nonExcludedIncome * 0.3 : 5000;
+        // Use the configured starting balance
+        initialBalance = startingBalance;
         
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         document.getElementById('calendarMonth').textContent = monthNames[month] + ' ' + year;
