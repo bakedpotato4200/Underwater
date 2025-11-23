@@ -6,6 +6,8 @@ import fs from 'fs';
 import pdfParse from 'pdf-parse';
 import { fileURLToPath } from 'url';
 import OpenAI from 'openai';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +27,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Authentication middleware
+function verifyToken(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (e) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
 app.use(express.static(path.join(__dirname, '..')));
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -32,6 +46,11 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const dataDir = path.join(__dirname, '..', 'data');
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+const usersDir = path.join(__dirname, '..', 'data', 'users');
+if (!fs.existsSync(usersDir)) fs.mkdirSync(usersDir, { recursive: true });
+const usersFile = path.join(__dirname, '..', 'data', 'users.json');
+const JWT_SECRET = 'underwater-secret-key-change-in-production';
 
 const upload = multer({ dest: uploadDir });
 
@@ -1571,4 +1590,87 @@ app.post('/api/starting-balance', express.json(), (req, res) => {
     balance: settings.startingBalance,
     date: settings.startingBalanceDate
   });
+});
+
+// Authentication endpoints
+function getUsers() {
+  try {
+    if (fs.existsSync(usersFile)) {
+      return JSON.parse(fs.readFileSync(usersFile, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Error loading users:', e.message);
+  }
+  return {};
+}
+
+function saveUsers(users) {
+  try {
+    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+  } catch (e) {
+    console.error('Error saving users:', e.message);
+  }
+}
+
+function createUserDataDir(userId) {
+  const userDir = path.join(usersDir, userId);
+  if (!fs.existsSync(userDir)) {
+    fs.mkdirSync(userDir, { recursive: true });
+  }
+  return userDir;
+}
+
+app.post('/api/auth/signup', express.json(), async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  
+  const users = getUsers();
+  if (users[email]) {
+    return res.status(400).json({ error: 'Email already registered' });
+  }
+  
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = email.replace(/[^a-zA-Z0-9]/g, '_');
+    createUserDataDir(userId);
+    
+    users[email] = { userId, hashedPassword, createdAt: new Date().toISOString() };
+    saveUsers(users);
+    
+    const token = jwt.sign({ email, userId }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, userId, email });
+  } catch (e) {
+    res.status(500).json({ error: 'Signup failed' });
+  }
+});
+
+app.post('/api/auth/login', express.json(), async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  
+  const users = getUsers();
+  const user = users[email];
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+  
+  try {
+    const match = await bcrypt.compare(password, user.hashedPassword);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    
+    const token = jwt.sign({ email, userId: user.userId }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, userId: user.userId, email });
+  } catch (e) {
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+app.get('/api/auth/verify', verifyToken, (req, res) => {
+  res.json({ valid: true, user: req.user });
 });
