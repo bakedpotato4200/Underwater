@@ -1045,32 +1045,110 @@
     
     async function loadDashboard() {
       try {
-        const monthInput = document.getElementById('dashboardMonth');
-        if (!monthInput.value) {
-          const now = new Date();
-          monthInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-        }
-        
-        const { start, end } = getMonthDateRange(monthInput.value);
-        
-        const txRes = await fetch(API_URL + '/api/transactions');
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
-        const transactions = await txRes.json();
         const bills = await billsRes.json();
         
-        const monthTxs = transactions.filter(t => {
-          const txDate = new Date(t.date);
-          return txDate >= start && txDate <= end;
-        });
+        // Calculate current paycheck period
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
         
-        const income = monthTxs.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-        const expenses = monthTxs.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-        const balance = income - expenses;
+        // Find current paycheck dates
+        let paycheck1 = null, paycheck2 = null;
+        const incomeBills = bills.filter(b => b.type === 'income');
+        const expenseBills = bills.filter(b => b.type !== 'income');
         
-        document.getElementById('totalIncome').textContent = formatCurrency(income);
-        document.getElementById('totalExpenses').textContent = formatCurrency(expenses);
-        document.getElementById('netBalance').textContent = formatCurrency(balance);
-        document.getElementById('financialScore').textContent = formatNumber((95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0));
+        if (incomeBills.length > 0) {
+          const mainPaycheck = incomeBills.find(b => b.frequency === 14) || incomeBills[0];
+          const [startYear, startMonth, startDay] = mainPaycheck.startDate.split('-').map(Number);
+          const startDate = new Date(startYear, startMonth - 1, startDay);
+          const frequency = mainPaycheck.frequency;
+          
+          let currentDate = new Date(startDate);
+          while (currentDate.getFullYear() < currentYear || (currentDate.getFullYear() === currentYear && currentDate.getMonth() < currentMonth)) {
+            currentDate = new Date(currentDate.getTime() + frequency * 24 * 60 * 60 * 1000);
+          }
+          
+          if (currentDate.getMonth() === currentMonth && currentDate.getFullYear() === currentYear) {
+            paycheck1 = new Date(currentDate);
+          }
+          
+          currentDate = new Date(currentDate.getTime() + frequency * 24 * 60 * 60 * 1000);
+          if (currentDate.getMonth() === currentMonth && currentDate.getFullYear() === currentYear) {
+            paycheck2 = new Date(currentDate);
+          }
+        }
+        
+        // Calculate income and bills for current paycheck
+        let currentPaycheckIncome = 0;
+        let currentPaycheckBills = 0;
+        let payCheckStartDate = paycheck1;
+        
+        // Determine if we're in paycheck1 or paycheck2 period
+        if (paycheck1 && paycheck2 && now > paycheck2) {
+          payCheckStartDate = paycheck2;
+        }
+        
+        if (payCheckStartDate) {
+          const payCheckEndDate = new Date(payCheckStartDate.getTime() + (paycheck1 && paycheck2 ? (paycheck2.getTime() - paycheck1.getTime()) : (14 * 24 * 60 * 60 * 1000)));
+          
+          // Calculate income for this period
+          incomeBills.forEach(bill => {
+            const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
+            let billDate = new Date(startYear, startMonth - 1, startDay);
+            
+            while (billDate < payCheckStartDate) {
+              billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+            }
+            
+            if (billDate < payCheckEndDate) {
+              currentPaycheckIncome += bill.amount;
+            }
+          });
+          
+          // Calculate bills for this period
+          expenseBills.forEach(bill => {
+            const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
+            let billDate = new Date(startYear, startMonth - 1, startDay);
+            
+            while (billDate < payCheckStartDate) {
+              billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
+            }
+            
+            if (billDate < payCheckEndDate) {
+              currentPaycheckBills += bill.amount;
+            }
+          });
+        }
+        
+        // Calculate health status
+        let healthStatus = 'Healthy';
+        let healthColor = '#34c759';
+        let healthEmoji = '✅';
+        
+        if (currentPaycheckIncome > 0) {
+          const billPercentage = (currentPaycheckBills / currentPaycheckIncome) * 100;
+          if (currentPaycheckBills > currentPaycheckIncome) {
+            healthStatus = 'Over Budget';
+            healthColor = '#ff3b30';
+            healthEmoji = '⚠️';
+          } else if (billPercentage > 70) {
+            healthStatus = 'Tight Budget';
+            healthColor = '#ff9500';
+            healthEmoji = '⚡';
+          }
+        }
+        
+        document.getElementById('totalIncome').textContent = formatCurrency(currentPaycheckIncome);
+        document.getElementById('totalExpenses').textContent = formatCurrency(currentPaycheckBills);
+        document.getElementById('netBalance').textContent = formatCurrency(currentPaycheckIncome - currentPaycheckBills);
+        
+        // Update health score display with color
+        const scoreEl = document.getElementById('financialScore');
+        scoreEl.textContent = healthEmoji + ' ' + healthStatus;
+        scoreEl.style.color = healthColor;
+        scoreEl.style.fontSize = '16px';
+        scoreEl.style.fontWeight = '700';
         
         // Count actual occurrences of bills and paychecks in THIS month
         function countOccurrencesInMonth(startDate, frequencyDays) {
