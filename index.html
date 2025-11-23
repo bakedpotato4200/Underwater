@@ -72,7 +72,7 @@
     .sidebar.hidden { transform: translateX(-100%); }
     
     .sidebar-header { 
-      padding: 32px 24px; 
+      padding: 24px; 
       border-bottom: 1px solid var(--border-color);
       font-weight: 800; 
       color: var(--text-primary); 
@@ -81,6 +81,41 @@
       align-items: center; 
       justify-content: space-between; 
       background: linear-gradient(135deg, var(--bg-tertiary) 0%, transparent 100%);
+      gap: 12px;
+    }
+    
+    .logo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    
+    .logo-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg-secondary);
+      padding: 4px;
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    
+    .logo-subtitle {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
     }
     
     .sidebar-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); transition: all 0.2s; }
