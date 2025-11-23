@@ -153,7 +153,7 @@
       padding: 12px 16px; 
       cursor: pointer; 
       color: var(--text-secondary); 
-      font-size: 13px; 
+      font-size: 16px; 
       font-weight: 600; 
       text-align: left; 
       width: 100%; 
@@ -232,7 +232,7 @@
       border-radius: 12px; 
       border: none; 
       cursor: pointer; 
-      font-size: 13px; 
+      font-size: 16px; 
       font-weight: 700; 
       transition: all 0.25s ease;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -272,7 +272,7 @@
     .card.full { grid-column: 1/-1; }
     
     .category-list { list-style: none; }
-    .category-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; transition: all 0.2s ease; border-radius: 6px; margin-bottom: 2px; }
+    .category-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 16px; transition: all 0.2s ease; border-radius: 6px; margin-bottom: 2px; }
     .category-item:hover { background: var(--bg-secondary); transform: translateX(2px); }
     .category-item:last-child { border-bottom: none; }
     .category-name { color: var(--text-primary); font-weight: 600; flex: 1; }
@@ -290,11 +290,11 @@
       transition: all 0.25s ease;
     }
     .bill-item:hover { border-color: var(--accent-primary); box-shadow: 0 8px 24px rgba(0, 217, 255, 0.12); transform: translateY(-2px); }
-    .bill-name { color: var(--text-primary); font-weight: 700; font-size: 13px; }
+    .bill-name { color: var(--text-primary); font-weight: 700; font-size: 16px; }
     .bill-date { color: var(--text-tertiary); font-size: 11px; margin-top: 3px; }
     .bill-amount { color: var(--accent-danger); font-weight: 800; font-size: 15px; }
     
-    .transaction-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; transition: all 0.2s ease; animation: slideIn 0.3s ease; border-radius: 6px; margin-bottom: 2px; }
+    .transaction-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 16px; transition: all 0.2s ease; animation: slideIn 0.3s ease; border-radius: 6px; margin-bottom: 2px; }
     .transaction-item:hover { background: var(--bg-secondary); transform: translateX(2px); }
     .transaction-item:last-child { border-bottom: none; }
     .transaction-date { color: var(--text-tertiary); font-size: 11px; }
@@ -358,13 +358,13 @@
     .action-buttons { position: sticky; bottom: -40px; margin-left: -40px; margin-right: -40px; margin-bottom: -40px; padding: 20px 40px 40px 40px; background: linear-gradient(180deg, transparent 0%, var(--bg-primary) 20%, var(--bg-primary) 100%); display: flex; gap: 12px; flex-wrap: wrap; z-index: 10; }
     .modal-header { font-size: 24px; font-weight: 800; margin-bottom: 28px; color: var(--text-primary); letter-spacing: -0.6px; }
     .form-group { margin-bottom: 24px; }
-    .form-group label { display: block; margin-bottom: 12px; color: var(--text-primary); font-weight: 700; font-size: 13px; letter-spacing: -0.2px; }
+    .form-group label { display: block; margin-bottom: 12px; color: var(--text-primary); font-weight: 700; font-size: 16px; letter-spacing: -0.2px; }
     .form-group input, .form-group select, .form-group textarea { 
       width: 100%; 
       padding: 12px 16px; 
       border: 1.5px solid var(--border-color); 
       border-radius: 12px; 
-      font-size: 13px; 
+      font-size: 16px; 
       transition: all 0.25s ease;
       font-family: inherit;
       background: var(--bg-secondary);
@@ -375,8 +375,8 @@
     .action-buttons { display: flex; gap: 10px; margin-top: 28px; }
     .action-buttons button { flex: 1; }
     
-    .loading { color: var(--text-secondary); text-align: center; padding: 32px 24px; font-size: 13px; animation: pulse 1.5s ease-in-out infinite; font-weight: 500; }
-    .search-box { width: 100%; padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; margin-bottom: 14px; font-size: 13px; transition: all 0.25s ease; font-family: inherit; }
+    .loading { color: var(--text-secondary); text-align: center; padding: 32px 24px; font-size: 16px; animation: pulse 1.5s ease-in-out infinite; font-weight: 500; }
+    .search-box { width: 100%; padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; margin-bottom: 14px; font-size: 16px; transition: all 0.25s ease; font-family: inherit; }
     .search-box:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1); }
     .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--accent-primary); transition: all 0.25s ease; }
     .insight-box:hover { border-color: var(--accent-primary); box-shadow: 0 6px 16px rgba(0, 217, 255, 0.12); transform: translateY(-2px); }
@@ -391,7 +391,7 @@
       .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .header { padding: 24px 16px; }
       .header h1 { font-size: 28px; }
-      .header p { font-size: 13px; }
+      .header p { font-size: 16px; }
       .stat-card { padding: 20px 16px; }
       .stat-value { font-size: 24px; }
       .stat-label { font-size: 10px; }
@@ -415,7 +415,7 @@
       <div style="text-align: center; margin-bottom: 32px;">
         <div style="font-size: 48px; margin-bottom: 12px;">🌊</div>
         <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 800;">Underwater</h1>
-        <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">Smart Budget Management</p>
+        <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">Smart Budget Management</p>
       </div>
       
       <div id="loginForm">
@@ -475,7 +475,7 @@
       <button onclick="switchTab('transactions'); toggleSidebar();">All Transactions</button>
       <button onclick="switchTab('settings'); toggleSidebar();" style="display: flex; align-items: center; gap: 8px; justify-content: flex-start; width: 100%;"><span style="font-size: 16px;">⚙️</span><span>Settings</span></button>
       <div style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
-        <button onclick="handleLogout(); toggleSidebar();" style="width: 100%; padding: 10px 12px; background: var(--accent-danger); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px;">Logout</button>
+        <button onclick="handleLogout(); toggleSidebar();" style="width: 100%; padding: 10px 12px; background: var(--accent-danger); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 16px;">Logout</button>
       </div>
     </div>
   </div>
@@ -494,15 +494,15 @@
         </div>
         <div class="stats">
           <div class="stat-card">
-            <div class="stat-value" id="totalIncome">$0</div>
+            <div class="stat-value" id="totalIncome">$0.00</div>
             <div class="stat-label">Income</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="totalExpenses">$0</div>
+            <div class="stat-value" id="totalExpenses">$0.00</div>
             <div class="stat-label">Expenses</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value" id="netBalance">$0</div>
+            <div class="stat-value" id="netBalance">$0.00</div>
             <div class="stat-label">Balance</div>
           </div>
           <div class="stat-card">
@@ -568,10 +568,10 @@
         <button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="openModal('uploadModal')">Upload Bank Statement PDF</button>
         <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
           <input type="text" id="transactionSearch" class="search-box" placeholder="Search transactions..." onkeyup="filterTransactions()" style="flex: 1; min-width: 200px; margin: 0;">
-          <select id="categoryFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 13px;" onchange="filterTransactions()">
+          <select id="categoryFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 16px;" onchange="filterTransactions()">
             <option value="">All Categories</option>
           </select>
-          <select id="statusFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 13px;" onchange="filterTransactions()">
+          <select id="statusFilter" style="padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-size: 16px;" onchange="filterTransactions()">
             <option value="all">All Transactions</option>
             <option value="included">Included Only</option>
             <option value="excluded">Excluded Only</option>
@@ -579,7 +579,7 @@
         </div>
         <div id="allTransactionsList" style="display: grid; gap: 0;"><div class="loading">Loading transactions...</div></div></div></div></div>
 
-      <div id="settingsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;"><h1 style="margin: 0; font-size: 32px;">⚙️</h1><div><h2 style="margin: 0; font-size: 24px;">Settings</h2><p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-secondary);">Manage your account preferences</p></div></div><div style="margin-top: 28px; display: grid; gap: 16px;">
+      <div id="settingsContent" style="display: none; grid-column: 1/-1;"><div class="card full"><div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;"><h1 style="margin: 0; font-size: 32px;">⚙️</h1><div><h2 style="margin: 0; font-size: 24px;">Settings</h2><p style="margin: 4px 0 0 0; font-size: 16px; color: var(--text-secondary);">Manage your account preferences</p></div></div><div style="margin-top: 28px; display: grid; gap: 16px;">
         <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; border-left: 4px solid var(--accent-primary); transition: all 0.2s;">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
             <div style="flex: 1;">
@@ -613,36 +613,36 @@
 
   <div id="uploadModal" class="modal"><div class="modal-content"><div class="modal-header">📤 Upload Bank Statement</div><div class="form-group"><label>Select PDF</label><input type="file" id="pdfFile" accept=".pdf"></div><div id="uploadStatus"></div><div class="action-buttons"><button class="btn btn-primary" onclick="handleUpload()">Upload & Process</button><button class="btn btn-secondary" onclick="closeModal('uploadModal')">Cancel</button></div></div></div>
 
-  <div id="noteModal" class="modal"><div class="modal-content"><div class="modal-header">📝 Add Note</div><div class="form-group"><label>Note</label><textarea id="noteText" placeholder="Add a note..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px;"></textarea></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveNote()">Save</button><button class="btn btn-secondary" onclick="closeModal('noteModal')">Cancel</button></div></div></div>
+  <div id="noteModal" class="modal"><div class="modal-content"><div class="modal-header">📝 Add Note</div><div class="form-group"><label>Note</label><textarea id="noteText" placeholder="Add a note..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; font-family: inherit; resize: vertical; min-height: 80px;"></textarea></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveNote()">Save</button><button class="btn btn-secondary" onclick="closeModal('noteModal')">Cancel</button></div></div></div>
 
 
-  <div id="addRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Add Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="recurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="recurringAmount" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="recurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="recurringFrequency"><option value="7">Weekly</option><option value="14" selected>Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="recurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveRecurringTransaction()">Add</button><button class="btn btn-secondary" onclick="closeModal('addRecurringModal')">Cancel</button></div></div></div>
+  <div id="addRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Add Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="recurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="recurringAmount" min="0" step="0.01" required placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="recurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="recurringFrequency"><option value="7">Weekly</option><option value="14" selected>Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="recurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveRecurringTransaction()">Add</button><button class="btn btn-secondary" onclick="closeModal('addRecurringModal')">Cancel</button></div></div></div>
 
-  <div id="editRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="editRecurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="editRecurringAmount" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="editRecurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="editRecurringFrequency"><option value="7">Weekly</option><option value="14">Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="editRecurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditRecurringTransaction()">Save</button><button class="btn btn-secondary" onclick="closeModal('editRecurringModal')">Cancel</button></div></div></div>
+  <div id="editRecurringModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Recurring Transaction</div><div class="form-group"><label>Name</label><input type="text" id="editRecurringName" placeholder="e.g., Paycheck, Netflix, Gym..."></div><div class="form-group"><label>Amount</label><input type="number" id="editRecurringAmount" min="0" step="0.01" required placeholder="0.00" step="0.01"></div><div class="form-group"><label>Type</label><select id="editRecurringType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="form-group"><label>Frequency</label><select id="editRecurringFrequency"><option value="7">Weekly</option><option value="14">Biweekly</option><option value="30">Monthly</option></select></div><div class="form-group"><label>Start Date</label><input type="date" id="editRecurringStartDate"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditRecurringTransaction()">Save</button><button class="btn btn-secondary" onclick="closeModal('editRecurringModal')">Cancel</button></div></div></div>
 
   <div id="categoryTransactionsModal" class="modal"><div class="modal-content" style="max-width: 700px; max-height: 85vh;"><div class="modal-header">Category Transactions</div><div id="categoryTransactionsList" style="max-height: calc(85vh - 120px); overflow-y: auto; margin-bottom: 20px;"><div class="loading">Loading...</div></div></div></div>
   
-  <div id="paycheckSettingsModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">⚙️ Paycheck Settings</div><div class="form-group"><label>Paycheck Amount</label><input type="number" id="paycheckAmountInput" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Frequency (Days)</label><input type="number" id="paycheckFreqInput" placeholder="1" step="1" min="1" max="365"></div><div class="action-buttons"><button class="btn btn-primary" onclick="savePaycheckSettings()">Save</button><button class="btn btn-secondary" onclick="closeModal('paycheckSettingsModal')">Cancel</button></div></div></div>
+  <div id="paycheckSettingsModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">⚙️ Paycheck Settings</div><div class="form-group"><label>Paycheck Amount</label><input type="number" id="paycheckAmountInput" min="0" step="0.01" required placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Frequency (Days)</label><input type="number" id="paycheckFreqInput" placeholder="1" step="1" min="1" max="365"></div><div class="action-buttons"><button class="btn btn-primary" onclick="savePaycheckSettings()">Save</button><button class="btn btn-secondary" onclick="closeModal('paycheckSettingsModal')">Cancel</button></div></div></div>
 
   <div id="startingBalanceModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">🏦 Starting Balance</div><div class="form-group"><label>Account Starting Balance</label><input type="number" id="startingBalanceInput" placeholder="0" step="0.01" min="0"><p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">The balance at the start date.</p></div><div class="form-group"><label>Balance Start Date</label><input type="date" id="startingBalanceDateInput"><p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Calendar calculations begin from this date.</p></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveStartingBalance()">Save</button><button class="btn btn-secondary" onclick="closeModal('startingBalanceModal')">Cancel</button></div></div></div>
 
   <div id="categoryModal" class="modal"><div class="modal-content" style="max-width: 500px;"><div class="modal-header" id="categoryModalHeader">Assign Category</div><div style="margin-top: 20px;">
     <div style="margin-bottom: 16px;">
-      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Quick categories:</p>
+      <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 12px;">Quick categories:</p>
       <div id="quickCategoryButtons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;"></div>
     </div>
     <div style="display: flex; gap: 10px;">
-      <input type="text" id="customCategory" placeholder="Or type custom category..." style="flex: 1; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 13px;">
+      <input type="text" id="customCategory" placeholder="Or type custom category..." style="flex: 1; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 16px;">
       <button onclick="assignTransactionCategory()" class="btn btn-primary" style="white-space: nowrap;">Save</button>
     </div>
     <button onclick="closeModal('categoryModal')" class="btn btn-secondary" style="width: 100%; margin-top: 12px;">Cancel</button>
   </div></div></div>
   
-  <div id="addDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Add Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="debtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="debtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="debtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="debtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="debtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day</label><input type="date" id="debtDueDay"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveDebt()">Add</button><button class="btn btn-secondary" onclick="closeModal('addDebtModal')">Cancel</button></div></div></div>
+  <div id="addDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Add Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="debtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="debtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="debtBalance" min="0" step="0.01" required placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="debtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="debtPayment" min="0" step="0.01" required placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day</label><input type="date" id="debtDueDay"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveDebt()">Add</button><button class="btn btn-secondary" onclick="closeModal('addDebtModal')">Cancel</button></div></div></div>
 
   <div id="editDebtModal" class="modal"><div class="modal-content"><div class="modal-header">Edit Debt</div><div class="form-group"><label>Creditor Name</label><input type="text" id="editDebtName" placeholder="e.g., Chase, Wells Fargo, etc."></div><div class="form-group"><label>Debt Type</label><select id="editDebtType"><option value="">Select Type</option><option value="Credit Card">Credit Card</option><option value="Car Loan">Car Loan</option><option value="Student Loan">Student Loan</option><option value="Personal Loan">Personal Loan</option><option value="Medical Debt">Medical Debt</option><option value="Home Loan">Home Loan</option><option value="Other">Other</option></select></div><div class="form-group"><label>Current Balance</label><input type="number" id="editDebtBalance" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Interest Rate (%)</label><input type="number" id="editDebtRate" placeholder="0.00" step="0.01" min="0"></div><div class="form-group"><label>Monthly Payment</label><input type="number" id="editDebtPayment" placeholder="0.00" step="0.01"></div><div class="form-group"><label>Payment Due Day</label><input type="date" id="editDebtDueDay"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveEditDebt()">Save</button><button class="btn btn-secondary" onclick="closeModal('editDebtModal')">Cancel</button></div></div></div>
 
-  <div id="actualIncomeModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">💰 Enter Actual Income</div><p style="color: var(--text-secondary); font-size: 13px; margin: 0 0 16px 0;">Type the actual amount you received. We'll automatically add any bonus/difference!</p><div class="form-group"><label>Amount You Actually Made</label><input type="number" id="actualIncomeAmount" placeholder="0.00" step="0.01" min="0"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveActualIncome()">Add</button><button class="btn btn-secondary" onclick="closeModal('actualIncomeModal')">Cancel</button></div></div></div>
+  <div id="actualIncomeModal" class="modal"><div class="modal-content" style="max-width: 400px;"><div class="modal-header">💰 Enter Actual Income</div><p style="color: var(--text-secondary); font-size: 16px; margin: 0 0 16px 0;">Type the actual amount you received. We'll automatically add any bonus/difference!</p><div class="form-group"><label>Amount You Actually Made</label><input type="number" id="actualIncomeAmount" placeholder="0.00" step="0.01" min="0"></div><div class="action-buttons"><button class="btn btn-primary" onclick="saveActualIncome()">Add</button><button class="btn btn-secondary" onclick="closeModal('actualIncomeModal')">Cancel</button></div></div></div>
 
   <div id="billsDetailsModal" class="modal"><div class="modal-content" style="max-width: 600px; max-height: 85vh;"><div class="modal-header">📋 Bills Breakdown</div><div style="margin-bottom: 20px; display: flex; gap: 8px;"><button id="detailPaycheck1Btn" onclick="setBillsDetailView('paycheck1')" style="flex: 1; padding: 10px 12px; background: var(--accent-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 1</button><button id="detailPaycheck2Btn" onclick="setBillsDetailView('paycheck2')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">Paycheck 2</button><button id="detailMonthlyBtn" onclick="setBillsDetailView('monthly')" style="flex: 1; padding: 10px 12px; background: var(--bg-tertiary); color: var(--text-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px;">All Month</button></div><div id="billsDetailsList" style="max-height: calc(85vh - 180px); overflow-y: auto;"><div class="loading">Loading...</div></div><div class="action-buttons"><button class="btn btn-secondary" onclick="closeModal('billsDetailsModal')">Close</button></div></div></div>
 
@@ -873,7 +873,7 @@
         const data = await res.json();
         startingBalance = data.balance;
         startingBalanceDate = data.date;
-        showToast('Starting balance saved!', 'success');
+        showSuccess("Saved successfully!")');
         closeModal('startingBalanceModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { showToast('Error saving balance', 'error'); }
@@ -899,7 +899,7 @@
           body: JSON.stringify({ amount, frequencyDays: freq })
         });
         paycheck = await res.json();
-        showToast('Paycheck settings saved!', 'success');
+        showSuccess("Saved successfully!")');
         closeModal('paycheckSettingsModal');
         loadDashboard();
       } catch (e) { showToast('Error saving settings', 'error'); }
@@ -1136,26 +1136,26 @@
         const spending = incomeInfo.total - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 1: ' + paycheck1Date.toLocaleDateString() + '</h3>';
-        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 8px;">' + formatCurrency(incomeInfo.total) + '</div>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 8px;">' + formatMoney(incomeInfo.total) + '</div>';
         if (incomeInfo.sources.length > 1) {
           html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; padding: 8px; background: var(--bg-secondary); border-radius: 4px;">';
           incomeInfo.sources.forEach(src => {
-            html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>' + src.name + (src.date ? ' (' + src.date + ')' : '') + '</span><span style="font-weight: 600; color: var(--accent-success);">' + formatCurrency(src.amount) + '</span></div>';
+            html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>' + src.name + (src.date ? ' (' + src.date + ')' : '') + '</span><span style="font-weight: 600; color: var(--accent-success);">' + formatMoney(src.amount) + '</span></div>';
           });
           html += '</div>';
         } else if (incomeInfo.sources.length === 1 && incomeInfo.sources[0].date) {
           html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">' + incomeInfo.sources[0].date + '</div>';
         }
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
-        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
-        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatMoney(billsTotal) + '</div></div>';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatMoney(spending) + '</div></div>';
         html += '</div></div>';
         
         if (bills.length) {
           html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Bills Due</h4>';
           bills.forEach(b => {
             const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px; cursor: pointer;" onclick="closeBillsAndGoToCalendar(' + b.id + ')"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px; cursor: pointer;" onclick="closeBillsAndGoToCalendar(' + b.id + ')"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatMoney(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
           });
         } else {
           html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
@@ -1167,26 +1167,26 @@
         const spending = incomeInfo.total - billsTotal;
         
         html += '<div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 16px;"><h3 style="margin: 0 0 12px 0; color: var(--text-primary); font-size: 14px; font-weight: 700;">💰 Paycheck 2: ' + paycheck2Date.toLocaleDateString() + '</h3>';
-        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 8px;">' + formatCurrency(incomeInfo.total) + '</div>';
+        html += '<div style="font-size: 24px; font-weight: 800; color: var(--accent-primary); margin-bottom: 8px;">' + formatMoney(incomeInfo.total) + '</div>';
         if (incomeInfo.sources.length > 1) {
           html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; padding: 8px; background: var(--bg-secondary); border-radius: 4px;">';
           incomeInfo.sources.forEach(src => {
-            html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>' + src.name + (src.date ? ' (' + src.date + ')' : '') + '</span><span style="font-weight: 600; color: var(--accent-success);">' + formatCurrency(src.amount) + '</span></div>';
+            html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>' + src.name + (src.date ? ' (' + src.date + ')' : '') + '</span><span style="font-weight: 600; color: var(--accent-success);">' + formatMoney(src.amount) + '</span></div>';
           });
           html += '</div>';
         } else if (incomeInfo.sources.length === 1 && incomeInfo.sources[0].date) {
           html += '<div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px;">' + incomeInfo.sources[0].date + '</div>';
         }
         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">';
-        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(billsTotal) + '</div></div>';
-        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatCurrency(spending) + '</div></div>';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">TO BILLS</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-danger);">' + formatMoney(billsTotal) + '</div></div>';
+        html += '<div><div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">SPENDING</div><div style="font-size: 18px; font-weight: 800; color: var(--accent-success);">' + formatMoney(spending) + '</div></div>';
         html += '</div></div>';
         
         if (bills.length) {
           html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Bills Due</h4>';
           bills.forEach(b => {
             const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
-            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px; cursor: pointer;" onclick="closeBillsAndGoToCalendar(' + b.id + ')"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px; cursor: pointer;" onclick="closeBillsAndGoToCalendar(' + b.id + ')"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="font-weight: 700; color: #ff3b30;">' + formatMoney(b.amount) + '</div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
           });
         } else {
           html += '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No bills due this paycheck</div>';
@@ -1216,7 +1216,7 @@
             const occurrences = countActualOccurrences(b.startDate, b.frequency);
             return sum + (b.amount * occurrences);
           }, 0);
-          html += '<div style="font-size: 20px; font-weight: 800; color: var(--accent-danger);">' + formatCurrency(monthlyTotal) + '</div>';
+          html += '<div style="font-size: 20px; font-weight: 800; color: var(--accent-danger);">' + formatMoney(monthlyTotal) + '</div>';
           html += '<div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px;">Total monthly expense</div></div>';
           
           html += '<h4 style="color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Breakdown by Bill</h4>';
@@ -1224,7 +1224,7 @@
             const freqText = b.frequency === 7 ? 'Weekly' : b.frequency === 14 ? 'Biweekly' : b.frequency === 30 ? 'Monthly' : 'Every ' + b.frequency + ' days';
             const occurrences = countActualOccurrences(b.startDate, b.frequency);
             const monthlyAmount = b.amount * occurrences;
-            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="text-align: right;"><div style="font-weight: 700; color: #ff3b30;">' + formatCurrency(b.amount) + '</div><div style="font-size: 10px; color: var(--text-secondary);">× ' + occurrences + ' = ' + formatCurrency(monthlyAmount) + '</div></div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
+            html += '<div style="padding: 12px; background: var(--bg-secondary); border-left: 4px solid #ff3b30; border-radius: 6px; margin-bottom: 10px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;"><div style="font-weight: 600; color: var(--text-primary);">' + b.name + '</div><div style="text-align: right;"><div style="font-weight: 700; color: #ff3b30;">' + formatMoney(b.amount) + '</div><div style="font-size: 10px; color: var(--text-secondary);">× ' + occurrences + ' = ' + formatMoney(monthlyAmount) + '</div></div></div><div style="font-size: 11px; color: var(--text-secondary);">' + freqText + '</div></div>';
           });
         }
       }
@@ -1240,7 +1240,7 @@
       }, 300);
     }
     
-    function formatCurrency(num) {
+    function formatMoney(num) {
       return '$' + num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
     
@@ -1262,7 +1262,7 @@
       const id = 'toast-' + Date.now();
       const toast = document.createElement('div');
       toast.id = id;
-      toast.style.cssText = `position: fixed; bottom: 20px; right: 20px; padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideIn 0.3s ease-out;`;
+      toast.style.cssText = `position: fixed; bottom: 20px; right: 20px; padding: 12px 16px; border-radius: 8px; font-size: 16px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideIn 0.3s ease-out;`;
       if (type === 'success') { toast.style.background = '#d4edda'; toast.style.color = '#155724'; toast.style.border = '1px solid #a6d6aa'; }
       else if (type === 'error') { toast.style.background = '#f8d7da'; toast.style.color = '#842029'; toast.style.border = '1px solid #f5c2c7'; }
       else if (type === 'warning') { toast.style.background = '#fff3cd'; toast.style.color = '#664d03'; toast.style.border = '1px solid #ffecb5'; }
@@ -1459,9 +1459,9 @@
           }
         }
         
-        document.getElementById('totalIncome').textContent = formatCurrency(currentPaycheckIncome);
-        document.getElementById('totalExpenses').textContent = formatCurrency(currentPaycheckBills);
-        document.getElementById('netBalance').textContent = formatCurrency(currentPaycheckIncome - currentPaycheckBills);
+        document.getElementById('totalIncome').textContent = formatMoney(currentPaycheckIncome);
+        document.getElementById('totalExpenses').textContent = formatMoney(currentPaycheckBills);
+        document.getElementById('netBalance').textContent = formatMoney(currentPaycheckIncome - currentPaycheckBills);
         
         // Update health score display with color
         const scoreEl = document.getElementById('financialScore');
@@ -1498,22 +1498,22 @@
         const totalMonthlyIncome = paycheckAmount * paychecksInMonth;
         const spendingMonthlyAmt = totalMonthlyIncome - billsMonthlyAmt;
         
-        document.getElementById('billsPerPaycheckData').textContent = formatCurrency(billsPerPaycheckAmt);
-        document.getElementById('billsMonthlyData').textContent = formatCurrency(billsMonthlyAmt);
+        document.getElementById('billsPerPaycheckData').textContent = formatMoney(billsPerPaycheckAmt);
+        document.getElementById('billsMonthlyData').textContent = formatMoney(billsMonthlyAmt);
         document.getElementById('billsFreqData').textContent = paychecksInMonth + ' paychecks this month';
-        document.getElementById('toBillsPaycheckData').textContent = formatCurrency(billsPerPaycheckAmt);
-        document.getElementById('toBillsMonthlyData').textContent = formatCurrency(billsMonthlyAmt);
-        document.getElementById('spendingPaycheckData').textContent = formatCurrency(spendingPerPaycheckAmt);
-        document.getElementById('spendingMonthlyData').textContent = formatCurrency(spendingMonthlyAmt);
+        document.getElementById('toBillsPaycheckData').textContent = formatMoney(billsPerPaycheckAmt);
+        document.getElementById('toBillsMonthlyData').textContent = formatMoney(billsMonthlyAmt);
+        document.getElementById('spendingPaycheckData').textContent = formatMoney(spendingPerPaycheckAmt);
+        document.getElementById('spendingMonthlyData').textContent = formatMoney(spendingMonthlyAmt);
         
         if (currentBillsView === 'paycheck') {
-          document.getElementById('billsAmount').textContent = formatCurrency(billsPerPaycheckAmt);
-          document.getElementById('toBillsAmount').textContent = formatCurrency(billsPerPaycheckAmt);
-          document.getElementById('spendingAmount').textContent = formatCurrency(spendingPerPaycheckAmt);
+          document.getElementById('billsAmount').textContent = formatMoney(billsPerPaycheckAmt);
+          document.getElementById('toBillsAmount').textContent = formatMoney(billsPerPaycheckAmt);
+          document.getElementById('spendingAmount').textContent = formatMoney(spendingPerPaycheckAmt);
         } else {
-          document.getElementById('billsAmount').textContent = formatCurrency(billsMonthlyAmt);
-          document.getElementById('toBillsAmount').textContent = formatCurrency(billsMonthlyAmt);
-          document.getElementById('spendingAmount').textContent = formatCurrency(spendingMonthlyAmt);
+          document.getElementById('billsAmount').textContent = formatMoney(billsMonthlyAmt);
+          document.getElementById('toBillsAmount').textContent = formatMoney(billsMonthlyAmt);
+          document.getElementById('spendingAmount').textContent = formatMoney(spendingMonthlyAmt);
         }
         
         loadUpcomingBills(bills);
@@ -1561,7 +1561,7 @@
       
       billsList.innerHTML = billsWithDates.map(({ bill: b, nextDate }) => {
         const dateStr = formatBillDate(nextDate);
-        return `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">${dateStr}</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? '#34C759' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : ''}${formatCurrency(b.amount)}</div></div>`;
+        return `<div class="bill-item"><div><div class="bill-name">${b.name}</div><div class="bill-date">${dateStr}</div></div><div class="bill-amount" style="color: ${b.type === 'income' ? '#34C759' : 'var(--accent-danger)'};">${b.type === 'income' ? '+' : ''}${formatMoney(b.amount)}</div></div>`;
       }).join('');
     }
     
@@ -1575,14 +1575,14 @@
       if (totalSpend === 0) { document.getElementById('spendingTrends').innerHTML = '<div class="loading">No spending data for this month</div>'; return; }
       const trendsHtml = sorted.map(([cat, amt]) => {
         const pct = (amt / totalSpend * 100).toFixed(1);
-        return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">${formatCurrency(amt)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
+        return `<div style="margin-bottom: 12px;"><div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span style="font-weight: 600; font-size: 12px;">${cat}</span><span style="color: var(--accent-primary); font-weight: 800;">${formatMoney(amt)}</span></div><div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-gold)); width: ${pct}%;"></div></div><div style="font-size: 10px; color: var(--text-tertiary); margin-top: 2px;">${pct}%</div></div>`;
       }).join('');
       document.getElementById('spendingTrends').innerHTML = trendsHtml || '<div class="loading">No spending data</div>';
     }
     
     function loadRecentTransactions(transactions) {
       const recentTxs = transactions.slice(-10).reverse();
-      const html = recentTxs.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</div></div>`).join('');
+      const html = recentTxs.map(t => `<div class="transaction-item"><div><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}</div></div><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div></div>`).join('');
       document.getElementById('transactionsList').innerHTML = html || '<div class="loading">No transactions</div>';
     }
     
@@ -1631,7 +1631,7 @@
         if (isHighlighted) {
           card += '<div style="font-size: 11px; color: ' + color + '; margin-top: 4px; font-weight: 600;">Highlighting calendar dates...</div>';
         }
-        card += '</div><div style="text-align: right; flex-shrink: 0;"><div style="font-weight: 700; font-size: 16px; color: ' + color + '; margin-bottom: 0;">' + (b.type === 'income' ? '+' : '') + formatCurrency(b.amount) + '</div></div></div>';
+        card += '</div><div style="text-align: right; flex-shrink: 0;"><div style="font-weight: 700; font-size: 16px; color: ' + color + '; margin-bottom: 0;">' + (b.type === 'income' ? '+' : '') + formatMoney(b.amount) + '</div></div></div>';
         if (isExpanded) {
           card += '<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid ' + color + '40;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">' + freqText + ' • Started ' + new Date(b.startDate).toLocaleDateString() + '</div><div style="display: flex; gap: 4px;"><button onclick="event.stopPropagation(); openEditRecurringModal(' + b.id + ')" style="padding: 4px 8px; background: var(--accent-primary); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; flex: 1;">Edit</button><button onclick="event.stopPropagation(); deleteRecurringBill(' + b.id + ')" style="padding: 4px 8px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; flex: 1;">Delete</button></div></div>';
         } else {
@@ -1746,7 +1746,7 @@
           body: JSON.stringify({ name, amount, type, frequency, startDate })
         });
         const data = await res.json();
-        showToast('Recurring transaction updated!', 'success');
+        showSuccess("Transaction updated successfully!")');
         closeModal('editRecurringModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         // Refresh Bills Calculator if modal is open
@@ -1762,7 +1762,7 @@
       if (!confirm('Delete this recurring transaction?')) return;
       try {
         await apiCall(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
-        showToast('Recurring transaction deleted!', 'success');
+        showSuccess("Deleted successfully!")');
         highlightedRecurringId = null;
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         // Refresh Bills Calculator if modal is open
@@ -1952,24 +1952,24 @@
       html += `<h3 style="margin: 0 0 16px 0; color: var(--text-primary); font-size: 18px;">${dateStr}</h3>`;
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; margin-bottom: 12px;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Starting Balance</div>`;
-      html += `<div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">${formatCurrency(data.startBalance)}</div>`;
+      html += `<div style="font-size: 20px; font-weight: 700; color: var(--accent-primary);">${formatMoney(data.startBalance)}</div>`;
       html += `</div>`;
       
       html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">`;
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #34c759;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">+ Income</div>`;
-      html += `<div style="font-size: 18px; font-weight: 700; color: #34c759;">${formatCurrency(data.income)}</div>`;
+      html += `<div style="font-size: 18px; font-weight: 700; color: #34c759;">${formatMoney(data.income)}</div>`;
       html += `</div>`;
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #ff3b30;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">- Expenses</div>`;
-      html += `<div style="font-size: 18px; font-weight: 700; color: #ff3b30;">${formatCurrency(data.expense)}</div>`;
+      html += `<div style="font-size: 18px; font-weight: 700; color: #ff3b30;">${formatMoney(data.expense)}</div>`;
       html += `</div>`;
       html += `</div>`;
       
       html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border: 2px solid var(--accent-gold); margin-bottom: 16px;">`;
       html += `<div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Ending Balance</div>`;
       const endColor = data.endBalance >= 0 ? 'var(--accent-success)' : 'var(--accent-danger)';
-      html += `<div style="font-size: 20px; font-weight: 700; color: ${endColor};">${formatCurrency(data.endBalance)}</div>`;
+      html += `<div style="font-size: 20px; font-weight: 700; color: ${endColor};">${formatMoney(data.endBalance)}</div>`;
       html += `</div>`;
       
       if (data.bills && data.bills.length > 0) {
@@ -1978,7 +1978,7 @@
         data.bills.forEach(b => {
           const color = b.type === 'income' ? '#34c759' : '#ff3b30';
           html += `<div style="padding: 10px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${color};">`;
-          html += `<div style="flex: 1;"><span style="color: var(--text-primary); font-weight: 500;">${b.name}</span><br><span style="color: ${color}; font-weight: 700; font-size: 14px;">${b.type === 'income' ? '+' : '-'}${formatCurrency(b.amount)}</span></div>`;
+          html += `<div style="flex: 1;"><span style="color: var(--text-primary); font-weight: 500;">${b.name}</span><br><span style="color: ${color}; font-weight: 700; font-size: 14px;">${b.type === 'income' ? '+' : '-'}${formatMoney(b.amount)}</span></div>`;
           if (!b.isActualOverride) {
             html += `<button onclick="deleteRecurringTransaction(${b.id})" style="padding: 6px 10px; background: #ff3b30; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>`;
           } else {
@@ -2020,7 +2020,7 @@
           body: JSON.stringify({ amount: actualAmount })
         });
         const data = await res.json();
-        showToast(`Actual income ${formatCurrency(actualAmount)} set for ${dateStr}!`, 'success');
+        showToast(`Actual income ${formatMoney(actualAmount)} set for ${dateStr}!`, 'success');
         closeModal('actualIncomeModal');
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         // Refresh Bills Calculator if modal is open to show actual income
@@ -2043,7 +2043,7 @@
         const res = await apiCall(API_URL + `/api/recurring-bills/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
-          showToast('Recurring transaction deleted!', 'success');
+          showSuccess("Deleted successfully!")');
           loadCalendar(calendarCurrentYear, calendarCurrentMonth);
         }
       } catch (e) { showToast('Error deleting transaction', 'error'); }
@@ -2094,13 +2094,13 @@
                 </div>
               </div>
               <div style="display: flex; gap: 12px;">
-                <button onclick="openEditDebtModal(${d.id})" style="padding: 0; background: none; color: var(--accent-primary); border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; opacity: 0.7;" onmouseover="this.style.opacity='1'; this.style.textDecoration='underline';" onmouseout="this.style.opacity='0.7'; this.style.textDecoration='none';">Edit</button>
-                <button onclick="deleteDebt(${d.id})" style="padding: 0; background: none; color: #ff3b30; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; opacity: 0.7;" onmouseover="this.style.opacity='1'; this.style.textDecoration='underline';" onmouseout="this.style.opacity='0.7'; this.style.textDecoration='none';">Delete</button>
+                <button onclick="openEditDebtModal(${d.id})" style="padding: 0; background: none; color: var(--accent-primary); border: none; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s; opacity: 0.7;" onmouseover="this.style.opacity='1'; this.style.textDecoration='underline';" onmouseout="this.style.opacity='0.7'; this.style.textDecoration='none';">Edit</button>
+                <button onclick="deleteDebt(${d.id})" style="padding: 0; background: none; color: #ff3b30; border: none; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s; opacity: 0.7;" onmouseover="this.style.opacity='1'; this.style.textDecoration='underline';" onmouseout="this.style.opacity='0.7'; this.style.textDecoration='none';">Delete</button>
               </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-              <div><div style="font-size: 11px; color: var(--text-secondary);">Balance</div><div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${formatCurrency(d.currentBalance)}</div></div>
-              <div><div style="font-size: 11px; color: var(--text-secondary);">Monthly Payment</div><div style="font-size: 14px; font-weight: 700; color: var(--accent-success);">${formatCurrency(d.monthlyPayment)}</div></div>
+              <div><div style="font-size: 11px; color: var(--text-secondary);">Balance</div><div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${formatMoney(d.currentBalance)}</div></div>
+              <div><div style="font-size: 11px; color: var(--text-secondary);">Monthly Payment</div><div style="font-size: 14px; font-weight: 700; color: var(--accent-success);">${formatMoney(d.monthlyPayment)}</div></div>
             </div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
               <div style="flex: 1; height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;"><div style="height: 100%; background: linear-gradient(90deg, #34C759, #00d9ff); width: ${progress}%;"></div></div>
@@ -2119,14 +2119,14 @@
         
         let analysisHtml = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div><div style="font-size: 12px; color: var(--text-secondary);">Total Debt</div><div style="font-size: 22px; font-weight: 800; color: #ff3b30;">${formatCurrency(totalDebt)}</div></div>
-            <div><div style="font-size: 12px; color: var(--text-secondary);">Total Monthly Payment</div><div style="font-size: 22px; font-weight: 800; color: #34C759;">${formatCurrency(totalPayment)}</div></div>
+            <div><div style="font-size: 12px; color: var(--text-secondary);">Total Debt</div><div style="font-size: 22px; font-weight: 800; color: #ff3b30;">${formatMoney(totalDebt)}</div></div>
+            <div><div style="font-size: 12px; color: var(--text-secondary);">Total Monthly Payment</div><div style="font-size: 22px; font-weight: 800; color: #34C759;">${formatMoney(totalPayment)}</div></div>
             <div><div style="font-size: 12px; color: var(--text-secondary);">Avg Interest Rate</div><div style="font-size: 22px; font-weight: 800; color: var(--accent-primary);">${avgRate.toFixed(2)}%</div></div>
             <div><div style="font-size: 12px; color: var(--text-secondary);">Debts Tracked</div><div style="font-size: 22px; font-weight: 800; color: var(--text-primary);">${formatNumber(allDebts.length)}</div></div>
           </div>
           <div style="margin-top: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid var(--accent-gold);">
             <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Monthly Interest Charge</div>
-            <div style="font-size: 18px; font-weight: 700; color: var(--accent-danger);">${formatCurrency(monthlyInterest)}</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--accent-danger);">${formatMoney(monthlyInterest)}</div>
             <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">This much goes to interest, not principal</div>
           </div>
         `;
@@ -2135,7 +2135,7 @@
           const isAvalancheRecommended = analysis.recommendation === 'avalanche';
           analysisHtml += `
             <div style="margin-top: 16px;">
-              <div style="font-weight: 700; font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Payoff Strategy Recommendation</div>
+              <div style="font-weight: 700; font-size: 16px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Payoff Strategy Recommendation</div>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                 <div style="padding: 16px; background: var(--bg-secondary); border: 1.5px solid ${isAvalancheRecommended ? 'var(--accent-primary)' : 'var(--border-color)'}; border-radius: 10px;">
@@ -2145,13 +2145,13 @@
                   </div>
                   <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Pay high-interest debts first</div>
                   <div style="display: grid; gap: 8px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 16px;">
                       <span style="color: var(--text-secondary);">Time to payoff</span>
                       <span style="font-weight: 700; color: var(--text-primary);">${analysis.avalanche.years} years</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 16px;">
                       <span style="color: var(--text-secondary);">Total interest paid</span>
-                      <span style="font-weight: 700; color: var(--text-primary);">${formatCurrency(analysis.avalanche.totalInterest)}</span>
+                      <span style="font-weight: 700; color: var(--text-primary);">${formatMoney(analysis.avalanche.totalInterest)}</span>
                     </div>
                   </div>
                 </div>
@@ -2163,35 +2163,35 @@
                   </div>
                   <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Pay smallest debts first</div>
                   <div style="display: grid; gap: 8px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 16px;">
                       <span style="color: var(--text-secondary);">Time to payoff</span>
                       <span style="font-weight: 700; color: var(--text-primary);">${analysis.snowball.years} years</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 16px;">
                       <span style="color: var(--text-secondary);">Total interest paid</span>
-                      <span style="font-weight: 700; color: var(--text-primary);">${formatCurrency(analysis.snowball.totalInterest)}</span>
+                      <span style="font-weight: 700; color: var(--text-primary);">${formatMoney(analysis.snowball.totalInterest)}</span>
                     </div>
                   </div>
                 </div>
               </div>
               
               <div style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; border-left: 3px solid var(--accent-primary);">
-                <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${analysis.recommendationLabel}</div>
-                <div style="font-size: 13px; color: var(--text-secondary);">Save ${formatCurrency(analysis.savingsVsMinimum)} compared to minimum payments</div>
+                <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${analysis.recommendationLabel}</div>
+                <div style="font-size: 16px; color: var(--text-secondary);">Save ${formatMoney(analysis.savingsVsMinimum)} compared to minimum payments</div>
               </div>
             </div>
             
             <div style="margin-top: 16px; padding: 14px; background: var(--bg-secondary); border-radius: 8px;">
               <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Monthly Budget Breakdown <button onclick="showInfoTooltip('budgetInfo')" style="width: 18px; height: 18px; border-radius: 50%; background: var(--accent-primary); color: white; border: none; cursor: pointer; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0;">ⓘ</button></div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; font-size: 12px;">
-                <div><span style="color: var(--text-secondary);">Income</span><div style="font-weight: 700; color: var(--text-primary);">${formatCurrency(incomeData.estimatedMonthlyIncome)}</div></div>
-                <div><span style="color: var(--text-secondary);">Bills</span><div style="font-weight: 700; color: var(--text-primary);">${formatCurrency(incomeData.monthlyBills)}</div></div>
-                <div><span style="color: var(--text-secondary);">Actual Spending</span><div style="font-weight: 700; color: var(--text-primary);">${formatCurrency(incomeData.avgMonthlyActualSpending)}</div></div>
-                <div><span style="color: var(--text-secondary);">Extra Available</span><div style="font-weight: 700; color: var(--accent-primary);">${formatCurrency(incomeData.expendableIncome)}</div></div>
+                <div><span style="color: var(--text-secondary);">Income</span><div style="font-weight: 700; color: var(--text-primary);">${formatMoney(incomeData.estimatedMonthlyIncome)}</div></div>
+                <div><span style="color: var(--text-secondary);">Bills</span><div style="font-weight: 700; color: var(--text-primary);">${formatMoney(incomeData.monthlyBills)}</div></div>
+                <div><span style="color: var(--text-secondary);">Actual Spending</span><div style="font-weight: 700; color: var(--text-primary);">${formatMoney(incomeData.avgMonthlyActualSpending)}</div></div>
+                <div><span style="color: var(--text-secondary);">Extra Available</span><div style="font-weight: 700; color: var(--accent-primary);">${formatMoney(incomeData.expendableIncome)}</div></div>
               </div>
               <div style="padding: 10px; background: var(--bg-primary); border-radius: 6px; border-left: 3px solid var(--accent-gold);">
                 <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 3px;">Suggested Extra Payment Monthly</div>
-                <div style="font-size: 18px; font-weight: 800; color: var(--accent-gold);">${incomeData.transactionSampleSize > 0 ? formatCurrency(incomeData.suggestedExtraPayment) : '$0.00'}</div>
+                <div style="font-size: 18px; font-weight: 800; color: var(--accent-gold);">${incomeData.transactionSampleSize > 0 ? formatMoney(incomeData.suggestedExtraPayment) : '$0.00'}</div>
                 <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">${incomeData.transactionSampleSize > 0 ? 'Based on actual bank statement spending from last 3 months' : 'Upload bank statements to get suggestions'}</div>
               </div>
             </div>
@@ -2204,16 +2204,16 @@
                   <div style="padding: 10px; background: var(--bg-primary); border-radius: 6px; border-left: 3px solid rgba(0, 217, 255, 0.4);">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
                       <div style="font-weight: 600; color: var(--text-primary);">${s.category}</div>
-                      <div style="font-size: 11px; color: var(--accent-primary); font-weight: 700;">Save ${formatCurrency(s.potentialSavings)}</div>
+                      <div style="font-size: 11px; color: var(--accent-primary); font-weight: 700;">Save ${formatMoney(s.potentialSavings)}</div>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Currently spending ${formatCurrency(s.currentMonthly)} monthly</div>
-                    <div style="font-size: 11px; color: var(--text-tertiary);">Reduce to ${formatCurrency(s.suggestedAmount)} to save ${formatCurrency(s.potentialSavings)} monthly</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Currently spending ${formatMoney(s.currentMonthly)} monthly</div>
+                    <div style="font-size: 11px; color: var(--text-tertiary);">Reduce to ${formatMoney(s.suggestedAmount)} to save ${formatMoney(s.potentialSavings)} monthly</div>
                   </div>
                 `).join('')}
               </div>
               <div style="margin-top: 12px; padding: 10px; background: var(--bg-primary); border-radius: 6px;">
                 <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 2px;">Total Monthly Savings Potential</div>
-                <div style="font-size: 16px; font-weight: 800; color: var(--accent-primary);">${formatCurrency(suggestions.totalPotentialSavings)}</div>
+                <div style="font-size: 16px; font-weight: 800; color: var(--accent-primary);">${formatMoney(suggestions.totalPotentialSavings)}</div>
               </div>
             </div>
             ` : ''}
@@ -2276,7 +2276,7 @@
           body: JSON.stringify({ name, type, currentBalance: balance, originalBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay, dueDate: dueDateStr })
         });
         const data = await res.json();
-        showToast('Debt added and linked to Calendar!', 'success');
+        showSuccess("Added successfully!")');
         closeModal('addDebtModal');
         loadDebtManager();
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
@@ -2301,7 +2301,7 @@
           body: JSON.stringify({ name, type, currentBalance: balance, interestRate: rate || 0, monthlyPayment: payment, dueDay, dueDate: dueDateStr })
         });
         const data = await res.json();
-        showToast('Debt updated!', 'success');
+        showSuccess("Transaction updated successfully!")');
         closeModal('editDebtModal');
         loadDebtManager();
         loadCalendar(calendarCurrentYear, calendarCurrentMonth);
@@ -2312,7 +2312,7 @@
       if (!confirm('Delete this debt?')) return;
       try {
         await apiCall(API_URL + `/api/debts/${id}`, { method: 'DELETE' });
-        showToast('Debt deleted', 'success');
+        showSuccess("Deleted successfully!")');
         loadDebtManager();
       } catch (e) { showToast('Error deleting debt', 'error'); }
     }
@@ -2327,7 +2327,7 @@
       try {
         const res = await apiCall(API_URL + '/api/recurring-bills', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, amount, type, frequency, startDate }) });
         const data = await res.json();
-        if (data.id || data.message) { showToast('Recurring transaction added!', 'success'); document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('recurringFrequency').value = '14'; document.getElementById('recurringStartDate').value = ''; closeModal('addRecurringModal'); loadCalendar(calendarCurrentYear, calendarCurrentMonth); }
+        if (data.id || data.message) { showSuccess("Added successfully!")'); document.getElementById('recurringName').value = ''; document.getElementById('recurringAmount').value = ''; document.getElementById('recurringFrequency').value = '14'; document.getElementById('recurringStartDate').value = ''; closeModal('addRecurringModal'); loadCalendar(calendarCurrentYear, calendarCurrentMonth); }
       } catch (e) { showToast('Error adding transaction: ' + e.message, 'error'); }
     }
     
@@ -2455,7 +2455,7 @@
             body: JSON.stringify({ category: data.category || category })
           });
           
-          showToast('Category updated & learned!', 'success');
+          showSuccess("Transaction updated successfully!")');
           closeModal('categoryModal');
           await loadCustomCategories();
           
@@ -2525,7 +2525,7 @@
         selectedTransactions.clear();
         selectionMode = false;
         updateBulkActionsBar();
-        showToast(`${selectedTransactions.size} transactions deleted!`, 'success');
+        showSuccess("Deleted successfully!")');
         await loadAllTransactions();
       } catch (e) { showToast('Error deleting transactions', 'error'); }
     }
@@ -2560,7 +2560,7 @@
       
       const html = filtered.map(t => {
         const isSelected = selectedTransactions.has(t.id);
-        return `<div class="transaction-item" data-txn-id="${t.id}" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative; background: ${isSelected ? 'rgba(0, 217, 255, 0.1)' : 'transparent'}; border: 2px solid ${isSelected ? 'rgba(0, 217, 255, 0.4)' : 'transparent'}; border-radius: 8px; padding: 8px; transition: all 0.2s; user-select: none;" ontouchstart="handleTransactionTouchStart(${t.id}, event)" onmousedown="handleTransactionMouseDown(${t.id}, event)"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</div><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">${t.category || 'No Category'}</button></div></div>`;
+        return `<div class="transaction-item" data-txn-id="${t.id}" style="opacity: ${t.excluded ? 0.5 : 1}; position: relative; background: ${isSelected ? 'rgba(0, 217, 255, 0.1)' : 'transparent'}; border: 2px solid ${isSelected ? 'rgba(0, 217, 255, 0.4)' : 'transparent'}; border-radius: 8px; padding: 8px; transition: all 0.2s; user-select: none;" ontouchstart="handleTransactionTouchStart(${t.id}, event)" onmousedown="handleTransactionMouseDown(${t.id}, event)"><div style="flex: 1;"><div class="transaction-date">${new Date(t.date).toLocaleDateString()}</div><div class="transaction-desc">${t.description}${t.excluded ? ' [EXCLUDED]' : ''}</div></div><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;"><div class="transaction-amount ${t.type}">${t.type === 'income' ? '+' : '-'}${formatMoney(t.amount)}</div><button ontouchstart="event.stopPropagation()" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); openCategorySelector(${t.id})" style="font-size: 11px; padding: 4px 8px; background: ${getCategoryColor(t.category)}; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">${t.category || 'No Category'}</button></div></div>`;
       }).join('');
       document.getElementById('allTransactionsList').innerHTML = html || '<div class="loading">No matching transactions</div>';
     }
@@ -2639,7 +2639,7 @@
       document.addEventListener('mouseup', handleMouseUp);
     }
     
-    function saveNote() { showToast('Note saved!', 'success'); closeModal('noteModal'); document.getElementById('noteText').value = ''; }
+    function saveNote() { showSuccess("Saved successfully!")'); closeModal('noteModal'); document.getElementById('noteText').value = ''; }
     
     async function handleUpload() {
       const file = document.getElementById('pdfFile').files[0];
@@ -2674,7 +2674,7 @@
     // Global error handler and notifications
     function showError(message) {
       const notification = document.createElement('div');
-      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent-danger); color: white; padding: 16px 20px; border-radius: 8px; z-index: 3000; font-size: 13px; font-weight: 600; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent-danger); color: white; padding: 16px 20px; border-radius: 8px; z-index: 3000; font-size: 16px; font-weight: 600; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
       notification.textContent = message;
       document.body.appendChild(notification);
       setTimeout(() => notification.remove(), 4000);
@@ -2682,7 +2682,7 @@
     
     function showSuccess(message) {
       const notification = document.createElement('div');
-      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent-success); color: white; padding: 16px 20px; border-radius: 8px; z-index: 3000; font-size: 13px; font-weight: 600; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent-success); color: white; padding: 16px 20px; border-radius: 8px; z-index: 3000; font-size: 16px; font-weight: 600; max-width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
       notification.textContent = message;
       document.body.appendChild(notification);
       setTimeout(() => notification.remove(), 3000);
