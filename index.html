@@ -2514,14 +2514,19 @@
       font-size: 12px;
       color: var(--text-secondary);
       line-height: 1.5;
-      max-width: 280px;
+      max-width: 300px;
+      max-height: 70vh;
+      overflow-y: auto;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
       animation: tooltipFade 0.2s ease-out;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
     }
     @keyframes tooltipFade { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   </style>
   
-  <div id="tooltip-budgetInfo" style="top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 200px;">
+  <div id="tooltip-budgetInfo">
     <div style="font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">Monthly Budget Breakdown</div>
     <div><strong>Income:</strong> Your estimated monthly paycheck based on your settings</div>
     <div style="margin-top: 6px;"><strong>Bills:</strong> Your recurring bills (rent, utilities, debt payments)</div>
@@ -2530,7 +2535,7 @@
     <div style="margin-top: 6px;"><strong>Suggested Payment:</strong> 60% of extra (keeps a safety buffer) to put toward debt</div>
   </div>
   
-  <div id="tooltip-spendingInfo" style="top: 50%; left: 50%; transform: translate(-50%, -50%); margin-top: 200px;">
+  <div id="tooltip-spendingInfo">
     <div style="font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">Spending Optimization</div>
     <div><strong>What it shows:</strong> Categories where you can cut spending by 25%</div>
     <div style="margin-top: 6px;"><strong>Data used:</strong> Your transactions from the last 6 months</div>
