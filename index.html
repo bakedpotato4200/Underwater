@@ -1047,8 +1047,10 @@
       try {
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
         const txRes = await fetch(API_URL + '/api/transactions');
+        const incomeRes = await fetch(API_URL + '/api/actual-income');
         const bills = await billsRes.json();
         const transactions = await txRes.json();
+        const actualIncomeData = await incomeRes.json();
         
         const now = new Date();
         const currentMonth = now.getMonth();
@@ -1100,7 +1102,7 @@
         if (payCheckStartDate) {
           const payCheckEndDate = new Date(payCheckStartDate.getTime() + (paycheck1 && paycheck2 ? (paycheck2.getTime() - paycheck1.getTime()) : (14 * 24 * 60 * 60 * 1000)));
           
-          // Calculate income for this period
+          // Calculate income for this period (use actual if set, otherwise projected)
           incomeBills.forEach(bill => {
             const [startYear, startMonth, startDay] = bill.startDate.split('-').map(Number);
             let billDate = new Date(startYear, startMonth - 1, startDay);
@@ -1110,7 +1112,9 @@
             }
             
             if (billDate < payCheckEndDate) {
-              currentPaycheckIncome += bill.amount;
+              const dateStr = billDate.getFullYear() + '-' + String(billDate.getMonth() + 1).padStart(2, '0') + '-' + String(billDate.getDate()).padStart(2, '0');
+              const actualAmount = actualIncomeData[dateStr];
+              currentPaycheckIncome += (actualAmount || bill.amount);
             }
           });
           
