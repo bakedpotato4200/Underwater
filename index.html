@@ -790,7 +790,7 @@
         const [startYear, startMonth, startDay] = b.startDate.split('-').map(Number);
         let billDate = new Date(startYear, startMonth - 1, startDay);
         
-        while (billDate <= paycheckDate || billDate < paycheckDate) {
+        while (billDate < paycheckDate) {
           billDate = new Date(billDate.getTime() + b.frequency * 24 * 60 * 60 * 1000);
         }
         
