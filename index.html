@@ -20,10 +20,12 @@
     
     @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInTab { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
     @keyframes growBar { from { height: 0; } to { height: 100%; } }
     @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
     @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+    @keyframes buttonPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     
     :root {
       --accent-primary: #00d9ff;
@@ -223,10 +225,12 @@
       transition: all 0.25s ease;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    .btn-primary { background: linear-gradient(135deg, var(--accent-primary) 0%, #00a8cc 100%); color: #0a1428; font-weight: 800; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent-primary) 0%, #00a8cc 100%); color: #0a1428; font-weight: 800; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0, 217, 255, 0.4); }
-    .btn-secondary { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); color: var(--text-primary); border: 1px solid var(--border-color); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-secondary { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); color: var(--text-primary); border: 1px solid var(--border-color); transition: all 0.3s ease; }
     .btn-secondary:hover { background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(0, 217, 255, 0.07) 100%); transform: translateY(-2px); }
+    .btn-secondary:active { transform: scale(0.98); }
     .btn-small { padding: 8px 14px; font-size: 12px; }
     
     .dashboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 28px; }
@@ -235,7 +239,7 @@
       border-radius: 18px; 
       padding: 32px; 
       border: 1px solid var(--border-color); 
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       box-shadow: var(--card-shadow);
       animation: slideIn 0.5s ease;
       min-height: 300px;
@@ -243,6 +247,7 @@
       flex-direction: column;
     }
     .card:hover { transform: translateY(-6px); box-shadow: var(--card-shadow-hover); border-color: var(--accent-primary); }
+    .card[id$="Content"] { opacity: 1; transition: opacity 0.3s ease; }
     .card h2 { 
       color: var(--text-primary); 
       margin-bottom: 20px; 
@@ -351,12 +356,12 @@
       background: var(--bg-secondary);
       color: var(--text-primary);
     }
-    .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: var(--text-secondary); }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1); }
+    .form-group input:hover, .form-group select:hover, .form-group textarea:hover { border-color: var(--text-secondary); background: var(--bg-primary); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.15); background: var(--bg-primary); transform: scale(1.01); }
     .action-buttons { display: flex; gap: 10px; margin-top: 28px; }
     .action-buttons button { flex: 1; }
     
-    .loading { color: var(--text-secondary); text-align: center; padding: 32px 24px; font-size: 13px; animation: pulse 2.5s ease-in-out infinite; }
+    .loading { color: var(--text-secondary); text-align: center; padding: 32px 24px; font-size: 13px; animation: pulse 1.5s ease-in-out infinite; font-weight: 500; }
     .search-box { width: 100%; padding: 11px 15px; border: 1.5px solid var(--border-color); border-radius: 10px; margin-bottom: 14px; font-size: 13px; transition: all 0.25s ease; font-family: inherit; }
     .search-box:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1); }
     .insight-box { background: linear-gradient(90deg, #f0f3ff 0%, #ffffff 100%); border: 1px solid #d0dcff; padding: 16px; border-radius: 12px; margin-bottom: 12px; border-left: 4px solid var(--accent-primary); transition: all 0.25s ease; }
@@ -1056,11 +1061,14 @@
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     
     function switchTab(tab) {
-      document.querySelectorAll('[id$="Content"]').forEach(el => el.style.display = 'none');
-      document.getElementById('overviewHeader').style.display = tab === 'overview' ? 'block' : 'none';
-      if (tab === 'overview') { document.getElementById('overviewContent').style.display = 'grid'; }
-      else if (tab === 'transactions') { document.getElementById('transactionsContent').style.display = 'grid'; }
-      else { document.getElementById(tab + 'Content').style.display = 'grid'; }
+      document.querySelectorAll('[id$="Content"]').forEach(el => { el.style.opacity = '0'; setTimeout(() => el.style.display = 'none', 150); });
+      setTimeout(() => {
+        document.getElementById('overviewHeader').style.display = tab === 'overview' ? 'block' : 'none';
+        if (tab === 'overview') { document.getElementById('overviewContent').style.display = 'grid'; }
+        else if (tab === 'transactions') { document.getElementById('transactionsContent').style.display = 'grid'; }
+        else { document.getElementById(tab + 'Content').style.display = 'grid'; }
+        setTimeout(() => { document.querySelectorAll('[id$="Content"][style*="display: grid"], #overviewHeader[style*="display: block"]').forEach(el => el.style.opacity = '1'); }, 10);
+      }, 150);
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
       localStorage.setItem('currentTab', tab);
