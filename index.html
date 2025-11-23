@@ -973,6 +973,9 @@
         const billsRes = await fetch(API_URL + '/api/recurring-bills');
         calendarBills = await billsRes.json();
         
+        const txRes = await fetch(API_URL + '/api/transactions');
+        const allTransactions = await txRes.json();
+        
         document.getElementById('recurringListView').style.display = 'none';
         
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -993,6 +996,7 @@
         
         for (let i = 1; i <= lastDay.getDate(); i++) {
           const currentDate = new Date(year, month, i);
+          const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(i).padStart(2, '0');
           
           // Show $0 for dates before starting balance date
           if (currentDate < balanceStartDate) {
@@ -1033,8 +1037,39 @@
             const matches = daysDiff >= 0 && daysDiff % parseInt(b.frequency) === 0;
             return matches;
           });
-          const dayIncome = dayBills.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
-          const dayExpense = dayBills.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0);
+          
+          // Get transactions for this day
+          const dayTransactions = allTransactions.filter(t => {
+            const txDate = typeof t.date === 'string' ? t.date : new Date(t.date).toISOString().split('T')[0];
+            return txDate === dateStr && !t.excluded;
+          });
+          
+          // Calculate income: use transactions only if they exist on this day, otherwise use recurring
+          let dayIncome = 0;
+          let dayExpense = 0;
+          let displayBills = [];
+          
+          // Check if there are actual income transactions for this day
+          const actualIncomeOnDay = dayTransactions.filter(t => t.type === 'income');
+          if (actualIncomeOnDay.length > 0) {
+            // Replace recurring income with actual transactions
+            dayIncome = actualIncomeOnDay.reduce((s, t) => s + parseFloat(t.amount), 0);
+            displayBills = actualIncomeOnDay;
+          } else {
+            // Use recurring bills
+            dayIncome = dayBills.filter(b => b.type === 'income').reduce((s, b) => s + b.amount, 0);
+            displayBills = dayBills;
+          }
+          
+          // Always include expenses from both recurring and transactions
+          const recurringExpense = dayBills.filter(b => b.type === 'expense').reduce((s, b) => s + b.amount, 0);
+          const transactionExpense = dayTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + parseFloat(t.amount), 0);
+          dayExpense = recurringExpense + transactionExpense;
+          
+          if (transactionExpense > 0 && displayBills.length === 0) {
+            displayBills = dayBills;
+          }
+          
           const endingBalance = runningBalance + dayIncome - dayExpense;
           
           calendarData[i] = {
@@ -1042,7 +1077,7 @@
             income: dayIncome,
             expense: dayExpense,
             endBalance: endingBalance,
-            bills: dayBills,
+            bills: displayBills,
             dayNum: i
           };
           

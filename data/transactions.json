@@ -4057,5 +4057,23 @@
     "description": "Paid",
     "type": "income",
     "excluded": false
+  },
+  {
+    "id": 452,
+    "date": "2025-11-23",
+    "amount": 1696,
+    "type": "income",
+    "category": "Bonus",
+    "description": "Actual income adjustment",
+    "excluded": false
+  },
+  {
+    "id": 453,
+    "date": "2025-11-23",
+    "amount": 1696,
+    "type": "income",
+    "category": "Bonus",
+    "description": "Actual income adjustment",
+    "excluded": false
   }
 ]
