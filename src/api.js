@@ -663,17 +663,6 @@ app.post('/api/transactions/:id/category', express.json(), (req, res) => {
       saveData(customCategoriesFile, customCategories);
     }
     
-    // Consolidate: if there are other transactions with different case variations, update them too
-    // Use the oldCategory passed from frontend (the transaction's previous category)
-    const oldCategory = req.body.oldCategory;
-    if (oldCategory && oldCategory !== finalCategory) {
-      transactions.forEach(t => {
-        if (t.category && t.category.toLowerCase() === oldCategory.toLowerCase()) {
-          t.category = finalCategory;
-        }
-      });
-    }
-    
     saveData(transactionsFile, transactions);
     res.json({ success: true, category: finalCategory });
   } else {
