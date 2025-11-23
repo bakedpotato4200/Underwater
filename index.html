@@ -733,14 +733,13 @@
       let startDate, endDate;
       
       if (paycheckIndex === 1) {
-        // Paycheck 1: From start of month to day BEFORE Paycheck 2
+        // Paycheck 1: From start of month to day BEFORE Paycheck 2 (NOT including Paycheck 2 date)
         startDate = new Date(paycheck1Date.getFullYear(), paycheck1Date.getMonth(), 1, 0, 0, 0);
-        endDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth(), paycheck2Date.getDate(), 0, 0, 0);
+        endDate = new Date(paycheck2Date.getTime());
       } else {
-        // Paycheck 2: From Paycheck 2 date to end of month
-        startDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth(), paycheck2Date.getDate(), 0, 0, 0);
-        const lastDay = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth() + 1, 0);
-        endDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth(), lastDay.getDate() + 1, 0, 0, 0);
+        // Paycheck 2: From Paycheck 2 date to end of month (NOT including next month)
+        startDate = new Date(paycheck2Date.getTime());
+        endDate = new Date(paycheck2Date.getFullYear(), paycheck2Date.getMonth() + 1, 1, 0, 0, 0);
       }
       
       let sources = [];
@@ -758,7 +757,7 @@
           billDate = new Date(billDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
         }
         
-        // Collect all occurrences within period (strictly within range)
+        // Collect all occurrences within period (strictly before endDate)
         while (billDate < endDate) {
           const dateStr = billDate.getFullYear() + '-' + String(billDate.getMonth() + 1).padStart(2, '0') + '-' + String(billDate.getDate()).padStart(2, '0');
           const actualAmount = actualIncomeData[dateStr];
