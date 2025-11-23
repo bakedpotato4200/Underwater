@@ -1134,9 +1134,10 @@
           body: JSON.stringify({ name, type, currentBalance: balance, originalBalance: balance, interestRate: rate || 0, monthlyPayment: payment })
         });
         const data = await res.json();
-        showToast('Debt added!', 'success');
+        showToast('Debt added and linked to Calendar!', 'success');
         closeModal('addDebtModal');
         loadDebtManager();
+        loadCalendar(calendarCurrentYear, calendarCurrentMonth);
       } catch (e) { showToast('Error adding debt', 'error'); }
     }
     

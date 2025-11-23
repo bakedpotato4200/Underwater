@@ -1179,7 +1179,25 @@ app.post('/api/debts', express.json(), (req, res) => {
   
   debts.push(debt);
   saveData(debtsFile, debts);
-  res.json(debt);
+  
+  // Automatically create recurring bill for monthly payment
+  recurringBills = loadData(recurringBillsFile);
+  if (!Array.isArray(recurringBills)) recurringBills = [];
+  
+  const today = new Date().toISOString().split('T')[0];
+  const recurringBill = {
+    id: Date.now() + 1,
+    name: `${name} Payment`,
+    amount: parseFloat(monthlyPayment),
+    frequency: 30,
+    startDate: today,
+    type: 'expense'
+  };
+  
+  recurringBills.push(recurringBill);
+  saveData(recurringBillsFile, recurringBills);
+  
+  res.json({ debt, recurring: recurringBill });
 });
 
 app.delete('/api/debts/:id', (req, res) => {
