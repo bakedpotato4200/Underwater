@@ -740,25 +740,37 @@
         document.getElementById('netBalance').textContent = formatCurrency(balance);
         document.getElementById('financialScore').textContent = formatNumber((95 - Math.max(0, Math.min(95, expenses / income * 100))).toFixed(0));
         
-        // Calculate monthly bills amount by accounting for frequency of each bill
+        // Count actual occurrences of bills and paychecks in THIS month
+        function countOccurrencesInMonth(startDate, frequencyDays) {
+          let count = 0;
+          let currentDate = new Date(startDate);
+          while (currentDate <= end) {
+            if (currentDate >= start) count++;
+            currentDate = new Date(currentDate.getTime() + frequencyDays * 24 * 60 * 60 * 1000);
+          }
+          return count;
+        }
+        
+        // Calculate monthly bills by counting actual occurrences
         const monthlyBillsAmount = bills.filter(b => b.type !== 'income').reduce((s, b) => {
-          const occurrencesPerMonth = 30.44 / b.frequency;
-          return s + (b.amount * occurrencesPerMonth);
+          const occurrences = countOccurrencesInMonth(b.startDate, b.frequency);
+          return s + (b.amount * occurrences);
         }, 0);
         
+        // Count how many paychecks in this month
         const paycheckAmount = paycheck.amount;
         const daysPerPaycheck = paycheck.frequencyDays;
-        const paychecksPerMonth = 30.44 / daysPerPaycheck;
+        const paychecksInMonth = countOccurrencesInMonth(bills.find(b => b.type === 'income')?.startDate || '2025-06-06', daysPerPaycheck);
         
-        const billsPerPaycheckAmt = monthlyBillsAmount / paychecksPerMonth;
+        const billsPerPaycheckAmt = paychecksInMonth > 0 ? monthlyBillsAmount / paychecksInMonth : 0;
         const billsMonthlyAmt = monthlyBillsAmount;
         const spendingPerPaycheckAmt = paycheckAmount - billsPerPaycheckAmt;
-        const totalMonthlyIncome = paycheckAmount * paychecksPerMonth;
+        const totalMonthlyIncome = paycheckAmount * paychecksInMonth;
         const spendingMonthlyAmt = totalMonthlyIncome - billsMonthlyAmt;
         
         document.getElementById('billsPerPaycheckData').textContent = formatCurrency(billsPerPaycheckAmt);
         document.getElementById('billsMonthlyData').textContent = formatCurrency(billsMonthlyAmt);
-        document.getElementById('billsFreqData').textContent = paychecksPerMonth.toFixed(1) + ' paychecks/month';
+        document.getElementById('billsFreqData').textContent = paychecksInMonth + ' paychecks this month';
         document.getElementById('toBillsPaycheckData').textContent = formatCurrency(billsPerPaycheckAmt);
         document.getElementById('toBillsMonthlyData').textContent = formatCurrency(billsMonthlyAmt);
         document.getElementById('spendingPaycheckData').textContent = formatCurrency(spendingPerPaycheckAmt);
