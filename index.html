@@ -449,6 +449,7 @@
         <div class="logo-text">
           <div class="logo-title">Underwater</div>
           <div class="logo-subtitle">Smart Budget</div>
+          <div id="sidebarUserEmail" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-weight: 500;"></div>
         </div>
       </div>
       <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
@@ -681,6 +682,7 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('sidebarUserEmail').textContent = '👤 ' + currentUser.email;
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
         errorEl.style.display = 'none';
@@ -736,6 +738,7 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
         document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('sidebarUserEmail').textContent = '👤 ' + currentUser.email;
         document.getElementById('signupEmail').value = '';
         document.getElementById('signupPassword').value = '';
         document.getElementById('signupPassword2').value = '';
@@ -2649,6 +2652,7 @@
       authToken = savedToken;
       currentUser = JSON.parse(savedUser);
       document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('sidebarUserEmail').textContent = '👤 ' + currentUser.email;
     }
     
     async function pageInit() {
