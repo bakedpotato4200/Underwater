@@ -964,6 +964,14 @@
       
       const color = bill.type === 'income' ? '#34c759' : '#ff3b30';
       
+      // Scroll to calendar view
+      setTimeout(() => {
+        const calendarView = document.getElementById('calendarView');
+        if (calendarView) {
+          calendarView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      
       // Highlight days on calendar
       const calendarDays = document.querySelectorAll('.calendar-day');
       calendarDays.forEach((day) => {
