@@ -8,6 +8,15 @@ import { fileURLToPath } from 'url';
 import OpenAI from 'openai';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('✅ MongoDB Connected'))
+.catch(err => console.error('❌ MongoDB Error:', err));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
