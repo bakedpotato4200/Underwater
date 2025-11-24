@@ -783,8 +783,9 @@
       currentUser = null;
       localStorage.removeItem('authToken');
       localStorage.removeItem('currentUser');
+      document.querySelector('.main-content').style.display = 'none';
+      document.querySelector('.sidebar').classList.add('hidden');
       document.getElementById('authScreen').style.display = 'flex';
-      document.getElementById('mainApp').style.display = 'none';
       document.getElementById('loginForm').style.display = 'block';
       document.getElementById('signupForm').style.display = 'none';
       document.getElementById('loginEmail').value = '';
