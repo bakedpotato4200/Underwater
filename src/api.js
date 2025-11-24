@@ -111,6 +111,51 @@ const ExclusionRule = mongoose.model('ExclusionRule', ExclusionRuleSchema);
 const LearnedPattern = mongoose.model('LearnedPattern', LearnedPatternSchema);
 const Settings = mongoose.model('Settings', SettingsSchema);
 
+// Create demo account on startup if it doesn't exist
+async function createDemoAccount() {
+  try {
+    const demoEmail = 'demo@example.com';
+    const demoPassword = 'demo';
+    
+    const existingDemo = await User.findOne({ email: demoEmail });
+    if (existingDemo) {
+      console.log('✅ Demo account already exists');
+      return;
+    }
+    
+    const hashedPassword = await bcrypt.hash(demoPassword, 10);
+    const demoUserId = 'demo-user-' + Date.now();
+    
+    const demoUser = new User({
+      email: demoEmail,
+      hashedPassword,
+      userId: demoUserId,
+      createdAt: new Date()
+    });
+    
+    await demoUser.save();
+    
+    const demoSettings = new Settings({
+      userId: demoUserId,
+      theme: 'light',
+      paycheckAmount: 0,
+      paycheckFrequencyDays: 14,
+      startingBalance: 0,
+      bankBalance: 0
+    });
+    
+    await demoSettings.save();
+    
+    console.log('✅ Demo account created in MongoDB (demo@example.com / demo)');
+  } catch (err) {
+    console.error('Error creating demo account:', err.message);
+  }
+}
+
+mongoose.connection.on('connected', () => {
+  createDemoAccount();
+});
+
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
