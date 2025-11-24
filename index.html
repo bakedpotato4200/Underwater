@@ -652,10 +652,8 @@
 
   <script>
     // Authentication setup
-    // Change this to your Railway backend URL when deployed
-    // Local: http://localhost:5000
-    // Railway: https://your-railway-app.up.railway.app
-    const API_URL = window.location.origin; // Will work locally; update for production
+    // Production Railway backend URL
+    const API_URL = 'https://underwater-production.up.railway.app';
     let currentUser = null;
     let authToken = null;
     
