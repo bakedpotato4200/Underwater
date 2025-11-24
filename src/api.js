@@ -10,22 +10,111 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log('✅ MongoDB Connected'))
-.catch(err => console.error('❌ MongoDB Error:', err));
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
 const app = express();
+const JWT_SECRET = 'underwater-secret-key-change-in-production';
 
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
+.then(() => console.log('✅ MongoDB Connected'))
+.catch(err => console.error('❌ MongoDB Error:', err.message));
+
+// === MONGOOSE SCHEMAS ===
+const UserSchema = new mongoose.Schema({
+  email: { type: String, unique: true, required: true, lowercase: true },
+  hashedPassword: { type: String, required: true },
+  userId: { type: String, unique: true, required: true },
+  createdAt: { type: Date, default: Date.now },
+  migrated: { type: Boolean, default: false }
+});
+
+const TransactionSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  id: { type: Number, required: true },
+  date: { type: String, required: true },
+  amount: { type: Number, required: true },
+  category: { type: String, default: 'Other' },
+  description: { type: String, required: true },
+  type: { type: String, enum: ['income', 'expense'], required: true },
+  excluded: { type: Boolean, default: false },
+  note: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const RecurringBillSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  amount: { type: Number, required: true },
+  frequency: { type: Number, required: true },
+  startDate: { type: String, required: true },
+  type: { type: String, enum: ['income', 'expense'], default: 'expense' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const DebtSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  id: { type: String, required: true },
+  creditor: { type: String, required: true },
+  balance: { type: Number, required: true },
+  minPayment: { type: Number, required: true },
+  interestRate: { type: Number, default: 0 },
+  dueDate: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const GoalSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  targetAmount: { type: Number, required: true },
+  currentAmount: { type: Number, default: 0 },
+  dueDate: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ExclusionRuleSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  type: { type: String, enum: ['merchant', 'category'], required: true },
+  pattern: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const LearnedPatternSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true, unique: true },
+  merchants: { type: mongoose.Schema.Types.Mixed, default: {} },
+  exclusions: { type: mongoose.Schema.Types.Mixed, default: {} },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const SettingsSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true, unique: true },
+  theme: { type: String, default: 'light' },
+  paycheckAmount: { type: Number, default: 0 },
+  paycheckFrequencyDays: { type: Number, default: 14 },
+  startingBalance: { type: Number, default: 0 },
+  startingBalanceDate: { type: String, default: '' },
+  bankBalance: { type: Number, default: 0 },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Create models
+const User = mongoose.model('User', UserSchema);
+const Transaction = mongoose.model('Transaction', TransactionSchema);
+const RecurringBill = mongoose.model('RecurringBill', RecurringBillSchema);
+const Debt = mongoose.model('Debt', DebtSchema);
+const Goal = mongoose.model('Goal', GoalSchema);
+const ExclusionRule = mongoose.model('ExclusionRule', ExclusionRuleSchema);
+const LearnedPattern = mongoose.model('LearnedPattern', LearnedPatternSchema);
+const Settings = mongoose.model('Settings', SettingsSchema);
+
+// Middleware
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-// Cache control - prevent stale data in iframe
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
   res.set('Pragma', 'no-cache');
@@ -33,7 +122,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Authentication middleware
+// Auth middleware
 function verifyToken(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'No token provided' });
@@ -47,112 +136,14 @@ function verifyToken(req, res, next) {
 
 app.use(express.static(path.join(__dirname, '..')));
 
+// Setup uploads
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const dataDir = path.join(__dirname, '..', 'data');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-
-const usersDir = path.join(__dirname, '..', 'data', 'users');
-if (!fs.existsSync(usersDir)) fs.mkdirSync(usersDir, { recursive: true });
-const usersFile = path.join(__dirname, '..', 'data', 'users.json');
-const JWT_SECRET = 'underwater-secret-key-change-in-production';
-
 const upload = multer({ dest: uploadDir });
 
-// User-specific file path helper
-function getUserDataDir(userId) {
-  const userDir = path.join(usersDir, userId);
-  if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
-  return userDir;
-}
-
-function getFileForUser(userId, fileName) {
-  return path.join(getUserDataDir(userId), fileName);
-}
-
-// Data files (legacy - now per-user)
-const transactionsFile = path.join(dataDir, 'transactions.json');
-const debtsFile = path.join(dataDir, 'debts.json');
-const subscriptionsFile = path.join(dataDir, 'subscriptions.json');
-const goalsFile = path.join(dataDir, 'goals.json');
-const exclusionRulesFile = path.join(dataDir, 'exclusion-rules.json');
-const learnedPatternsFile = path.join(dataDir, 'learned-patterns.json');
-const customCategoriesFile = path.join(dataDir, 'custom-categories.json');
-const recurringBillsFile = path.join(dataDir, 'recurring-bills.json');
-const bankBalanceFile = path.join(dataDir, 'bank-balance.json');
-const settingsFile = path.join(dataDir, 'settings.json');
-const actualIncomeFile = path.join(dataDir, 'actual-income-overrides.json');
-
-// Load/Save functions
-function loadData(file) {
-  try {
-    if (fs.existsSync(file)) {
-      return JSON.parse(fs.readFileSync(file, 'utf8'));
-    }
-  } catch (e) {
-    console.error(`Error loading ${file}:`, e.message);
-  }
-  return [];
-}
-
-function saveData(file, data) {
-  try {
-    fs.writeFileSync(file, JSON.stringify(data, null, 2));
-  } catch (e) {
-    console.error(`Error saving ${file}:`, e.message);
-  }
-}
-
-// Initialize data from files
-let transactions = loadData(transactionsFile);
-
-// Function to get fresh transaction data
-function getTransactions() {
-  transactions = loadData(transactionsFile);
-  return transactions;
-}
-let debts = loadData(debtsFile);
-let subscriptions = loadData(subscriptionsFile);
-let bankBalance = loadData(bankBalanceFile) || { balance: 0 };
-let goals = loadData(goalsFile);
-let exclusionRules = loadData(exclusionRulesFile);
-let learnedPatterns = loadData(learnedPatternsFile) || { merchants: {}, exclusions: {} };
-let customCategories = loadData(customCategoriesFile) || {};
-let recurringBills = loadData(recurringBillsFile);
-
-function shouldExcludeByRule(txn) {
-  if (!Array.isArray(exclusionRules)) return false;
-  return exclusionRules.some(rule => {
-    if (rule.type === 'merchant') {
-      return txn.description.toLowerCase().includes(rule.pattern.toLowerCase());
-    }
-    if (rule.type === 'category') {
-      return txn.category === rule.pattern;
-    }
-    return false;
-  });
-}
-
-function applyExclusionRules() {
-  transactions.forEach(txn => {
-    if (!txn.excluded && shouldExcludeByRule(txn)) {
-      txn.excluded = true;
-    }
-  });
-}
-
-console.log(`Loaded ${transactions.length} transactions, ${debts.length} debts, ${goals.length} goals`);
-
+// === BUSINESS LOGIC FUNCTIONS ===
 function categorizeTransaction(description) {
   const desc = description.toLowerCase();
-  
-  // Check learned patterns first (highest priority)
-  for (const [pattern, category] of Object.entries(learnedPatterns.merchants || {})) {
-    if (desc.includes(pattern.toLowerCase())) return category;
-  }
-  
-  // Fall back to hardcoded patterns
   if (desc.match(/transfer|from account|to account|xfer|move|deposit to|acct|internal|between accounts/i)) return 'Transfer';
   if (desc.match(/starbucks|coffee|cafe|restaurant|food|dining|uber eats|doordash|grubhub|pizza|burger|taco|harps|inola|sinclair/)) return 'Food & Dining';
   if (desc.match(/whole foods|safeway|kroger|trader joe|grocery|costco|walmart|supercenter|wm super/)) return 'Groceries';
@@ -166,9 +157,8 @@ function categorizeTransaction(description) {
 }
 
 function detectRecurring(userTransactions = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
   const merchants = {};
-  txnsToUse.forEach(t => {
+  userTransactions.forEach(t => {
     const merchant = t.description.split(' ')[0];
     if (!merchants[merchant]) merchants[merchant] = [];
     merchants[merchant].push(t);
@@ -182,85 +172,47 @@ function detectRecurring(userTransactions = []) {
       intervals.push(Math.round((d1 - d2) / (1000 * 60 * 60 * 24)));
     }
     const avgInterval = intervals.length > 0 ? Math.round(intervals.reduce((a, b) => a + b) / intervals.length) : 30;
+    const nextDue = new Date(sorted[sorted.length - 1].date);
+    nextDue.setDate(nextDue.getDate() + avgInterval);
     return {
       merchant: m,
       count: txns.length,
       avgAmount: Math.abs(txns.reduce((s, t) => s + t.amount, 0) / txns.length),
-      category: txns[0].category,
-      avgInterval,
-      lastTransaction: txns[txns.length - 1].date,
-      isRecurring: txns.length >= 2,
-      nextDueDate: new Date(new Date(txns[txns.length - 1].date).getTime() + avgInterval * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      isRecurring: intervals.length > 0,
+      nextDueDate: nextDue.toISOString().split('T')[0],
+      avgInterval
     };
   });
 }
 
 function generateBillCalendar(months = 3, userTransactions = [], userBills = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
-  const billsToUse = userBills.length > 0 ? userBills : recurringBills;
-  const recurring = detectRecurring(txnsToUse).filter(r => r.isRecurring);
   const calendar = {};
   const today = new Date();
-
-  for (let m = 0; m < months; m++) {
-    for (let d = 1; d <= 31; d++) {
-      const date = new Date(today.getFullYear(), today.getMonth() + m, d);
-      if (date.getMonth() !== (today.getMonth() + m) % 12) break;
-      const dateStr = date.toISOString().split('T')[0];
-      calendar[dateStr] = [];
-
-      // Add income transactions
-      txnsToUse.forEach(t => {
-        if (t.type === 'income' && t.date === dateStr && !t.excluded) {
-          calendar[dateStr].push({
-            merchant: t.description,
-            amount: Math.abs(t.amount),
-            category: t.category || 'Income',
-            type: 'income',
-            daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24))
+  const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  const endDate = new Date(today.getFullYear(), today.getMonth() + months, 0);
+  
+  if (Array.isArray(userBills)) {
+    userBills.forEach(bill => {
+      const startDateBill = new Date(bill.startDate);
+      let checkDate = new Date(startDateBill);
+      
+      while (checkDate <= endDate) {
+        if (checkDate >= startDate) {
+          const dateKey = checkDate.toISOString().split('T')[0];
+          if (!calendar[dateKey]) calendar[dateKey] = [];
+          calendar[dateKey].push({
+            merchant: bill.name,
+            amount: bill.type === 'income' ? Math.abs(bill.amount) : bill.amount,
+            type: bill.type || 'expense',
+            daysUntilDue: Math.ceil((checkDate - today) / (1000 * 60 * 60 * 24)),
+            frequency: bill.frequency
           });
         }
-      });
-
-      recurring.forEach(bill => {
-        const lastDate = new Date(bill.lastTransaction);
-        const nextDate = new Date(lastDate.getTime() + bill.avgInterval * 24 * 60 * 60 * 1000);
-        
-        if (date.getDate() === nextDate.getDate() && date.getMonth() === nextDate.getMonth()) {
-          calendar[dateStr].push({
-            merchant: bill.merchant,
-            amount: bill.avgAmount,
-            category: bill.category,
-            type: 'expense',
-            daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
-            frequency: bill.avgInterval
-          });
-        }
-      });
-
-      // Add manually added recurring bills
-      if (Array.isArray(billsToUse)) {
-        billsToUse.forEach(bill => {
-          const startDate = new Date(bill.startDate);
-          const checkDate = new Date(startDate);
-          while (checkDate <= date) {
-            const checkStr = checkDate.toISOString().split('T')[0];
-            if (checkStr === dateStr) {
-              calendar[dateStr].push({
-                merchant: bill.name,
-                amount: bill.type === 'income' ? Math.abs(bill.amount) : bill.amount,
-                type: bill.type || 'expense',
-                daysUntilDue: Math.ceil((date - today) / (1000 * 60 * 60 * 24)),
-                frequency: bill.frequency
-              });
-            }
-            checkDate.setDate(checkDate.getDate() + bill.frequency);
-          }
-        });
+        checkDate.setDate(checkDate.getDate() + bill.frequency);
       }
-    }
+    });
   }
-
+  
   return Object.entries(calendar).filter(([_, bills]) => bills.length > 0).reduce((acc, [date, bills]) => {
     acc[date] = bills;
     return acc;
@@ -268,13 +220,12 @@ function generateBillCalendar(months = 3, userTransactions = [], userBills = [])
 }
 
 function calculateCashFlow(months = 6, userTransactions = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
   const projection = {};
   const today = new Date();
-  const recurring = detectRecurring(txnsToUse).filter(r => r.isRecurring);
-  const totalIncome = txnsToUse.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const avgDailyExpense = txnsToUse.filter(t => t.type === 'expense').length > 0 
-    ? txnsToUse.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0) / Math.max(txnsToUse.filter(t => t.type === 'expense').length, 1)
+  const recurring = detectRecurring(userTransactions).filter(r => r.isRecurring);
+  const totalIncome = userTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const avgDailyExpense = userTransactions.filter(t => t.type === 'expense').length > 0 
+    ? userTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0) / Math.max(userTransactions.filter(t => t.type === 'expense').length, 1)
     : 0;
 
   for (let m = 0; m < months; m++) {
@@ -296,164 +247,45 @@ function calculateCashFlow(months = 6, userTransactions = []) {
 }
 
 function calculateSpendingVelocity(userTransactions = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
-  if (txnsToUse.length === 0) return { daily: 0, weekly: 0, monthly: 0, trend: 'stable' };
-
-  const today = new Date();
-  const last7 = txnsToUse.filter(t => {
-    const d = new Date(t.date);
-    return (today - d) / (1000 * 60 * 60 * 24) <= 7;
-  }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
-
-  const last30 = txnsToUse.filter(t => {
-    const d = new Date(t.date);
-    return (today - d) / (1000 * 60 * 60 * 24) <= 30;
-  }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
-
-  const prev30 = txnsToUse.filter(t => {
-    const d = new Date(t.date);
-    const days = (today - d) / (1000 * 60 * 60 * 24);
-    return days > 30 && days <= 60;
-  }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
-
+  if (userTransactions.length === 0) return { daily: 0, weekly: 0, monthly: 0, trend: 'stable' };
+  
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+  
+  const last30 = userTransactions.filter(t => new Date(t.date) >= thirtyDaysAgo && t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+  const prev30 = userTransactions.filter(t => new Date(t.date) >= sixtyDaysAgo && new Date(t.date) < thirtyDaysAgo && t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
+  
+  const trend = last30 > prev30 ? 'increasing' : last30 < prev30 ? 'decreasing' : 'stable';
+  const trendPercent = prev30 > 0 ? Math.round(((last30 - prev30) / prev30) * 100) : 0;
+  
   return {
-    daily: (last7 / 7).toFixed(2),
-    weekly: (last7).toFixed(2),
-    monthly: (last30).toFixed(2),
-    trend: last30 > prev30 ? 'increasing' : last30 < prev30 ? 'decreasing' : 'stable',
-    trendPercent: prev30 > 0 ? (((last30 - prev30) / prev30) * 100).toFixed(1) : 0
+    daily: (last30 / 30).toFixed(2),
+    weekly: (last30 / 4.29).toFixed(2),
+    monthly: last30.toFixed(2),
+    trend,
+    trendPercent
   };
 }
 
 function detectAnomalies(userTransactions = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
-  if (txnsToUse.length < 3) return [];
-  const anomalies = [];
-  
-  // Category-based anomalies
-  const categories = {};
-  txnsToUse.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer').forEach(t => {
-    if (!categories[t.category]) categories[t.category] = [];
-    categories[t.category].push(Math.abs(t.amount));
-  });
-  
-  // Z-score based outlier detection per category
-  Object.entries(categories).forEach(([cat, amounts]) => {
-    if (amounts.length < 3) return;
-    const mean = amounts.reduce((a, b) => a + b) / amounts.length;
-    const stdDev = Math.sqrt(amounts.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / amounts.length);
-    
-    txnsToUse.filter(t => t.category === cat && t.type === 'expense' && !t.excluded).forEach(t => {
-      const zScore = stdDev > 0 ? Math.abs((Math.abs(t.amount) - mean) / stdDev) : 0;
-      if (zScore > 2.5) anomalies.push({...t, zScore, reason: 'Category outlier'});
-    });
-  });
-  
-  // Spike detection: compare to last 7 day average
-  const last7Days = txnsToUse.filter(t => {
-    const d = new Date(t.date);
-    return (new Date() - d) / (1000 * 60 * 60 * 24) <= 7 && t.type === 'expense' && !t.excluded;
-  });
-  const avg7 = last7Days.length > 0 ? last7Days.reduce((s, t) => s + Math.abs(t.amount), 0) / last7Days.length : 0;
-  
-  last7Days.forEach(t => {
-    if (Math.abs(t.amount) > avg7 * 3 && avg7 > 0) {
-      anomalies.push({...t, reason: 'Spending spike', ratio: (Math.abs(t.amount) / avg7).toFixed(1)});
-    }
-  });
-  
-  return anomalies.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)).slice(0, 5);
-}
-
-function getSmartRecommendations(userTransactions = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
-  const recs = [];
-  const expenses = txnsToUse.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer');
-  const categories = {};
-  
-  expenses.forEach(t => {
-    if (t.category !== 'Transfer' && t.category !== 'Income') {
-      categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
-    }
-  });
-  
-  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-  const totalExpense = expenses.reduce((s, t) => s + Math.abs(t.amount), 0);
-  const savingsRate = totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
-  
-  // 1. Spending optimization per category
-  const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
-  if (sorted.length > 0) {
-    const topCat = sorted[0];
-    const percent = ((topCat[1] / totalExpense) * 100).toFixed(0);
-    const savings = (topCat[1] * 0.15).toFixed(2);
-    recs.push({ 
-      title: `Optimize ${topCat[0]}`, 
-      desc: `${topCat[0]} is ${percent}% of spending ($${topCat[1].toFixed(0)}). Cut 15% and save $${savings} monthly` 
-    });
-  }
-  
-  // 2. Recurring bills audit
-  const recurring = detectRecurring().filter(r => r.isRecurring);
-  if (recurring.length > 0) {
-    const yearlyRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
-    const potentialSavings = yearlyRecurring * 0.2;
-    recs.push({ 
-      title: 'Audit Recurring Bills', 
-      desc: `${recurring.length} recurring bills cost $${yearlyRecurring.toFixed(0)}/year. Eliminate 20% could save $${potentialSavings.toFixed(0)}` 
-    });
-  }
-  
-  // 3. Savings strategy
-  if (savingsRate > 0) {
-    const monthlySavings = totalIncome - totalExpense;
-    const yearEnd = monthlySavings * 12;
-    if (monthlySavings > 500) {
-      recs.push({ 
-        title: '50/30/20 Rule', 
-        desc: `Allocate: 50% needs, 30% wants, 20% savings. You save ${(savingsRate*100).toFixed(0)}% – excellent track record` 
-      });
-    } else {
-      recs.push({ 
-        title: `Boost Savings to ${(yearEnd * 1.5).toFixed(0)}/year`, 
-        desc: `Target 20% savings rate. Current: ${(savingsRate*100).toFixed(0)}% ($${monthlySavings.toFixed(0)}/mo). Increase by ${((yearEnd * 0.2 - monthlySavings) / 10 * 12).toFixed(0)}%` 
-      });
-    }
-  }
-  
-  // 4. Category-specific insights
-  if (sorted.length > 1) {
-    const foodIdx = sorted.findIndex(([cat]) => cat === 'Food & Dining');
-    if (foodIdx !== -1 && sorted[foodIdx][1] > totalExpense * 0.12) {
-      recs.push({ 
-        title: 'Meal Planning', 
-        desc: `Food & Dining: $${sorted[foodIdx][1].toFixed(0)}/month. Meal prep 2x/week saves 10-20%` 
-      });
-    }
-  }
-  
-  // 5. Spending trend warning
-  const velocity = calculateSpendingVelocity(txnsToUse);
-  if (velocity.trend === 'increasing') {
-    recs.push({ 
-      title: `Reverse ${velocity.trendPercent}% Spending Rise`, 
-      desc: `Monthly spend up ${velocity.trendPercent}%. Set category budgets to lock spending at current baseline` 
-    });
-  }
-  
-  return recs.slice(0, 5);
+  if (userTransactions.length < 10) return [];
+  const expenses = userTransactions.filter(t => t.type === 'expense');
+  const amounts = expenses.map(t => Math.abs(t.amount)).sort((a, b) => a - b);
+  const q1 = amounts[Math.floor(amounts.length * 0.25)];
+  const q3 = amounts[Math.floor(amounts.length * 0.75)];
+  const iqr = q3 - q1;
+  const upper = q3 + 1.5 * iqr;
+  return expenses.filter(t => Math.abs(t.amount) > upper);
 }
 
 function generateAlerts(userTransactions = [], userBills = [], userDebts = []) {
-  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
-  const billsToUse = userBills.length > 0 ? userBills : recurringBills;
-  const debtsToUse = userDebts.length > 0 ? userDebts : debts;
   const alerts = [];
-  const recurring = detectRecurring(txnsToUse).filter(r => r.isRecurring);
-  const velocity = calculateSpendingVelocity(txnsToUse);
-  const totalIncome = txnsToUse.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-  const totalExpense = txnsToUse.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const anomalies = detectAnomalies(txnsToUse);
+  const recurring = detectRecurring(userTransactions).filter(r => r.isRecurring);
+  const velocity = calculateSpendingVelocity(userTransactions);
+  const totalIncome = userTransactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = userTransactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const anomalies = detectAnomalies(userTransactions);
 
   if (anomalies.length > 0) {
     const anomaly = anomalies[0];
@@ -481,14 +313,62 @@ function generateAlerts(userTransactions = [], userBills = [], userDebts = []) {
     alerts.push({ type: 'info', title: 'High Recurring Costs', message: `You have ${recurring.length} recurring bills costing ~$${totalRecurring.toFixed(0)}/year` });
   }
 
-  if (debtsToUse.length > 0) {
-    const totalDebt = debtsToUse.reduce((s, d) => s + d.balance, 0);
+  if (userDebts.length > 0) {
+    const totalDebt = userDebts.reduce((s, d) => s + d.balance, 0);
     if (totalDebt > totalIncome * 3) {
       alerts.push({ type: 'alert', title: 'High Debt Ratio', message: `Your debt (${(totalDebt / totalIncome).toFixed(1)}x income) is very high. Focus on payoff!` });
     }
   }
 
   return alerts.slice(0, 5);
+}
+
+function getSmartRecommendations(userTransactions = []) {
+  const recs = [];
+  const categories = {};
+  
+  userTransactions.filter(t => !t.excluded).forEach(t => {
+    if (t.category !== 'Transfer' && t.category !== 'Income') {
+      categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
+    }
+  });
+  
+  const totalIncome = userTransactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = Object.values(categories).reduce((s, t) => s + t, 0);
+  const savingsRate = totalIncome > 0 ? (totalIncome - totalExpense) / totalIncome : 0;
+  
+  const sorted = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+  if (sorted.length > 0) {
+    const topCat = sorted[0];
+    const percent = ((topCat[1] / totalExpense) * 100).toFixed(0);
+    const savings = (topCat[1] * 0.15).toFixed(2);
+    recs.push({ 
+      title: `Optimize ${topCat[0]}`, 
+      desc: `${topCat[0]} is ${percent}% of spending ($${topCat[1].toFixed(0)}). Cut 15% and save $${savings} monthly` 
+    });
+  }
+  
+  const recurring = detectRecurring(userTransactions).filter(r => r.isRecurring);
+  if (recurring.length > 0) {
+    const yearlyRecurring = recurring.reduce((s, r) => s + r.avgAmount, 0) * 12;
+    const potentialSavings = yearlyRecurring * 0.2;
+    recs.push({ 
+      title: 'Audit Recurring Bills', 
+      desc: `${recurring.length} recurring bills cost $${yearlyRecurring.toFixed(0)}/year. Eliminate 20% could save $${potentialSavings.toFixed(0)}` 
+    });
+  }
+  
+  if (savingsRate > 0) {
+    const monthlySavings = totalIncome - totalExpense;
+    if (monthlySavings > 500) {
+      recs.push({ 
+        title: '50/30/20 Rule', 
+        desc: `Allocate: 50% needs, 30% wants, 20% savings. You save ${(savingsRate*100).toFixed(0)}% – excellent track record` 
+      });
+    }
+  }
+  
+  return recs.slice(0, 5);
 }
 
 function extractTransactions(text) {
@@ -551,25 +431,111 @@ function extractTransactions(text) {
   return transactions;
 }
 
-app.post('/api/upload-statement', verifyToken, upload.single('file'), async (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
+// === AUTH ENDPOINTS ===
+app.post('/api/auth/signup', express.json(), async (req, res) => {
   try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = email.replace(/[^a-zA-Z0-9]/g, '_');
+    
+    const user = new User({
+      email: email.toLowerCase(),
+      hashedPassword,
+      userId,
+      createdAt: new Date()
+    });
+    await user.save();
+    
+    // Create default settings
+    const settings = new Settings({
+      userId,
+      theme: 'light',
+      paycheckAmount: 0,
+      paycheckFrequencyDays: 14,
+      startingBalance: 0,
+      bankBalance: 0
+    });
+    await settings.save();
+    
+    // Create learned patterns
+    const patterns = new LearnedPattern({
+      userId,
+      merchants: {},
+      exclusions: {}
+    });
+    await patterns.save();
+    
+    const token = jwt.sign({ email: email.toLowerCase(), userId }, JWT_SECRET, { expiresIn: '30d' });
+    console.log(`✅ New user registered: ${email} (${userId})`);
+    res.json({ token, userId, email: email.toLowerCase() });
+  } catch (e) {
+    console.error('Signup error:', e.message);
+    res.status(500).json({ error: 'Signup failed: ' + e.message });
+  }
+});
+
+app.post('/api/auth/login', express.json(), async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    
+    const match = await bcrypt.compare(password, user.hashedPassword);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    
+    const token = jwt.sign({ email: email.toLowerCase(), userId: user.userId }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, userId: user.userId, email: email.toLowerCase() });
+  } catch (e) {
+    res.status(500).json({ error: 'Login failed: ' + e.message });
+  }
+});
+
+app.get('/api/auth/verify', verifyToken, (req, res) => {
+  res.json({ valid: true, user: req.user });
+});
+
+// === TRANSACTION ENDPOINTS ===
+app.post('/api/upload-statement', verifyToken, upload.single('file'), async (req, res) => {
+  try {
+    const userId = req.user.userId;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    
     const pdfBuffer = fs.readFileSync(req.file.path);
     const pdfData = await pdfParse(pdfBuffer);
     const text = pdfData.text;
     const parsedTransactions = extractTransactions(text);
-    let userTxns = loadData(userTxnFile) || [];
+    
+    const userTxns = await Transaction.find({ userId });
     const nextId = userTxns.length > 0 ? Math.max(...userTxns.map(t => t.id || 0)) + 1 : 1;
+    
     parsedTransactions.forEach((t, idx) => {
       t.id = nextId + idx;
       t.excluded = false;
+      t.userId = userId;
     });
+    
     const seen = new Set();
     userTxns.forEach(t => {
       seen.add(`${t.date}|${t.amount}|${t.description}`);
     });
+    
     const newTransactions = [];
     parsedTransactions.forEach(t => {
       if (t.type === 'income') return;
@@ -579,239 +545,203 @@ app.post('/api/upload-statement', verifyToken, upload.single('file'), async (req
         seen.add(key);
       }
     });
-    userTxns.push(...newTransactions);
-    saveData(userTxnFile, userTxns);
+    
+    if (newTransactions.length > 0) {
+      await Transaction.insertMany(newTransactions);
+    }
+    
     fs.unlink(req.file.path, (err) => { if (err) console.error('Error deleting file:', err); });
     
-    // Process categorization in background (don't wait for it)
-    setImmediate(async () => {
-      try {
-        const updated = loadData(userTxnFile) || [];
-        updated.forEach(t => {
-          if (!t.category || t.category === 'Other') {
-            t.category = categorizeTransaction(t.description);
-          }
-        });
-        saveData(userTxnFile, updated);
-      } catch (e) { console.error('Background categorization error:', e); }
-    });
-    
-    res.json({ success: true, transactions: userTxns.length, message: `Loaded ${userTxns.length} total transactions (${newTransactions.length} new)` });
+    const totalTxns = await Transaction.countDocuments({ userId });
+    res.json({ success: true, transactions: totalTxns, message: `Loaded ${totalTxns} total transactions (${newTransactions.length} new)` });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Upload failed: ' + error.message });
   }
 });
 
-app.get('/api/transactions', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const txns = loadData(userTxnFile) || [];
-  res.json(txns);
-});
-app.post('/api/transactions', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const txns = loadData(userTxnFile) || [];
-  const newTransaction = { id: Math.max(...txns.map(t => t.id || 0), 0) + 1, ...req.body, date: new Date().toISOString().split('T')[0], excluded: false };
-  txns.push(newTransaction);
-  saveData(userTxnFile, txns);
-  res.json(newTransaction);
-});
-
-app.post('/api/transactions/:id/toggle-exclude', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userRulesFile = getFileForUser(userId, 'exclusion-rules.json');
-  const txns = loadData(userTxnFile) || [];
-  const rules = loadData(userRulesFile) || [];
-  const txn = txns.find(t => t.id == req.params.id);
-  if (txn) {
-    txn.excluded = !txn.excluded;
-    if (txn.excluded && req.body.learnRule) {
-      const merchant = txn.description.split(' ')[0];
-      const existingRule = rules.find(r => r.pattern === merchant);
-      if (!existingRule) {
-        rules.push({ type: 'merchant', pattern: merchant });
-        saveData(userRulesFile, rules);
-      }
-    }
-    saveData(userTxnFile, txns);
-    res.json({ success: true, excluded: txn.excluded });
-  } else {
-    res.status(404).json({ error: 'Transaction not found' });
+app.get('/api/transactions', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId }).lean();
+    res.json(txns);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
-app.get('/api/exclusion-rules', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userRulesFile = getFileForUser(userId, 'exclusion-rules.json');
-  const rules = loadData(userRulesFile) || [];
-  res.json(rules);
+app.post('/api/transactions', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const userTxns = await Transaction.find({ userId });
+    const newId = userTxns.length > 0 ? Math.max(...userTxns.map(t => t.id || 0)) + 1 : 1;
+    
+    const txn = new Transaction({
+      userId,
+      id: newId,
+      ...req.body,
+      date: new Date().toISOString().split('T')[0],
+      excluded: false
+    });
+    await txn.save();
+    res.json(txn);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.delete('/api/exclusion-rules/:index', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userRulesFile = getFileForUser(userId, 'exclusion-rules.json');
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  
-  let rules = loadData(userRulesFile) || [];
-  let txns = loadData(userTxnFile) || [];
-  
-  const idx = parseInt(req.params.index);
-  if (idx >= 0 && idx < rules.length) {
-    const removed = rules.splice(idx, 1);
-    saveData(userRulesFile, rules);
-    txns.forEach(txn => {
-      if (txn.excluded && removed[0].type === 'merchant') {
-        const merchant = txn.description.split(' ')[0];
-        if (merchant.toLowerCase() === removed[0].pattern.toLowerCase()) {
-          txn.excluded = false;
+app.post('/api/transactions/:id/toggle-exclude', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txnId = parseInt(req.params.id);
+    
+    const txn = await Transaction.findOne({ userId, id: txnId });
+    if (!txn) return res.status(404).json({ error: 'Transaction not found' });
+    
+    txn.excluded = !txn.excluded;
+    await txn.save();
+    res.json(txn);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/transactions/:id/note', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txnId = parseInt(req.params.id);
+    const { note } = req.body;
+    
+    const txn = await Transaction.findOne({ userId, id: txnId });
+    if (!txn) return res.status(404).json({ error: 'Transaction not found' });
+    
+    txn.note = note;
+    await txn.save();
+    res.json(txn);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/transactions/:id', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txnId = parseInt(req.params.id);
+    
+    await Transaction.deleteOne({ userId, id: txnId });
+    const txns = await Transaction.find({ userId });
+    res.json(txns);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/transactions/:id/category', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txnId = parseInt(req.params.id);
+    const { category } = req.body;
+    
+    const txn = await Transaction.findOne({ userId, id: txnId });
+    if (!txn) return res.status(404).json({ error: 'Transaction not found' });
+    
+    txn.category = category;
+    await txn.save();
+    
+    // Update learned patterns
+    let patterns = await LearnedPattern.findOne({ userId });
+    if (!patterns) {
+      patterns = new LearnedPattern({ userId, merchants: {}, exclusions: {} });
+    }
+    patterns.merchants[txn.description] = category;
+    await patterns.save();
+    
+    res.json(txn);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === EXCLUSION RULES ===
+app.get('/api/exclusion-rules', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const rules = await ExclusionRule.find({ userId });
+    res.json(rules);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/exclusion-rules/:index', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const ruleId = req.params.index;
+    
+    await ExclusionRule.deleteOne({ userId, _id: ruleId });
+    const rules = await ExclusionRule.find({ userId });
+    res.json(rules);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === ANALYTICS ===
+app.get('/api/spending-trends', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId }).lean();
+    
+    const trends = {};
+    const excludedAmounts = {};
+    const months = {};
+    
+    txns.forEach(t => {
+      const monthKey = t.date.substring(0, 7);
+      if (t.excluded) {
+        excludedAmounts[monthKey] = (excludedAmounts[monthKey] || 0) + Math.abs(t.amount);
+      } else {
+        if (t.category !== 'Transfer' && t.category !== 'Income') {
+          if (!months[monthKey]) months[monthKey] = {};
+          if (!months[monthKey][t.category]) months[monthKey][t.category] = 0;
+          months[monthKey][t.category] += Math.abs(t.amount);
         }
       }
     });
-    saveData(userTxnFile, txns);
-    res.json({ success: true });
-  } else {
-    res.status(404).json({ error: 'Rule not found' });
-  }
-});
-
-app.post('/api/transactions/:id/note', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userFile = getFileForUser(userId, 'transactions.json');
-  let txns = loadData(userFile) || [];
-  const txn = txns.find(t => t.id == req.params.id);
-  if (txn) {
-    txn.note = req.body.note || '';
-    saveData(userFile, txns);
-    res.json({ success: true, note: txn.note });
-  } else {
-    res.status(404).json({ error: 'Transaction not found' });
-  }
-});
-
-app.delete('/api/transactions/:id', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userFile = getFileForUser(userId, 'transactions.json');
-  let transactions = loadData(userFile) || [];
-  const index = transactions.findIndex(t => t.id == req.params.id);
-  if (index !== -1) {
-    transactions.splice(index, 1);
-    saveData(userFile, transactions);
-    res.json({ success: true, message: 'Transaction deleted' });
-  } else {
-    res.status(404).json({ error: 'Transaction not found' });
-  }
-});
-
-app.post('/api/transactions/:id/category', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userLearnedFile = getFileForUser(userId, 'learned-patterns.json');
-  const userCategoriesFile = getFileForUser(userId, 'custom-categories.json');
-  
-  let txns = loadData(userTxnFile) || [];
-  let learned = loadData(userLearnedFile) || { merchants: {} };
-  let customCats = loadData(userCategoriesFile) || {};
-  
-  const txn = txns.find(t => t.id == req.params.id);
-  if (txn) {
-    const newCategory = (req.body.category || txn.category).trim();
     
-    // Normalize category: check for existing similar categories (case-insensitive exact match)
-    const existingCategory = txns
-      .map(t => t.category)
-      .filter(cat => cat && cat.toLowerCase() === newCategory.toLowerCase())
-      .find(cat => cat); // Get the first exact match (case-insensitive)
+    const allCategories = new Set();
+    Object.values(months).forEach(m => Object.keys(m).forEach(cat => allCategories.add(cat)));
     
-    // Use existing category if found, otherwise use the new one
-    const finalCategory = existingCategory || newCategory;
-    
-    // Update this transaction
-    txn.category = finalCategory;
-    
-    // Learn from this category change - extract merchant name and remember the category
-    const merchant = txn.description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
-    if (merchant && finalCategory) {
-      if (!learned.merchants) learned.merchants = {};
-      learned.merchants[merchant] = finalCategory;
-      saveData(userLearnedFile, learned);
-    }
-    
-    // Track custom category usage (for auto-saving after 3 uses)
-    customCats[finalCategory] = (customCats[finalCategory] || 0) + 1;
-    if (customCats[finalCategory] >= 3) {
-      saveData(userCategoriesFile, customCats);
-    }
-    
-    saveData(userTxnFile, txns);
-    res.json({ success: true, category: finalCategory });
-  } else {
-    res.status(404).json({ error: 'Transaction not found' });
-  }
-});
-
-app.get('/api/spending-trends', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const fresh = loadData(userTxnFile) || [];
-  const trends = {};
-  const months = {};
-  const excludedAmounts = {};
-  
-  fresh.forEach(t => {
-    const date = new Date(t.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    
-    if (!excludedAmounts[monthKey]) excludedAmounts[monthKey] = 0;
-    
-    if (t.type === 'expense' && t.category !== 'Transfer') {
-      if (t.excluded) {
-        // Track excluded amounts separately
-        excludedAmounts[monthKey] += Math.abs(t.amount);
-      } else {
-        // Include non-excluded expenses
-        if (!months[monthKey]) months[monthKey] = {};
-        if (!months[monthKey][t.category]) months[monthKey][t.category] = 0;
-        months[monthKey][t.category] += Math.abs(t.amount);
-      }
-    }
-  });
-  
-  const allCategories = new Set();
-  Object.values(months).forEach(m => Object.keys(m).forEach(cat => allCategories.add(cat)));
-  
-  const sorted = Object.keys(months).sort();
-  sorted.forEach(month => {
-    trends[month] = {};
-    allCategories.forEach(cat => {
-      trends[month][cat] = months[month][cat] || 0;
+    const sorted = Object.keys(months).sort();
+    sorted.forEach(month => {
+      trends[month] = {};
+      allCategories.forEach(cat => {
+        trends[month][cat] = months[month][cat] || 0;
+      });
     });
-  });
-  
-  res.json({ trends, excludedAmounts });
+    
+    res.json({ trends, excludedAmounts });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.get('/api/bill-buffer', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-  const recurringBillsUser = loadData(userBillsFile) || [];
-  
-  const days = parseInt(req.query.days) || 30;
-  const today = new Date();
-  const cutoffDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
-  
-  // Only use manually added recurring bills to avoid duplicates
-  const billsWithDates = [];
-  if (Array.isArray(recurringBillsUser)) {
-    recurringBillsUser.forEach(bill => {
-      if (bill.type === 'income') return; // Skip income bills
+app.get('/api/bill-buffer', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const bills = await RecurringBill.find({ userId });
+    
+    const days = parseInt(req.query.days) || 30;
+    const today = new Date();
+    const cutoffDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+    
+    const billsWithDates = [];
+    bills.forEach(bill => {
+      if (bill.type === 'income') return;
       
       const startDate = new Date(bill.startDate);
       let currentDate = new Date(startDate);
       
-      // Generate all occurrences within the period
       while (currentDate <= cutoffDate) {
         if (currentDate >= today) {
           billsWithDates.push({
@@ -824,1079 +754,532 @@ app.get('/api/bill-buffer', verifyToken, (req, res) => {
         currentDate = new Date(currentDate.getTime() + bill.frequency * 24 * 60 * 60 * 1000);
       }
     });
-  }
-  
-  billsWithDates.sort((a, b) => a.date - b.date);
-  const billsInPeriod = billsWithDates.filter(b => b.date <= cutoffDate);
-  
-  const totalBillsNeeded = billsInPeriod.reduce((sum, bill) => sum + bill.amount, 0);
-  const desiredBuffer = totalBillsNeeded * 0.2;
-  const requiredBalance = totalBillsNeeded + desiredBuffer;
-  
-  res.json({
-    days: days,
-    nextBills: billsInPeriod.map(b => ({
-      merchant: b.merchant,
-      amount: b.amount,
-      daysUntilDue: b.daysUntilDue,
-      date: b.date.toISOString().split('T')[0]
-    })),
-    billCount: billsInPeriod.length,
-    totalBillsAmount: totalBillsNeeded,
-    recommendedBuffer: desiredBuffer,
-    requiredBalance: requiredBalance,
-    leftoverAfterBills: desiredBuffer
-  });
-});
-
-app.get('/api/categories', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const txns = loadData(userTxnFile) || [];
-  const categories = {};
-  txns.forEach(t => {
-    if (t.type === 'expense' && t.category !== 'Income' && !t.excluded) {
-      categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
-    }
-  });
-  res.json(categories);
-});
-
-app.get('/api/balance', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const txns = loadData(userTxnFile) || [];
-  const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const excluded = txns.filter(t => t.excluded).length;
-  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: txns.length, excluded });
-});
-
-app.get('/api/summary', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const txns = loadData(userTxnFile) || [];
-  const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses });
-});
-
-app.get('/api/daily-breakdown', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const txns = loadData(userTxnFile) || [];
-  const daily = {};
-  txns.forEach(t => {
-    daily[t.date] = (daily[t.date] || 0) + t.amount;
-  });
-  res.json(daily);
-});
-
-app.get('/api/recurring-calendar', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-  const userTxns = loadData(userTxnFile) || [];
-  const userBills = loadData(userBillsFile) || [];
-  res.json(generateBillCalendar(3, userTxns, userBills));
-});
-
-app.get('/api/cash-flow', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userTxns = loadData(userTxnFile) || [];
-  res.json(calculateCashFlow(6, userTxns));
-});
-
-app.get('/api/spending-velocity', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userTxns = loadData(userTxnFile) || [];
-  res.json(calculateSpendingVelocity(userTxns));
-});
-
-app.get('/api/alerts', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const userTxns = loadData(userTxnFile) || [];
-  const userBills = loadData(userBillsFile) || [];
-  const userDebts = loadData(userDebtsFile) || [];
-  res.json(generateAlerts(userTxns, userBills, userDebts));
-});
-
-app.get('/api/insights', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const userTxns = loadData(userTxnFile) || [];
-  const userDebts = loadData(userDebtsFile) || [];
-  const recurring = detectRecurring(userTxns);
-  const velocity = calculateSpendingVelocity(userTxns);
-  const totalIncome = userTxns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = userTxns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
-  const debtTotal = userDebts.reduce((s, d) => s + d.balance, 0);
-  const debtRatio = totalIncome > 0 ? (debtTotal / totalIncome) : 0;
-  const anomalies = detectAnomalies(userTxns);
-  
-  // Advanced Financial Health Score
-  let score = 40;
-  
-  // Savings rate scoring (0-30 points)
-  if (savingsRate >= 30) score += 30;
-  else if (savingsRate >= 20) score += 25;
-  else if (savingsRate >= 15) score += 20;
-  else if (savingsRate >= 10) score += 15;
-  else if (savingsRate >= 5) score += 10;
-  else if (savingsRate > 0) score += 5;
-  
-  // Spending trend (0-20 points)
-  if (velocity.trend === 'decreasing') score += 20;
-  else if (velocity.trend === 'stable') score += 10;
-  
-  // Debt management (0-20 points)
-  if (debtRatio === 0) score += 20;
-  else if (debtRatio < 0.5) score += 15;
-  else if (debtRatio < 1) score += 10;
-  else if (debtRatio < 2) score += 5;
-  
-  // Expense stability (0-15 points)
-  if (anomalies.length === 0) score += 15;
-  else if (anomalies.length <= 2) score += 10;
-  else if (anomalies.length <= 4) score += 5;
-  
-  // Recurring bill management (0-15 points)
-  const recurringMonthly = recurring.filter(r => r.isRecurring).reduce((s, r) => s + r.avgAmount, 0);
-  const recurringPercent = totalIncome > 0 ? (recurringMonthly / totalIncome) * 100 : 0;
-  if (recurringPercent < 20) score += 15;
-  else if (recurringPercent < 30) score += 10;
-  else if (recurringPercent < 40) score += 5;
-  
-  res.json({
-    financialScore: Math.min(100, Math.round(score)),
-    savingsRate: savingsRate.toFixed(1),
-    debtRatio,
-    recurringTransactions: recurring,
-    velocity,
-    avgDailySpend: velocity.daily,
-    totalTransactions: userTxns.length,
-    excludedTransactions: userTxns.filter(t => t.excluded).length,
-    debtTotal,
-    anomalies,
-    recommendations: getSmartRecommendations(userTxns)
-  });
-});
-
-app.post('/api/goals', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userGoalsFile = getFileForUser(userId, 'goals.json');
-  let userGoals = loadData(userGoalsFile) || [];
-  const newGoal = { id: Math.max(...userGoals.map(g => g.id || 0), 0) + 1, ...req.body, createdAt: new Date() };
-  userGoals.push(newGoal);
-  saveData(userGoalsFile, userGoals);
-  res.json(newGoal);
-});
-
-app.get('/api/goals', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userGoalsFile = getFileForUser(userId, 'goals.json');
-  const userGoals = loadData(userGoalsFile) || [];
-  res.json(userGoals);
-});
-
-app.post('/api/payoff-strategy', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const userDebts = loadData(userDebtsFile) || [];
-  const { strategy, extraPayment } = req.body;
-  const extra = extraPayment || 0;
-  
-  const calculatePayoff = (debtList, strat, extra) => {
-    const dts = JSON.parse(JSON.stringify(debtList));
-    if (strat === 'avalanche') dts.sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
-    else dts.sort((a, b) => a.balance - b.balance);
     
-    let months = 0, interest = 0;
-    while (dts.some(d => d.balance > 0) && months < 600) {
-      dts.forEach(d => {
-        if (d.balance > 0) {
-          const i = (d.balance * (d.interestRate || 0)) / 100 / 12;
-          d.balance += i;
-          interest += i;
-          d.balance -= Math.min(d.minPayment || 50, d.balance);
-        }
-      });
-      months++;
-    }
-    return { months, interest: Math.round(interest) };
-  };
-  
-  const aval = calculatePayoff(userDebts, 'avalanche', extra);
-  const snow = calculatePayoff(userDebts, 'snowball', extra);
-  const selected = strategy === 'avalanche' ? aval : snow;
-  const other = strategy === 'avalanche' ? snow : aval;
-  
-  res.json({
-    strategy: strategy.toUpperCase(),
-    recommendation: `Save $${(other.interest - selected.interest).toLocaleString()} and finish ${other.months - selected.months} months faster`,
-    payoff: selected,
-    comparison: { avalanche: aval, snowball: snow }
-  });
-});
-
-// AI Debt Advisor - the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-app.post('/api/ai-debt-advisor', express.json(), async (req, res) => {
-  try {
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(400).json({ error: 'OpenAI API key not configured' });
-    }
+    billsWithDates.sort((a, b) => a.date - b.date);
+    const billsInPeriod = billsWithDates.filter(b => b.date <= cutoffDate);
     
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    
-    // Get income info
-    const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-    const totalSpending = Math.abs(transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + t.amount, 0));
-    const availableForPayoff = totalIncome - totalSpending;
-    
-    // Build debt summary
-    const debtSummary = debts.map(d => `- ${d.name || 'Debt'}: $${d.balance} at ${d.interestRate || 0}% interest, ${d.minPayment || 'no'} min payment`).join('\n');
-    
-    const prompt = `You are a financial advisor. Based on this financial situation, provide specific debt payoff strategy recommendations:
-
-FINANCIAL SITUATION:
-- Monthly Income: $${totalIncome.toFixed(0)}
-- Monthly Spending: $${totalSpending.toFixed(0)}
-- Available for Extra Payments: $${availableForPayoff.toFixed(0)}
-
-DEBTS:
-${debtSummary || 'No debts'}
-
-Provide:
-1. Recommended payoff strategy (avalanche or snowball) with reasoning
-2. Suggested extra monthly payment amount
-3. Estimated time to debt freedom
-4. Specific action steps for this month
-5. Quick win opportunities
-
-Keep it practical and actionable.`;
-
-    const message = await client.chat.completions.create({
-      model: 'gpt-5',
-      messages: [{ role: 'user', content: prompt }],
-      max_completion_tokens: 2000
-    });
-    
-    res.json({ advice: message.choices[0].message.content });
-  } catch (error) {
-    console.error('AI Advisor error:', error);
-    res.status(500).json({ error: 'Failed to get advice: ' + error.message });
-  }
-});
-
-app.post('/api/subscriptions', express.json(), (req, res) => {
-  const newSub = { id: Math.max(...subscriptions.map(s => s.id || 0), 0) + 1, ...req.body };
-  subscriptions.push(newSub);
-  saveData(subscriptionsFile, subscriptions);
-  res.json(newSub);
-});
-
-app.get('/api/subscriptions', (req, res) => res.json(subscriptions));
-
-app.get('/api/recurring-bills', (req, res) => res.json(Array.isArray(recurringBills) ? recurringBills : []));
-
-app.post('/api/recurring-bills', express.json(), (req, res) => {
-  const { name, amount, type, frequency, startDate } = req.body;
-  if (!name || !amount || !frequency || !startDate) {
-    return res.status(400).json({ error: 'name, amount, frequency, and startDate required' });
-  }
-  
-  const bill = {
-    id: Date.now(),
-    name,
-    amount: parseFloat(amount),
-    type: type || 'expense',
-    frequency: parseInt(frequency),
-    startDate
-  };
-  
-  if (!Array.isArray(recurringBills)) recurringBills = [];
-  recurringBills.push(bill);
-  saveData(recurringBillsFile, recurringBills);
-  
-  res.json(bill);
-});
-
-app.put('/api/recurring-bills/:id', express.json(), (req, res) => {
-  const id = parseInt(req.params.id);
-  const { name, amount, type, frequency, startDate } = req.body;
-  if (!name || amount === undefined || !frequency || !startDate) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-  
-  if (!Array.isArray(recurringBills)) recurringBills = [];
-  const bill = recurringBills.find(b => b.id === id);
-  if (!bill) {
-    return res.status(404).json({ error: 'Bill not found' });
-  }
-  
-  bill.name = name;
-  bill.amount = parseFloat(amount);
-  bill.type = type;
-  bill.frequency = parseInt(frequency);
-  bill.startDate = startDate;
-  
-  saveData(recurringBillsFile, recurringBills);
-  res.json(bill);
-});
-
-app.delete('/api/recurring-bills/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  if (!Array.isArray(recurringBills)) recurringBills = [];
-  recurringBills = recurringBills.filter(b => b.id !== id);
-  saveData(recurringBillsFile, recurringBills);
-  res.json({ success: true });
-});
-
-// Convert a transaction to a recurring bill
-app.post('/api/transaction-to-recurring', express.json(), (req, res) => {
-  const { merchant, amount, frequency } = req.body;
-  if (!merchant || !amount || !frequency) {
-    return res.status(400).json({ error: 'merchant, amount, and frequency required' });
-  }
-  
-  const bill = {
-    id: Date.now(),
-    name: merchant,
-    amount: Math.abs(parseFloat(amount)),
-    frequency: parseInt(frequency),
-    startDate: new Date().toISOString().split('T')[0]
-  };
-  
-  if (!Array.isArray(recurringBills)) recurringBills = [];
-  recurringBills.push(bill);
-  saveData(recurringBillsFile, recurringBills);
-  
-  res.json(bill);
-});
-
-// Bills Calculator endpoint
-app.get('/api/bills-calculator', verifyToken, (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-    // Reload bills from disk to ensure we have the latest
-    const freshBills = loadData(userBillsFile);
-    
-    // Calculate total monthly bills from recurring bills
-    let totalMonthlyBills = 0;
-    let paycheckAmount = 0;
-    let paycheckFrequency = 30;
-    
-    // Get all recurring bills (only manually added ones, not detected historical)
-    if (Array.isArray(freshBills) && freshBills.length > 0) {
-      freshBills.forEach(bill => {
-        if (bill.type === 'income') {
-          paycheckAmount = parseFloat(bill.amount) || 0;
-          paycheckFrequency = parseInt(bill.frequency) || 30;
-        } else if (!bill.type || bill.type === 'expense') {
-          const freq = parseInt(bill.frequency) || 30;
-          const amt = parseFloat(bill.amount) || 0;
-          const occurrencesPerMonth = 30 / freq;
-          totalMonthlyBills += amt * occurrencesPerMonth;
-        }
-      });
-    }
-    
-    // Ensure all values are numbers
-    totalMonthlyBills = parseFloat(totalMonthlyBills) || 0;
-    paycheckAmount = parseFloat(paycheckAmount) || 0;
-    paycheckFrequency = parseInt(paycheckFrequency) || 30;
-    
-    const paychecksPerMonth = paycheckFrequency > 0 ? 30 / paycheckFrequency : 1;
-    const billsPerPaycheck = paychecksPerMonth > 0 ? totalMonthlyBills / paychecksPerMonth : 0;
-    const spendingPerPaycheck = paycheckAmount - billsPerPaycheck;
+    const totalBillsNeeded = billsInPeriod.reduce((sum, bill) => sum + bill.amount, 0);
+    const desiredBuffer = totalBillsNeeded * 0.2;
+    const requiredBalance = totalBillsNeeded + desiredBuffer;
     
     res.json({
-      paycheckAmount: Math.round(paycheckAmount * 100) / 100,
-      paycheckFrequency,
-      paychecksPerMonth: Math.round(paychecksPerMonth * 100) / 100,
-      totalMonthlyBills: Math.round(totalMonthlyBills * 100) / 100,
-      billsPerPaycheck: Math.round(billsPerPaycheck * 100) / 100,
-      spendingPerPaycheck: Math.round(spendingPerPaycheck * 100) / 100
+      days,
+      nextBills: billsInPeriod.map(b => ({
+        merchant: b.merchant,
+        amount: b.amount,
+        daysUntilDue: b.daysUntilDue,
+        date: b.date.toISOString().split('T')[0]
+      })),
+      billCount: billsInPeriod.length,
+      totalBillsAmount: totalBillsNeeded,
+      recommendedBuffer: desiredBuffer,
+      requiredBalance: requiredBalance,
+      leftoverAfterBills: desiredBuffer
     });
   } catch (e) {
-    console.error('Error calculating bills:', e.message);
-    res.json({
-      paycheckAmount: 0,
-      paycheckFrequency: 30,
-      paychecksPerMonth: 1,
-      totalMonthlyBills: 0,
-      billsPerPaycheck: 0,
-      spendingPerPaycheck: 0
-    });
+    res.status(500).json({ error: e.message });
   }
 });
 
-// Bank balance endpoints
-app.get('/api/bank-balance', (req, res) => {
-  res.json(bankBalance);
-});
-
-app.post('/api/bank-balance', express.json(), (req, res) => {
-  const { balance } = req.body;
-  if (balance === undefined || balance === null) {
-    return res.status(400).json({ error: 'balance required' });
-  }
-  bankBalance = { balance: parseFloat(balance) };
-  saveData(bankBalanceFile, bankBalance);
-  res.json(bankBalance);
-});
-
-app.delete('/api/bank-balance', (req, res) => {
-  bankBalance = {};
-  saveData(bankBalanceFile, bankBalance);
-  res.json({ success: true });
-});
-
-// Learning endpoints
-app.get('/api/learned-patterns', (req, res) => {
-  res.json(learnedPatterns);
-});
-
-app.post('/api/learn-category', express.json(), (req, res) => {
-  const { description, category } = req.body;
-  if (!description || !category) {
-    return res.status(400).json({ error: 'description and category required' });
-  }
-  
-  // Extract merchant name (first few words or unique identifier)
-  const merchant = description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
-  learnedPatterns.merchants = learnedPatterns.merchants || {};
-  learnedPatterns.merchants[merchant] = category;
-  saveData(learnedPatternsFile, learnedPatterns);
-  
-  res.json({ success: true, learned: { merchant, category } });
-});
-
-app.post('/api/custom-categories/track', express.json(), (req, res) => {
-  const { category } = req.body;
-  if (!category) {
-    return res.status(400).json({ error: 'category required' });
-  }
-  
-  // Track usage of this category
-  customCategories[category] = (customCategories[category] || 0) + 1;
-  
-  // If category used 3+ times, keep it saved
-  // Otherwise remove it if it drops below threshold
-  if (customCategories[category] >= 3) {
-    saveData(customCategoriesFile, customCategories);
-    res.json({ success: true, saved: true, count: customCategories[category] });
-  } else {
-    res.json({ success: true, saved: false, count: customCategories[category] });
-  }
-});
-
-app.get('/api/custom-categories', (req, res) => {
-  const saved = Object.keys(customCategories).filter(cat => customCategories[cat] >= 3);
-  res.json(saved);
-});
-
-app.post('/api/learn-exclusion', express.json(), (req, res) => {
-  const { description } = req.body;
-  if (!description) {
-    return res.status(400).json({ error: 'description required' });
-  }
-  
-  // Extract merchant name for exclusion pattern
-  const merchant = description.split(/\s+/).slice(0, 2).join(' ').toLowerCase();
-  learnedPatterns.exclusions = learnedPatterns.exclusions || {};
-  learnedPatterns.exclusions[merchant] = true;
-  saveData(learnedPatternsFile, learnedPatterns);
-  
-  res.json({ success: true, learned: { merchant } });
-});
-
-// Debt endpoints
-app.get('/api/debts', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const userDebts = loadData(userDebtsFile) || [];
-  res.json(userDebts || []);
-});
-
-app.post('/api/debts', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-  const { name, type, currentBalance, originalBalance, interestRate, monthlyPayment, dueDay, dueDate } = req.body;
-  if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-  
-  let userDebts = loadData(userDebtsFile) || [];
-  if (!Array.isArray(userDebts)) userDebts = [];
-  
-  const debt = {
-    id: Date.now(),
-    name,
-    type,
-    currentBalance: parseFloat(currentBalance),
-    originalBalance: parseFloat(originalBalance) || parseFloat(currentBalance),
-    interestRate: parseFloat(interestRate) || 0,
-    monthlyPayment: parseFloat(monthlyPayment),
-    dueDay: parseInt(dueDay) || 1,
-    dueDate: dueDate || new Date().toISOString().split('T')[0],
-    createdAt: new Date().toISOString()
-  };
-  
-  userDebts.push(debt);
-  saveData(userDebtsFile, userDebts);
-  
-  let userBills = loadData(userBillsFile) || [];
-  if (!Array.isArray(userBills)) userBills = [];
-  
-  const startDate = dueDate || new Date().toISOString().split('T')[0];
-  const recurringBill = {
-    id: Date.now() + 1,
-    name: `${name} Payment`,
-    amount: parseFloat(monthlyPayment),
-    frequency: 30,
-    startDate: startDate,
-    type: 'expense'
-  };
-  
-  userBills.push(recurringBill);
-  saveData(userBillsFile, userBills);
-  
-  res.json({ debt, recurring: recurringBill });
-});
-
-app.put('/api/debts/:id', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-  const id = parseInt(req.params.id);
-  const { name, type, currentBalance, interestRate, monthlyPayment, dueDay, dueDate } = req.body;
-  if (!name || !type || currentBalance === undefined || monthlyPayment === undefined) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-  
-  let userDebts = loadData(userDebtsFile) || [];
-  if (!Array.isArray(userDebts)) userDebts = [];
-  
-  const debtIndex = userDebts.findIndex(d => d.id === id);
-  if (debtIndex === -1) {
-    return res.status(404).json({ error: 'Debt not found' });
-  }
-  
-  userDebts[debtIndex] = {
-    ...userDebts[debtIndex],
-    name,
-    type,
-    currentBalance: parseFloat(currentBalance),
-    interestRate: parseFloat(interestRate) || 0,
-    monthlyPayment: parseFloat(monthlyPayment),
-    dueDay: parseInt(dueDay) || 1,
-    dueDate: dueDate || userDebts[debtIndex].dueDate
-  };
-  
-  saveData(userDebtsFile, userDebts);
-  
-  let userBills = loadData(userBillsFile) || [];
-  if (!Array.isArray(userBills)) userBills = [];
-  const recurringIndex = userBills.findIndex(b => b.name === `${userDebts[debtIndex].name} Payment`);
-  if (recurringIndex !== -1) {
-    userBills[recurringIndex] = {
-      ...userBills[recurringIndex],
-      amount: parseFloat(monthlyPayment),
-      startDate: dueDate || userBills[recurringIndex].startDate
-    };
-    saveData(userBillsFile, userBills);
-  }
-  
-  res.json(userDebts[debtIndex]);
-});
-
-app.delete('/api/debts/:id', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  const id = parseInt(req.params.id);
-  let userDebts = loadData(userDebtsFile) || [];
-  if (!Array.isArray(userDebts)) userDebts = [];
-  userDebts = userDebts.filter(d => d.id !== id);
-  saveData(userDebtsFile, userDebts);
-  res.json({ success: true });
-});
-
-// Debt Analysis Endpoint
-app.get('/api/expendable-income', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
-  const userSettingsFile = getFileForUser(userId, 'settings.json');
-  const userTransactions = loadData(userTxnFile) || [];
-  const userBills = loadData(userBillsFile) || [];
-  const userSettings = loadData(userSettingsFile) || {};
-  
-  const today = new Date();
-  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
-  
-  const paycheckAmount = userSettings.paycheckAmount || 0;
-  const paycheckFrequency = userSettings.paycheckFrequencyDays || 1;
-  const estimatedMonthlyIncome = paycheckAmount * (30 / paycheckFrequency);
-  
-  const expenseBills = userBills.filter(b => b.type !== 'income');
-  let monthlyBillsAmount = 0;
-  expenseBills.forEach(bill => {
-    if (bill.frequency === 30) {
-      monthlyBillsAmount += bill.amount;
-    } else {
-      monthlyBillsAmount += (bill.amount * 30 / bill.frequency);
-    }
-  });
-  
-  let totalActualSpending = 0;
-  let transactionCount = 0;
-  userTransactions.forEach(t => {
-    const txDate = new Date(t.date);
-    if (txDate >= sixMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
-      totalActualSpending += Math.abs(t.amount);
-      transactionCount++;
-    }
-  });
-  
-  const monthsDifference = (today - sixMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
-  const avgMonthlyActualSpending = monthsDifference > 0 ? totalActualSpending / monthsDifference : 0;
-  
-  const expendableIncome = Math.max(0, estimatedMonthlyIncome - monthlyBillsAmount - avgMonthlyActualSpending);
-  const suggestedExtraPayment = Math.round(expendableIncome * 0.6);
-  
-  res.json({
-    estimatedMonthlyIncome,
-    monthlyBills: monthlyBillsAmount,
-    avgMonthlyActualSpending,
-    expendableIncome,
-    suggestedExtraPayment,
-    transactionSampleSize: transactionCount
-  });
-});
-
-app.get('/api/spending-suggestions', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userTxnFile = getFileForUser(userId, 'transactions.json');
-  let userTransactions = loadData(userTxnFile);
-  if (!Array.isArray(userTransactions)) userTransactions = [];
-  
-  const today = new Date();
-  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
-  
-  // Ensure all transactions have categories assigned
-  userTransactions = userTransactions.map(t => {
-    if (!t.category || t.category === 'Other') {
-      t.category = categorizeTransaction(t.description);
-    }
-    return t;
-  });
-  
-  // Categorize as essential vs discretionary
-  const essentialCategories = ['Utilities', 'Groceries', 'Transportation', 'Health & Fitness'];
-  const discretionaryCategories = ['Food & Dining', 'Entertainment', 'Shopping'];
-  
-  // Analyze spending by category
-  const categorySpending = {};
-  userTransactions.forEach(t => {
-    const txDate = new Date(t.date);
-    if (txDate >= sixMonthsAgo && t.type === 'expense' && !t.excluded && t.category !== 'Transfer') {
-      if (!categorySpending[t.category]) {
-        categorySpending[t.category] = 0;
+app.get('/api/categories', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const categories = {};
+    txns.forEach(t => {
+      if (t.type === 'expense' && t.category !== 'Income' && !t.excluded) {
+        categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
       }
-      categorySpending[t.category] += Math.abs(t.amount);
+    });
+    res.json(categories);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/balance', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const excluded = txns.filter(t => t.excluded).length;
+    res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: txns.length, excluded });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/summary', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => s + Math.abs(t.amount), 0);
+    res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/daily-breakdown', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const daily = {};
+    txns.forEach(t => {
+      daily[t.date] = (daily[t.date] || 0) + t.amount;
+    });
+    res.json(daily);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/recurring-calendar', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const bills = await RecurringBill.find({ userId });
+    res.json(generateBillCalendar(3, txns, bills));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/cash-flow', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    res.json(calculateCashFlow(6, txns));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/spending-velocity', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    res.json(calculateSpendingVelocity(txns));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/alerts', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const bills = await RecurringBill.find({ userId });
+    const debts = await Debt.find({ userId });
+    res.json(generateAlerts(txns, bills, debts));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/insights', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const txns = await Transaction.find({ userId });
+    const debts = await Debt.find({ userId });
+    const recurring = detectRecurring(txns);
+    const velocity = calculateSpendingVelocity(txns);
+    const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
+    const debtTotal = debts.reduce((s, d) => s + d.balance, 0);
+    const debtRatio = totalIncome > 0 ? (debtTotal / totalIncome) : 0;
+    const anomalies = detectAnomalies(txns);
+    
+    let score = 40;
+    if (savingsRate >= 30) score += 30;
+    else if (savingsRate >= 20) score += 25;
+    else if (savingsRate >= 15) score += 20;
+    else if (savingsRate >= 10) score += 15;
+    else if (savingsRate >= 5) score += 10;
+    else if (savingsRate > 0) score += 5;
+    
+    if (velocity.trend === 'decreasing') score += 20;
+    else if (velocity.trend === 'stable') score += 10;
+    
+    if (debtRatio === 0) score += 20;
+    else if (debtRatio < 0.5) score += 15;
+    else if (debtRatio < 1) score += 10;
+    else if (debtRatio < 2) score += 5;
+    
+    if (anomalies.length === 0) score += 15;
+    else if (anomalies.length <= 2) score += 10;
+    else if (anomalies.length <= 4) score += 5;
+    
+    const recurringMonthly = recurring.filter(r => r.isRecurring).reduce((s, r) => s + r.avgAmount, 0);
+    const recurringPercent = totalIncome > 0 ? (recurringMonthly / totalIncome) * 100 : 0;
+    if (recurringPercent < 20) score += 15;
+    else if (recurringPercent < 30) score += 10;
+    else if (recurringPercent < 40) score += 5;
+    
+    res.json({
+      score: Math.min(100, score),
+      savingsRate: savingsRate.toFixed(1),
+      spendingTrend: velocity.trend,
+      debts: debts.length,
+      recurringBills: recurring.filter(r => r.isRecurring).length,
+      recommendations: getSmartRecommendations(txns)
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === DEBTS ===
+app.post('/api/debts', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const debts = await Debt.find({ userId });
+    const debtId = `debt_${Date.now()}`;
+    
+    const debt = new Debt({
+      userId,
+      id: debtId,
+      ...req.body
+    });
+    await debt.save();
+    res.json(debt);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/debts', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const debts = await Debt.find({ userId });
+    res.json(debts);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put('/api/debts/:id', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const debtId = req.params.id;
+    
+    const debt = await Debt.findOne({ userId, id: debtId });
+    if (!debt) return res.status(404).json({ error: 'Debt not found' });
+    
+    Object.assign(debt, req.body);
+    await debt.save();
+    res.json(debt);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/debts/:id', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const debtId = req.params.id;
+    
+    await Debt.deleteOne({ userId, id: debtId });
+    const debts = await Debt.find({ userId });
+    res.json(debts);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === GOALS ===
+app.post('/api/goals', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const goalId = `goal_${Date.now()}`;
+    
+    const goal = new Goal({
+      userId,
+      id: goalId,
+      ...req.body
+    });
+    await goal.save();
+    res.json(goal);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/goals', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const goals = await Goal.find({ userId });
+    res.json(goals);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === RECURRING BILLS ===
+app.get('/api/recurring-bills', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const bills = await RecurringBill.find({ userId });
+    res.json(bills);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/recurring-bills', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const billId = `bill_${Date.now()}`;
+    
+    const bill = new RecurringBill({
+      userId,
+      id: billId,
+      ...req.body
+    });
+    await bill.save();
+    res.json(bill);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put('/api/recurring-bills/:id', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const billId = req.params.id;
+    
+    const bill = await RecurringBill.findOne({ userId, id: billId });
+    if (!bill) return res.status(404).json({ error: 'Bill not found' });
+    
+    Object.assign(bill, req.body);
+    await bill.save();
+    res.json(bill);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/recurring-bills/:id', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const billId = req.params.id;
+    
+    await RecurringBill.deleteOne({ userId, id: billId });
+    const bills = await RecurringBill.find({ userId });
+    res.json(bills);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === SETTINGS ===
+app.get('/api/paycheck-settings', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    let settings = await Settings.findOne({ userId });
+    if (!settings) settings = { paycheckAmount: 0, paycheckFrequencyDays: 14 };
+    
+    res.json({
+      amount: settings.paycheckAmount || 0,
+      frequencyDays: settings.paycheckFrequencyDays || 14
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/paycheck-settings', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { amount, frequencyDays } = req.body;
+    if (amount === undefined || frequencyDays === undefined) {
+      return res.status(400).json({ error: 'amount and frequencyDays required' });
     }
-  });
-  
-  // Calculate average monthly by category
-  const monthsDifference = (today - sixMonthsAgo) / (1000 * 60 * 60 * 24 * 30);
-  const avgByCat = {};
-  Object.entries(categorySpending).forEach(([cat, total]) => {
-    avgByCat[cat] = monthsDifference > 0 ? total / monthsDifference : 0;
-  });
-  
-  // Generate suggestions for discretionary spending
-  const suggestions = [];
-  discretionaryCategories.forEach(cat => {
-    if (avgByCat[cat] && avgByCat[cat] > 0) {
-      const currentSpend = avgByCat[cat];
-      // Suggest 25% reduction for discretionary categories
-      const potentialSavings = Math.round(currentSpend * 0.25);
-      if (potentialSavings > 5) { // Only show if savings > $5
-        suggestions.push({
-          category: cat,
-          currentMonthly: currentSpend,
-          potentialSavings,
-          suggestedAmount: Math.round(currentSpend * 0.75)
+    
+    let settings = await Settings.findOne({ userId });
+    if (!settings) settings = new Settings({ userId });
+    
+    settings.paycheckAmount = parseFloat(amount);
+    settings.paycheckFrequencyDays = parseInt(frequencyDays);
+    await settings.save();
+    
+    res.json({
+      amount: settings.paycheckAmount,
+      frequencyDays: settings.paycheckFrequencyDays
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/starting-balance', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    let settings = await Settings.findOne({ userId });
+    if (!settings) settings = { startingBalance: 0 };
+    
+    const today = new Date();
+    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const defaultDate = firstOfMonth.toISOString().split('T')[0];
+    
+    res.json({
+      balance: settings.startingBalance || 0,
+      date: settings.startingBalanceDate || defaultDate
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/starting-balance', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { balance, date } = req.body;
+    if (balance === undefined || !date) {
+      return res.status(400).json({ error: 'balance and date required' });
+    }
+    
+    let settings = await Settings.findOne({ userId });
+    if (!settings) settings = new Settings({ userId });
+    
+    settings.startingBalance = parseFloat(balance);
+    settings.startingBalanceDate = date;
+    await settings.save();
+    
+    res.json({
+      balance: settings.startingBalance,
+      date: settings.startingBalanceDate
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// === BILL CALCULATOR ===
+app.get('/api/bills-calculator', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const settings = await Settings.findOne({ userId });
+    const bills = await RecurringBill.find({ userId });
+    
+    const paycheckAmount = settings?.paycheckAmount || 0;
+    const frequencyDays = settings?.paycheckFrequencyDays || 14;
+    const incomeBills = bills.filter(b => b.type === 'income');
+    
+    let totalMonthlyIncome = (paycheckAmount / frequencyDays) * 30;
+    incomeBills.forEach(b => {
+      const monthlyFrequency = (30 / b.frequency);
+      totalMonthlyIncome += b.amount * monthlyFrequency;
+    });
+    
+    const expenseBills = bills.filter(b => b.type === 'expense' || !b.type);
+    let totalMonthlyExpense = 0;
+    const distribution = {};
+    
+    expenseBills.forEach(b => {
+      const monthlyFrequency = (30 / b.frequency);
+      const monthlyAmount = b.amount * monthlyFrequency;
+      totalMonthlyExpense += monthlyAmount;
+      distribution[b.name] = monthlyAmount;
+    });
+    
+    const breakdown = [];
+    let running = 0;
+    
+    for (let day = 1; day <= 30; day++) {
+      let dayIncrement = 0;
+      const dayBills = [];
+      
+      for (const bill of expenseBills) {
+        const billDay = parseInt(bill.startDate.split('-')[2]);
+        if (billDay === day || (billDay > 30 && day === 30)) {
+          dayBills.push(bill.name);
+          dayIncrement += bill.amount;
+        }
+      }
+      
+      for (const bill of incomeBills) {
+        const billDay = parseInt(bill.startDate.split('-')[2]);
+        if (billDay === day || (billDay > 30 && day === 30)) {
+          dayBills.push(`+ ${bill.name}`);
+          dayIncrement += bill.amount;
+        }
+      }
+      
+      const paycheckDay = parseInt(bill.startDate?.split('-')[2]) || 15;
+      if (day === paycheckDay || (day === 14 && paycheckDay > 14 && paycheckDay <= 15)) {
+        dayBills.push(`+ Paycheck`);
+        dayIncrement += paycheckAmount;
+      }
+      
+      running += dayIncrement;
+      if (dayBills.length > 0) {
+        breakdown.push({
+          day,
+          bills: dayBills,
+          change: dayIncrement,
+          running: running.toFixed(2)
         });
       }
     }
-  });
-  
-  // Sort by savings potential (highest first)
-  suggestions.sort((a, b) => b.potentialSavings - a.potentialSavings);
-  
-  res.json({
-    suggestions,
-    totalPotentialSavings: suggestions.reduce((sum, s) => sum + s.potentialSavings, 0)
-  });
+    
+    res.json({
+      totalMonthlyIncome: totalMonthlyIncome.toFixed(2),
+      totalMonthlyExpense: totalMonthlyExpense.toFixed(2),
+      monthlyBalance: (totalMonthlyIncome - totalMonthlyExpense).toFixed(2),
+      distribution,
+      breakdown
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.get('/api/debts/analysis', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userDebtsFile = getFileForUser(userId, 'debts.json');
-  let userDebts = loadData(userDebtsFile);
-  if (!Array.isArray(userDebts) || userDebts.length === 0) {
-    return res.json({ avalanche: null, snowball: null, currentPath: null, recommendation: 'Add debts to see analysis' });
-  }
-
-  function simulatePayoff(sortedDebts, strategy) {
-    let debtsToSimulate = JSON.parse(JSON.stringify(sortedDebts));
-    let totalInterest = 0;
-    let totalMonths = 0;
-    const paymentSchedule = [];
+// === PAYOFF STRATEGY ===
+app.post('/api/payoff-strategy', verifyToken, express.json(), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { strategy } = req.body;
+    const debts = await Debt.find({ userId });
     
-    while (debtsToSimulate.some(d => d.currentBalance > 0.01)) {
-      totalMonths++;
-      if (totalMonths > 600) break; // Safety limit (50 years)
-      
-      // Add interest to each debt
-      debtsToSimulate.forEach(d => {
-        const monthlyInterest = (d.currentBalance * d.interestRate) / 100 / 12;
-        d.currentBalance += monthlyInterest;
-        totalInterest += monthlyInterest;
-      });
-      
-      // Apply payments (minimum on all, extra on target)
-      debtsToSimulate.forEach((d, idx) => {
-        let payment = d.monthlyPayment;
-        if (idx === 0 && debtsToSimulate[0].currentBalance > 0.01) {
-          // Pay extra on highest priority debt
-          const extraAvailable = debtsToSimulate.reduce((sum, debt, i) => {
-            if (i === 0) return sum;
-            return sum + (debt.monthlyPayment - Math.min(debt.monthlyPayment, debt.currentBalance));
-          }, 0);
-          payment = Math.min(d.monthlyPayment + extraAvailable, d.currentBalance);
-        }
-        d.currentBalance = Math.max(0, d.currentBalance - payment);
-      });
-      
-      // Remove paid off debts
-      debtsToSimulate = debtsToSimulate.filter(d => d.currentBalance > 0.01);
-      if (debtsToSimulate.length === 0) break;
+    let sorted;
+    if (strategy === 'avalanche') {
+      sorted = [...debts].sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
+    } else {
+      sorted = [...debts].sort((a, b) => b.balance - a.balance);
     }
     
-    return {
-      months: totalMonths,
-      years: (totalMonths / 12).toFixed(1),
-      totalInterest: totalInterest,
-      strategy: strategy
-    };
-  }
-
-  // Avalanche: Sort by interest rate (highest first)
-  const avalancheDebts = JSON.parse(JSON.stringify(userDebts)).sort((a, b) => b.interestRate - a.interestRate);
-  const avalanche = simulatePayoff(avalancheDebts, 'avalanche');
-
-  // Snowball: Sort by balance (smallest first)
-  const snowballDebts = JSON.parse(JSON.stringify(userDebts)).sort((a, b) => a.currentBalance - b.currentBalance);
-  const snowball = simulatePayoff(snowballDebts, 'snowball');
-
-  // Current path (paying minimums only)
-  const currentDebts = JSON.parse(JSON.stringify(userDebts));
-  const currentPath = simulatePayoff(currentDebts, 'minimum');
-
-  // Determine recommendation
-  let recommendation = 'avalanche';
-  let recommendationLabel = 'Debt Avalanche - Saves Most Money';
-  let savingsVsMinimum = currentPath.totalInterest - avalanche.totalInterest;
-
-  if (snowball.totalInterest < avalanche.totalInterest) {
-    recommendation = 'snowball';
-    recommendationLabel = 'Debt Snowball - Fastest Wins';
-    savingsVsMinimum = currentPath.totalInterest - snowball.totalInterest;
-  }
-
-  res.json({
-    avalanche,
-    snowball,
-    currentPath,
-    recommendation,
-    recommendationLabel,
-    savingsVsMinimum: Math.max(0, savingsVsMinimum),
-    debts: userDebts.map(d => ({ name: d.name, balance: d.currentBalance, rate: d.interestRate }))
-  });
-});
-
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
-
-// Initialize settings
-let settings = loadData(settingsFile) || { paycheckAmount: 0, paycheckFrequencyDays: 1 };
-
-app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
-
-// Actual Income Override Endpoints
-app.get('/api/actual-income', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userIncomeFile = getFileForUser(userId, 'actual-income-overrides.json');
-  const overrides = loadData(userIncomeFile) || {};
-  res.json(overrides);
-});
-
-app.post('/api/actual-income/:dateStr', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userIncomeFile = getFileForUser(userId, 'actual-income-overrides.json');
-  const { dateStr } = req.params;
-  const { amount } = req.body;
-  if (amount === undefined || amount < 0) {
-    return res.status(400).json({ error: 'amount required and must be >= 0' });
-  }
-  
-  let overrides = loadData(userIncomeFile) || {};
-  if (amount === 0) {
-    delete overrides[dateStr];
-  } else {
-    overrides[dateStr] = parseFloat(amount);
-  }
-  saveData(userIncomeFile, overrides);
-  res.json(overrides);
-});
-
-app.delete('/api/actual-income/:dateStr', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userIncomeFile = getFileForUser(userId, 'actual-income-overrides.json');
-  const { dateStr } = req.params;
-  let overrides = loadData(userIncomeFile) || {};
-  delete overrides[dateStr];
-  saveData(userIncomeFile, overrides);
-  res.json(overrides);
-});
-
-app.get('/api/paycheck-settings', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userSettingsFile = getFileForUser(userId, 'settings.json');
-  const userSettings = loadData(userSettingsFile) || {};
-  res.json({
-    amount: userSettings.paycheckAmount || 0,
-    frequencyDays: userSettings.paycheckFrequencyDays || 1
-  });
-});
-
-app.post('/api/paycheck-settings', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userSettingsFile = getFileForUser(userId, 'settings.json');
-  const { amount, frequencyDays } = req.body;
-  if (amount === undefined || frequencyDays === undefined) {
-    return res.status(400).json({ error: 'amount and frequencyDays required' });
-  }
-  
-  let userSettings = loadData(userSettingsFile) || {};
-  userSettings.paycheckAmount = parseFloat(amount);
-  userSettings.paycheckFrequencyDays = parseInt(frequencyDays);
-  saveData(userSettingsFile, userSettings);
-  
-  res.json({
-    amount: userSettings.paycheckAmount,
-    frequencyDays: userSettings.paycheckFrequencyDays
-  });
-});
-
-app.get('/api/starting-balance', verifyToken, (req, res) => {
-  const userId = req.user.userId;
-  const userSettingsFile = getFileForUser(userId, 'settings.json');
-  const userSettings = loadData(userSettingsFile) || {};
-  const today = new Date();
-  const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const defaultDate = firstOfMonth.toISOString().split('T')[0];
-  res.json({
-    balance: userSettings.startingBalance || 0,
-    date: userSettings.startingBalanceDate || defaultDate
-  });
-});
-
-app.post('/api/starting-balance', verifyToken, express.json(), (req, res) => {
-  const userId = req.user.userId;
-  const userSettingsFile = getFileForUser(userId, 'settings.json');
-  const { balance, date } = req.body;
-  if (balance === undefined || !date) {
-    return res.status(400).json({ error: 'balance and date required' });
-  }
-  
-  let userSettings = loadData(userSettingsFile) || {};
-  userSettings.startingBalance = parseFloat(balance);
-  userSettings.startingBalanceDate = date;
-  saveData(userSettingsFile, userSettings);
-  
-  res.json({
-    balance: userSettings.startingBalance,
-    date: userSettings.startingBalanceDate
-  });
-});
-
-// Authentication endpoints
-function getUsers() {
-  try {
-    if (fs.existsSync(usersFile)) {
-      return JSON.parse(fs.readFileSync(usersFile, 'utf8'));
-    }
+    const payoffPlan = sorted.map((d, idx) => ({
+      priority: idx + 1,
+      creditor: d.creditor,
+      balance: d.balance,
+      minPayment: d.minPayment,
+      interestRate: d.interestRate,
+      order: strategy === 'avalanche' ? 'Pay highest rate first' : 'Pay largest balance first'
+    }));
+    
+    res.json({ strategy, payoffPlan });
   } catch (e) {
-    console.error('Error loading users:', e.message);
-  }
-  return {};
-}
-
-function saveUsers(users) {
-  try {
-    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
-  } catch (e) {
-    console.error('Error saving users:', e.message);
-  }
-}
-
-function createUserDataDir(userId) {
-  const userDir = path.join(usersDir, userId);
-  if (!fs.existsSync(userDir)) {
-    fs.mkdirSync(userDir, { recursive: true });
-  }
-  return userDir;
-}
-
-app.post('/api/auth/signup', express.json(), async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
-  }
-  
-  const users = getUsers();
-  if (users[email]) {
-    return res.status(400).json({ error: 'Email already registered' });
-  }
-  
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = email.replace(/[^a-zA-Z0-9]/g, '_');
-    createUserDataDir(userId);
-    
-    // Initialize empty data files for new user
-    const userDir = getUserDataDir(userId);
-    const emptyFiles = {
-      'transactions.json': [],
-      'debts.json': [],
-      'recurring-bills.json': [],
-      'exclusion-rules.json': [],
-      'learned-patterns.json': { merchants: {}, exclusions: {} },
-      'custom-categories.json': {},
-      'actual-income-overrides.json': {},
-      'bank-balance.json': { balance: 0 },
-      'settings.json': { theme: 'light' }
-    };
-    
-    for (const [fileName, data] of Object.entries(emptyFiles)) {
-      const filePath = path.join(userDir, fileName);
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    }
-    
-    users[email] = { userId, hashedPassword, createdAt: new Date().toISOString() };
-    saveUsers(users);
-    console.log(`✅ New user registered: ${email} (${userId})`);
-    
-    const token = jwt.sign({ email, userId }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ token, userId, email });
-  } catch (e) {
-    console.error('Signup error:', e.message);
-    res.status(500).json({ error: 'Signup failed: ' + e.message });
+    res.status(500).json({ error: e.message });
   }
 });
 
-app.post('/api/auth/login', express.json(), async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
-  }
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
   
-  const users = getUsers();
-  const user = users[email];
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid email or password' });
-  }
-  
-  try {
-    const match = await bcrypt.compare(password, user.hashedPassword);
-    if (!match) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-    
-    const token = jwt.sign({ email, userId: user.userId }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ token, userId: user.userId, email });
-  } catch (e) {
-    res.status(500).json({ error: 'Login failed' });
-  }
-});
-
-app.get('/api/auth/verify', verifyToken, (req, res) => {
-  res.json({ valid: true, user: req.user });
-});
-
-// Data migration for existing users
-async function migrateExistingData() {
-  const users = getUsers();
-  const demoEmail = 'demo@example.com';
-  
-  // Check if data files exist in root data directory
-  const rootDataFiles = [
-    transactionsFile, debtsFile, recurringBillsFile, settingsFile,
-    bankBalanceFile, exclusionRulesFile, learnedPatternsFile,
-    customCategoriesFile, actualIncomeFile
-  ];
-  
-  const hasExistingData = rootDataFiles.some(file => {
+  // Log initial data count
+  setTimeout(async () => {
     try {
-      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-      if (Array.isArray(data)) return data.length > 0;
-      if (typeof data === 'object') return Object.keys(data).length > 0;
-      return false;
+      const txnCount = await Transaction.countDocuments();
+      const debtCount = await Debt.countDocuments();
+      const goalCount = await Goal.countDocuments();
+      console.log(`Loaded ${txnCount} transactions, ${debtCount} debts, ${goalCount} goals`);
     } catch (e) {
-      return false;
+      console.error('Error counting documents:', e.message);
     }
-  });
-  
-  if (hasExistingData && !users[demoEmail]) {
-    console.log('Migrating existing data to demo account...');
-    try {
-      const hashedPassword = await bcrypt.hash('demo', 10);
-      const userId = 'demo_user';
-      const userDir = createUserDataDir(userId);
-      
-      // Copy all data files to user directory
-      rootDataFiles.forEach(file => {
-        try {
-          const fileName = path.basename(file);
-          const newPath = path.join(userDir, fileName);
-          if (fs.existsSync(file)) {
-            fs.copyFileSync(file, newPath);
-          }
-        } catch (e) {
-          console.log(`Skipped ${file}:`, e.message);
-        }
-      });
-      
-      users[demoEmail] = { userId, hashedPassword, createdAt: new Date().toISOString(), migrated: true };
-      saveUsers(users);
-      console.log('✅ Data migrated! Log in with demo@example.com / demo');
-    } catch (e) {
-      console.error('Migration failed:', e.message);
-    }
-  }
-}
-
-// Run migration on startup
-migrateExistingData();
+  }, 1000);
+});
