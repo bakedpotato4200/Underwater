@@ -1,15 +1,20 @@
-FROM node:20-alpine
+# Use the official Node 18 image
+FROM node:18
 
+# Create app directory
 WORKDIR /app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-RUN npm install --production
+# Install dependencies
+RUN npm install
 
+# Copy the rest of your project
 COPY . .
 
-EXPOSE 8080
+# Expose the port Railway assigns
+EXPOSE 3000
 
-ENV PORT=8080
-
-CMD ["npm", "start"]
+# Start your server
+CMD ["node", "src/api.js"]
