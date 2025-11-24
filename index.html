@@ -1351,8 +1351,13 @@
         const txRes = await apiCall(API_URL + '/api/transactions');
         const incomeRes = await apiCall(API_URL + '/api/actual-income');
         const bills = await billsRes.json();
-        const transactions = await txRes.json();
+        let transactions = await txRes.json();
         const actualIncomeData = await incomeRes.json();
+        
+        // Ensure transactions is an array
+        if (!Array.isArray(transactions)) {
+          transactions = transactions?.transactions || [];
+        }
         
         // Get selected month from input or use current month
         const dashboardMonthInput = document.getElementById('dashboardMonth');
@@ -1370,7 +1375,7 @@
         const monthStart = new Date(currentYear, currentMonth, 1);
         const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
         
-        const monthTxs = transactions.filter(t => {
+        const monthTxs = (transactions || []).filter(t => {
           const txDate = new Date(t.date);
           return txDate >= monthStart && txDate <= monthEnd;
         });
