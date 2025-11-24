@@ -627,35 +627,48 @@ app.post('/api/transactions/:id/toggle-exclude', verifyToken, express.json(), (r
   }
 });
 
-app.get('/api/exclusion-rules', (req, res) => {
-  res.json(exclusionRules);
+app.get('/api/exclusion-rules', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userRulesFile = getFileForUser(userId, 'exclusion-rules.json');
+  const rules = loadData(userRulesFile) || [];
+  res.json(rules);
 });
 
-app.delete('/api/exclusion-rules/:index', express.json(), (req, res) => {
+app.delete('/api/exclusion-rules/:index', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userRulesFile = getFileForUser(userId, 'exclusion-rules.json');
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  
+  let rules = loadData(userRulesFile) || [];
+  let txns = loadData(userTxnFile) || [];
+  
   const idx = parseInt(req.params.index);
-  if (idx >= 0 && idx < exclusionRules.length) {
-    const removed = exclusionRules.splice(idx, 1);
-    saveData(exclusionRulesFile, exclusionRules);
-    transactions.forEach(txn => {
-      if (txn.excluded && shouldExcludeByRule(txn) === false && removed[0].type === 'merchant') {
+  if (idx >= 0 && idx < rules.length) {
+    const removed = rules.splice(idx, 1);
+    saveData(userRulesFile, rules);
+    txns.forEach(txn => {
+      if (txn.excluded && removed[0].type === 'merchant') {
         const merchant = txn.description.split(' ')[0];
         if (merchant.toLowerCase() === removed[0].pattern.toLowerCase()) {
           txn.excluded = false;
         }
       }
     });
-    saveData(transactionsFile, transactions);
+    saveData(userTxnFile, txns);
     res.json({ success: true });
   } else {
     res.status(404).json({ error: 'Rule not found' });
   }
 });
 
-app.post('/api/transactions/:id/note', express.json(), (req, res) => {
-  const txn = transactions.find(t => t.id == req.params.id);
+app.post('/api/transactions/:id/note', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userFile = getFileForUser(userId, 'transactions.json');
+  let txns = loadData(userFile) || [];
+  const txn = txns.find(t => t.id == req.params.id);
   if (txn) {
     txn.note = req.body.note || '';
-    saveData(transactionsFile, transactions);
+    saveData(userFile, txns);
     res.json({ success: true, note: txn.note });
   } else {
     res.status(404).json({ error: 'Transaction not found' });
@@ -723,8 +736,10 @@ app.post('/api/transactions/:id/category', verifyToken, express.json(), (req, re
   }
 });
 
-app.get('/api/spending-trends', (req, res) => {
-  const fresh = getTransactions();
+app.get('/api/spending-trends', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const fresh = loadData(userTxnFile) || [];
   const trends = {};
   const months = {};
   const excludedAmounts = {};
@@ -762,15 +777,19 @@ app.get('/api/spending-trends', (req, res) => {
   res.json({ trends, excludedAmounts });
 });
 
-app.get('/api/bill-buffer', (req, res) => {
+app.get('/api/bill-buffer', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
+  const recurringBillsUser = loadData(userBillsFile) || [];
+  
   const days = parseInt(req.query.days) || 30;
   const today = new Date();
   const cutoffDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
   
   // Only use manually added recurring bills to avoid duplicates
   const billsWithDates = [];
-  if (Array.isArray(recurringBills)) {
-    recurringBills.forEach(bill => {
+  if (Array.isArray(recurringBillsUser)) {
+    recurringBillsUser.forEach(bill => {
       if (bill.type === 'income') return; // Skip income bills
       
       const startDate = new Date(bill.startDate);
@@ -814,9 +833,12 @@ app.get('/api/bill-buffer', (req, res) => {
   });
 });
 
-app.get('/api/categories', (req, res) => {
+app.get('/api/categories', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const txns = loadData(userTxnFile) || [];
   const categories = {};
-  transactions.forEach(t => {
+  txns.forEach(t => {
     if (t.type === 'expense' && t.category !== 'Income' && !t.excluded) {
       categories[t.category] = (categories[t.category] || 0) + Math.abs(t.amount);
     }
@@ -824,22 +846,31 @@ app.get('/api/categories', (req, res) => {
   res.json(categories);
 });
 
-app.get('/api/balance', (req, res) => {
-  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const excluded = transactions.filter(t => t.excluded).length;
-  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: transactions.length, excluded });
+app.get('/api/balance', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const txns = loadData(userTxnFile) || [];
+  const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const excluded = txns.filter(t => t.excluded).length;
+  res.json({ income: totalIncome, expenses: totalExpense, balance: totalIncome - totalExpense, transactionCount: txns.length, excluded });
 });
 
-app.get('/api/summary', (req, res) => {
-  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+app.get('/api/summary', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const txns = loadData(userTxnFile) || [];
+  const totalIncome = txns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = txns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
   res.json({ totalIncome, totalExpenses, balance: totalIncome - totalExpenses });
 });
 
-app.get('/api/daily-breakdown', (req, res) => {
+app.get('/api/daily-breakdown', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const txns = loadData(userTxnFile) || [];
   const daily = {};
-  transactions.forEach(t => {
+  txns.forEach(t => {
     daily[t.date] = (daily[t.date] || 0) + t.amount;
   });
   res.json(daily);
