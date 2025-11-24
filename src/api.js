@@ -159,9 +159,10 @@ function categorizeTransaction(description) {
   return 'Other';
 }
 
-function detectRecurring() {
+function detectRecurring(userTransactions = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
   const merchants = {};
-  transactions.forEach(t => {
+  txnsToUse.forEach(t => {
     const merchant = t.description.split(' ')[0];
     if (!merchants[merchant]) merchants[merchant] = [];
     merchants[merchant].push(t);
@@ -188,8 +189,10 @@ function detectRecurring() {
   });
 }
 
-function generateBillCalendar(months = 3) {
-  const recurring = detectRecurring().filter(r => r.isRecurring);
+function generateBillCalendar(months = 3, userTransactions = [], userBills = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
+  const billsToUse = userBills.length > 0 ? userBills : recurringBills;
+  const recurring = detectRecurring(txnsToUse).filter(r => r.isRecurring);
   const calendar = {};
   const today = new Date();
 
@@ -201,7 +204,7 @@ function generateBillCalendar(months = 3) {
       calendar[dateStr] = [];
 
       // Add income transactions
-      transactions.forEach(t => {
+      txnsToUse.forEach(t => {
         if (t.type === 'income' && t.date === dateStr && !t.excluded) {
           calendar[dateStr].push({
             merchant: t.description,
@@ -230,8 +233,8 @@ function generateBillCalendar(months = 3) {
       });
 
       // Add manually added recurring bills
-      if (Array.isArray(recurringBills)) {
-        recurringBills.forEach(bill => {
+      if (Array.isArray(billsToUse)) {
+        billsToUse.forEach(bill => {
           const startDate = new Date(bill.startDate);
           const checkDate = new Date(startDate);
           while (checkDate <= date) {
@@ -258,13 +261,14 @@ function generateBillCalendar(months = 3) {
   }, {});
 }
 
-function calculateCashFlow(months = 6) {
+function calculateCashFlow(months = 6, userTransactions = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
   const projection = {};
   const today = new Date();
-  const recurring = detectRecurring().filter(r => r.isRecurring);
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-  const avgDailyExpense = transactions.filter(t => t.type === 'expense').length > 0 
-    ? transactions.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0) / Math.max(transactions.filter(t => t.type === 'expense').length, 1)
+  const recurring = detectRecurring(txnsToUse).filter(r => r.isRecurring);
+  const totalIncome = txnsToUse.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const avgDailyExpense = txnsToUse.filter(t => t.type === 'expense').length > 0 
+    ? txnsToUse.filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0) / Math.max(txnsToUse.filter(t => t.type === 'expense').length, 1)
     : 0;
 
   for (let m = 0; m < months; m++) {
@@ -285,21 +289,22 @@ function calculateCashFlow(months = 6) {
   return projection;
 }
 
-function calculateSpendingVelocity() {
-  if (transactions.length === 0) return { daily: 0, weekly: 0, monthly: 0, trend: 'stable' };
+function calculateSpendingVelocity(userTransactions = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
+  if (txnsToUse.length === 0) return { daily: 0, weekly: 0, monthly: 0, trend: 'stable' };
 
   const today = new Date();
-  const last7 = transactions.filter(t => {
+  const last7 = txnsToUse.filter(t => {
     const d = new Date(t.date);
     return (today - d) / (1000 * 60 * 60 * 24) <= 7;
   }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
 
-  const last30 = transactions.filter(t => {
+  const last30 = txnsToUse.filter(t => {
     const d = new Date(t.date);
     return (today - d) / (1000 * 60 * 60 * 24) <= 30;
   }).filter(t => t.type === 'expense').reduce((s, t) => s + Math.abs(t.amount), 0);
 
-  const prev30 = transactions.filter(t => {
+  const prev30 = txnsToUse.filter(t => {
     const d = new Date(t.date);
     const days = (today - d) / (1000 * 60 * 60 * 24);
     return days > 30 && days <= 60;
@@ -314,13 +319,14 @@ function calculateSpendingVelocity() {
   };
 }
 
-function detectAnomalies() {
-  if (transactions.length < 3) return [];
+function detectAnomalies(userTransactions = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
+  if (txnsToUse.length < 3) return [];
   const anomalies = [];
   
   // Category-based anomalies
   const categories = {};
-  transactions.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer').forEach(t => {
+  txnsToUse.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer').forEach(t => {
     if (!categories[t.category]) categories[t.category] = [];
     categories[t.category].push(Math.abs(t.amount));
   });
@@ -331,14 +337,14 @@ function detectAnomalies() {
     const mean = amounts.reduce((a, b) => a + b) / amounts.length;
     const stdDev = Math.sqrt(amounts.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / amounts.length);
     
-    transactions.filter(t => t.category === cat && t.type === 'expense' && !t.excluded).forEach(t => {
+    txnsToUse.filter(t => t.category === cat && t.type === 'expense' && !t.excluded).forEach(t => {
       const zScore = stdDev > 0 ? Math.abs((Math.abs(t.amount) - mean) / stdDev) : 0;
       if (zScore > 2.5) anomalies.push({...t, zScore, reason: 'Category outlier'});
     });
   });
   
   // Spike detection: compare to last 7 day average
-  const last7Days = transactions.filter(t => {
+  const last7Days = txnsToUse.filter(t => {
     const d = new Date(t.date);
     return (new Date() - d) / (1000 * 60 * 60 * 24) <= 7 && t.type === 'expense' && !t.excluded;
   });
@@ -353,9 +359,10 @@ function detectAnomalies() {
   return anomalies.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)).slice(0, 5);
 }
 
-function getSmartRecommendations() {
+function getSmartRecommendations(userTransactions = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
   const recs = [];
-  const expenses = transactions.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer');
+  const expenses = txnsToUse.filter(t => t.type === 'expense' && !t.excluded && t.category !== 'Transfer');
   const categories = {};
   
   expenses.forEach(t => {
@@ -420,7 +427,7 @@ function getSmartRecommendations() {
   }
   
   // 5. Spending trend warning
-  const velocity = calculateSpendingVelocity();
+  const velocity = calculateSpendingVelocity(txnsToUse);
   if (velocity.trend === 'increasing') {
     recs.push({ 
       title: `Reverse ${velocity.trendPercent}% Spending Rise`, 
@@ -431,13 +438,16 @@ function getSmartRecommendations() {
   return recs.slice(0, 5);
 }
 
-function generateAlerts() {
+function generateAlerts(userTransactions = [], userBills = [], userDebts = []) {
+  const txnsToUse = userTransactions.length > 0 ? userTransactions : transactions;
+  const billsToUse = userBills.length > 0 ? userBills : recurringBills;
+  const debtsToUse = userDebts.length > 0 ? userDebts : debts;
   const alerts = [];
-  const recurring = detectRecurring().filter(r => r.isRecurring);
-  const velocity = calculateSpendingVelocity();
-  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
-  const anomalies = detectAnomalies();
+  const recurring = detectRecurring(txnsToUse).filter(r => r.isRecurring);
+  const velocity = calculateSpendingVelocity(txnsToUse);
+  const totalIncome = txnsToUse.filter(t => t.type === 'income' && !t.excluded).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = txnsToUse.filter(t => t.type === 'expense' && !t.excluded).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const anomalies = detectAnomalies(txnsToUse);
 
   if (anomalies.length > 0) {
     const anomaly = anomalies[0];
@@ -465,8 +475,8 @@ function generateAlerts() {
     alerts.push({ type: 'info', title: 'High Recurring Costs', message: `You have ${recurring.length} recurring bills costing ~$${totalRecurring.toFixed(0)}/year` });
   }
 
-  if (debts.length > 0) {
-    const totalDebt = debts.reduce((s, d) => s + d.balance, 0);
+  if (debtsToUse.length > 0) {
+    const totalDebt = debtsToUse.reduce((s, d) => s + d.balance, 0);
     if (totalDebt > totalIncome * 3) {
       alerts.push({ type: 'alert', title: 'High Debt Ratio', message: `Your debt (${(totalDebt / totalIncome).toFixed(1)}x income) is very high. Focus on payoff!` });
     }
@@ -876,20 +886,54 @@ app.get('/api/daily-breakdown', verifyToken, (req, res) => {
   res.json(daily);
 });
 
-app.get('/api/recurring-calendar', (req, res) => res.json(generateBillCalendar(3)));
-app.get('/api/cash-flow', (req, res) => res.json(calculateCashFlow(6)));
-app.get('/api/spending-velocity', (req, res) => res.json(calculateSpendingVelocity()));
-app.get('/api/alerts', (req, res) => res.json(generateAlerts()));
+app.get('/api/recurring-calendar', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
+  const userTxns = loadData(userTxnFile) || [];
+  const userBills = loadData(userBillsFile) || [];
+  res.json(generateBillCalendar(3, userTxns, userBills));
+});
 
-app.get('/api/insights', (req, res) => {
-  const recurring = detectRecurring();
-  const velocity = calculateSpendingVelocity();
-  const totalIncome = transactions.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+app.get('/api/cash-flow', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userTxns = loadData(userTxnFile) || [];
+  res.json(calculateCashFlow(6, userTxns));
+});
+
+app.get('/api/spending-velocity', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userTxns = loadData(userTxnFile) || [];
+  res.json(calculateSpendingVelocity(userTxns));
+});
+
+app.get('/api/alerts', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userBillsFile = getFileForUser(userId, 'recurring-bills.json');
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  const userTxns = loadData(userTxnFile) || [];
+  const userBills = loadData(userBillsFile) || [];
+  const userDebts = loadData(userDebtsFile) || [];
+  res.json(generateAlerts(userTxns, userBills, userDebts));
+});
+
+app.get('/api/insights', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userTxnFile = getFileForUser(userId, 'transactions.json');
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  const userTxns = loadData(userTxnFile) || [];
+  const userDebts = loadData(userDebtsFile) || [];
+  const recurring = detectRecurring(userTxns);
+  const velocity = calculateSpendingVelocity(userTxns);
+  const totalIncome = userTxns.filter(t => t.type === 'income' && !t.excluded).reduce((sum, t) => sum + t.amount, 0);
+  const totalExpenses = userTxns.filter(t => t.type === 'expense' && !t.excluded).reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
-  const debtTotal = debts.reduce((s, d) => s + d.balance, 0);
+  const debtTotal = userDebts.reduce((s, d) => s + d.balance, 0);
   const debtRatio = totalIncome > 0 ? (debtTotal / totalIncome) : 0;
-  const anomalies = detectAnomalies();
+  const anomalies = detectAnomalies(userTxns);
   
   // Advanced Financial Health Score
   let score = 40;
@@ -931,35 +975,46 @@ app.get('/api/insights', (req, res) => {
     recurringTransactions: recurring,
     velocity,
     avgDailySpend: velocity.daily,
-    totalTransactions: transactions.length,
-    excludedTransactions: transactions.filter(t => t.excluded).length,
+    totalTransactions: userTxns.length,
+    excludedTransactions: userTxns.filter(t => t.excluded).length,
     debtTotal,
     anomalies,
-    recommendations: getSmartRecommendations()
+    recommendations: getSmartRecommendations(userTxns)
   });
 });
 
-app.post('/api/goals', express.json(), (req, res) => {
-  const newGoal = { id: Math.max(...goals.map(g => g.id || 0), 0) + 1, ...req.body, createdAt: new Date() };
-  goals.push(newGoal);
-  saveData(goalsFile, goals);
+app.post('/api/goals', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userGoalsFile = getFileForUser(userId, 'goals.json');
+  let userGoals = loadData(userGoalsFile) || [];
+  const newGoal = { id: Math.max(...userGoals.map(g => g.id || 0), 0) + 1, ...req.body, createdAt: new Date() };
+  userGoals.push(newGoal);
+  saveData(userGoalsFile, userGoals);
   res.json(newGoal);
 });
 
-app.get('/api/goals', (req, res) => res.json(goals));
+app.get('/api/goals', verifyToken, (req, res) => {
+  const userId = req.user.userId;
+  const userGoalsFile = getFileForUser(userId, 'goals.json');
+  const userGoals = loadData(userGoalsFile) || [];
+  res.json(userGoals);
+});
 
-app.post('/api/payoff-strategy', express.json(), (req, res) => {
+app.post('/api/payoff-strategy', verifyToken, express.json(), (req, res) => {
+  const userId = req.user.userId;
+  const userDebtsFile = getFileForUser(userId, 'debts.json');
+  const userDebts = loadData(userDebtsFile) || [];
   const { strategy, extraPayment } = req.body;
   const extra = extraPayment || 0;
   
   const calculatePayoff = (debtList, strat, extra) => {
-    const debts = JSON.parse(JSON.stringify(debtList));
-    if (strat === 'avalanche') debts.sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
-    else debts.sort((a, b) => a.balance - b.balance);
+    const dts = JSON.parse(JSON.stringify(debtList));
+    if (strat === 'avalanche') dts.sort((a, b) => (b.interestRate || 0) - (a.interestRate || 0));
+    else dts.sort((a, b) => a.balance - b.balance);
     
     let months = 0, interest = 0;
-    while (debts.some(d => d.balance > 0) && months < 600) {
-      debts.forEach(d => {
+    while (dts.some(d => d.balance > 0) && months < 600) {
+      dts.forEach(d => {
         if (d.balance > 0) {
           const i = (d.balance * (d.interestRate || 0)) / 100 / 12;
           d.balance += i;
@@ -972,8 +1027,8 @@ app.post('/api/payoff-strategy', express.json(), (req, res) => {
     return { months, interest: Math.round(interest) };
   };
   
-  const aval = calculatePayoff(debts, 'avalanche', extra);
-  const snow = calculatePayoff(debts, 'snowball', extra);
+  const aval = calculatePayoff(userDebts, 'avalanche', extra);
+  const snow = calculatePayoff(userDebts, 'snowball', extra);
   const selected = strategy === 'avalanche' ? aval : snow;
   const other = strategy === 'avalanche' ? snow : aval;
   
