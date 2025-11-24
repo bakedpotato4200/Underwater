@@ -19,28 +19,6 @@ expertMode = true
 integrations = ["javascript_openai:1.0.0"]
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Budget App Server"
-
-[[workflows.workflow]]
-name = "Budget App Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node src/api.js"
-waitForPort = 5000
 
 [[ports]]
 localPort = 3001

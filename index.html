@@ -1370,6 +1370,9 @@
           transactions = transactions?.transactions || [];
         }
         
+        // Get current date
+        const now = new Date();
+        
         // Get selected month from input or use current month
         const dashboardMonthInput = document.getElementById('dashboardMonth');
         let currentMonth, currentYear;
@@ -1378,7 +1381,6 @@
           currentYear = year;
           currentMonth = month - 1;
         } else {
-          const now = new Date();
           currentMonth = now.getMonth();
           currentYear = now.getFullYear();
           if (dashboardMonthInput) dashboardMonthInput.value = currentYear + '-' + String(currentMonth + 1).padStart(2, '0');
