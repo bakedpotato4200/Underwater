@@ -1694,13 +1694,34 @@ app.post('/api/auth/signup', express.json(), async (req, res) => {
     const userId = email.replace(/[^a-zA-Z0-9]/g, '_');
     createUserDataDir(userId);
     
+    // Initialize empty data files for new user
+    const userDir = getUserDataDir(userId);
+    const emptyFiles = {
+      'transactions.json': [],
+      'debts.json': [],
+      'recurring-bills.json': [],
+      'exclusion-rules.json': [],
+      'learned-patterns.json': { merchants: {}, exclusions: {} },
+      'custom-categories.json': {},
+      'actual-income-overrides.json': {},
+      'bank-balance.json': { balance: 0 },
+      'settings.json': { theme: 'light' }
+    };
+    
+    for (const [fileName, data] of Object.entries(emptyFiles)) {
+      const filePath = path.join(userDir, fileName);
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    }
+    
     users[email] = { userId, hashedPassword, createdAt: new Date().toISOString() };
     saveUsers(users);
+    console.log(`✅ New user registered: ${email} (${userId})`);
     
     const token = jwt.sign({ email, userId }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, userId, email });
   } catch (e) {
-    res.status(500).json({ error: 'Signup failed' });
+    console.error('Signup error:', e.message);
+    res.status(500).json({ error: 'Signup failed: ' + e.message });
   }
 });
 
