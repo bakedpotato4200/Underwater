@@ -1830,9 +1830,13 @@
         const prevLastDay = new Date(year, month, 0).getDate();
         const nextDays = 42 - (lastDay.getDate() + firstDay.getDay());
         
-        // Parse starting balance date
-        const [startBalYear, startBalMonth, startBalDay] = startingBalanceDate.split('-').map(Number);
-        const balanceStartDate = new Date(startBalYear, startBalMonth - 1, startBalDay);
+        // Parse starting balance date with fallback
+        let balanceStartDate = new Date(year, month, 1);
+        let startBalYear = year, startBalMonth = month + 1, startBalDay = 1;
+        if (startingBalanceDate && typeof startingBalanceDate === 'string' && startingBalanceDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          [startBalYear, startBalMonth, startBalDay] = startingBalanceDate.split('-').map(Number);
+          balanceStartDate = new Date(startBalYear, startBalMonth - 1, startBalDay);
+        }
         
         // Calculate running balance for each day
         let runningBalance = startingBalance;
