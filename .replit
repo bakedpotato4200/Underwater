@@ -28,19 +28,19 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Frontend Server"
+args = "Backend API Server"
 
 [[workflows.workflow]]
-name = "Frontend Server"
+name = "Backend API Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python3 -m http.server 5000"
-waitForPort = 5000
+args = "node src/api.js"
+waitForPort = 3000
 
 [workflows.workflow.metadata]
-outputType = "webview"
+outputType = "console"
 
 [[ports]]
 localPort = 3001
@@ -49,6 +49,10 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
 
 [[ports]]
 localPort = 33085
@@ -105,3 +109,8 @@ externalPort = 8081
 [[ports]]
 localPort = 46097
 externalPort = 4200
+
+[userenv]
+
+[userenv.shared]
+MONGO_URI = "mongodb+srv://18jacobemmer:Jacob112234@underwaterdb.5epugn3.mongodb.net/?appName=Underwaterdb"
