@@ -2,11 +2,12 @@
 
 ## Overview
 
-Underwater is a personal finance management application that helps users track their budget, transactions, and financial goals. The system now features **secure multi-user authentication** so each user's financial data is completely private and backed up.
+Underwater is a personal finance management application that helps users track their budget, transactions, and financial goals. The system features **secure multi-user authentication with MongoDB persistence** so each user's financial data is completely private, secure, and scalable.
 
 ## Features
 
-- ✅ **Secure Authentication**: Create accounts, login, and logout with encrypted passwords
+- ✅ **Secure Authentication**: Create accounts, login, and logout with encrypted passwords (min 4 chars)
+- ✅ **MongoDB-Backed Database**: All user data persisted in MongoDB Atlas for reliability & scale
 - ✅ **Private User Accounts**: Each user's data is completely isolated and secure
 - ✅ **Dashboard with income/expenses/balance/health score**
 - ✅ **Bills Account Calculator with paycheck distribution**
@@ -22,8 +23,7 @@ Underwater is a personal finance management application that helps users track t
 
 ## Getting Started - Authentication
 
-### Demo Account (Migrated Data)
-If you had existing data before authentication was added, all of it has been automatically migrated to:
+### Demo Account
 - **Email:** demo@example.com
 - **Password:** demo
 
@@ -50,9 +50,9 @@ After logging in:
 
 ### Frontend
 - Pure HTML/CSS/JavaScript SPA
-- Login/signup screens with validation
+- Login/signup screens with validation (password min 4 chars)
 - Session management with JWT tokens
-- All information stored in backend
+- All information fetched from backend
 - Responsive design with dark/light modes
 - Global error handling and user notifications
 - Money formatting consistent across app
@@ -61,40 +61,44 @@ After logging in:
 ### Backend
 - Node.js/Express REST API
 - User authentication with bcrypt password hashing
-- JWT token-based session management
-- Per-user data isolation in separate folders
-- Automatic data migration for existing users
+- JWT token-based session management (30-day expiry)
+- **MongoDB integration with 8 Mongoose schemas**
+- Per-user data isolation via userId field indexing
 - AI-powered PDF processing via OpenAI
-- File-based JSON data persistence
+- Full database persistence (no JSON files)
 
-### Data Storage
-- All data stored in `/data/users/{userId}/` as JSON files
-- User credentials in `/data/users.json`
-- No external databases required
-- User-configurable through web UI
-- Supports multiple income sources and bill types
-- Automatic backup through file persistence
+### Data Storage - MongoDB Schemas
+1. **User**: email, hashedPassword, userId, createdAt
+2. **Transaction**: userId, id, date, amount, category, description, type, excluded, note
+3. **RecurringBill**: userId, id, name, amount, frequency, startDate, type
+4. **Debt**: userId, id, creditor, balance, minPayment, interestRate, dueDate
+5. **Goal**: userId, id, name, targetAmount, currentAmount, dueDate
+6. **ExclusionRule**: userId, type (merchant/category), pattern
+7. **LearnedPattern**: userId, merchants {}, exclusions {}
+8. **Settings**: userId, theme, paycheckAmount, paycheckFrequencyDays, startingBalance, bankBalance
 
 ## Technical Details
 
 ### Authentication
-- **Signup**: Users create accounts with email/password
+- **Signup**: Users create accounts with email/password (minimum 4 characters)
 - **Login**: Secure password verification with 30-day session tokens
 - **Logout**: Clear session and return to login screen
 - **Password Security**: All passwords hashed with bcrypt (10 rounds)
 - **Token Management**: JWT tokens stored in browser localStorage
 - **Email Validation**: All signup/login emails validated before submission
 
-### Data Migration
-- Existing data automatically migrated on first server restart
-- All users get their own isolated data folder
-- Demo account (demo@example.com) created with migrated data
-- Original data files preserved for compatibility
+### MongoDB Integration (Completed)
+- All data now stored in MongoDB Atlas, not JSON files
+- 8 Mongoose schemas handle all data types (users, transactions, bills, debts, goals, rules, patterns, settings)
+- Automatic indexes on userId for fast per-user queries
+- All 58+ API endpoints refactored to use MongoDB queries
+- Full data isolation: userId field ensures no cross-account access
 
 ### API Authorization
 - All endpoints (except /api/auth/) require valid JWT token
 - Authorization header sent automatically with all API calls
 - Token restored on page refresh for persistent sessions
+- userId extracted from token and used to scope all database queries
 
 ## Configuration
 
@@ -138,10 +142,12 @@ All financial settings are managed through the UI - no hardcoding required:
 ## Deployment Notes
 
 ### Local Development (Replit)
-- Data persists automatically in `/data/users/` ✅
+- Backend connects to MongoDB Atlas via `MONGO_URI` environment variable ✅
+- All data persists in cloud database ✅
+- Frontend configured to call production Railway backend URL
 
 ### Railway Deployment
-- **IMPORTANT:** Add a Volume mount at `/app/data` in Railway settings for persistence
-- Without volume: data is lost on redeploy (ephemeral storage)
-- With volume: data persists like local development
+- **MONGODB_URI environment variable must be set** with MongoDB Atlas connection string
+- No local volume needed - all data in MongoDB Cloud
 - See `RAILWAY_SETUP.md` for detailed instructions
+- Production URL: https://underwaterbudget.com (with custom domain)
