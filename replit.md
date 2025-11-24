@@ -135,9 +135,17 @@ All financial settings are managed through the UI - no hardcoding required:
 - Passwords are securely encrypted - the app never stores plain text passwords
 - Sessions expire after 30 days for security
 - Users can create as many accounts as needed
-- All user data is backed up through file persistence
-- The demo account contains your migrated historical data
+- All user data persisted in MongoDB cloud database
+- Demo account (`demo@example.com / demo`) fully migrated to MongoDB with all historical data
 - No external email service needed (password reset feature for future)
+
+## Latest Updates (Nov 24, 2025)
+
+✅ **Fixed all issues:**
+- Password validation corrected from 6 to 4 characters minimum
+- Demo account fully created in MongoDB with transferred data
+- Calendar date parsing fixed with proper fallback handling
+- All workflows running and stable
 
 ## Deployment Notes
 
