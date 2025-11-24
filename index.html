@@ -676,12 +676,6 @@
         return;
       }
       
-      if (!validateEmail(email)) {
-        errorEl.textContent = 'Please enter a valid email';
-        errorEl.style.display = 'block';
-        return;
-      }
-      
       try {
         const res = await safeApiCall(API_URL + '/api/auth/login', {
           method: 'POST',
@@ -718,12 +712,6 @@
       
       if (!email || !password || !password2) {
         errorEl.textContent = 'All fields required';
-        errorEl.style.display = 'block';
-        return;
-      }
-      
-      if (!validateEmail(email)) {
-        errorEl.textContent = 'Please enter a valid email';
         errorEl.style.display = 'block';
         return;
       }
