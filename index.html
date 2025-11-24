@@ -418,37 +418,37 @@
         <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">Smart Budget Management</p>
       </div>
       
-      <div id="loginForm">
+      <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
         <div class="form-group">
           <label>Email</label>
-          <input type="text" id="loginEmail" placeholder="you@example.com" autocomplete="off">
+          <input type="text" id="loginEmail" placeholder="you@example.com" autocomplete="off" onkeypress="if(event.key==='Enter') handleLogin();">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="off">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="off" onkeypress="if(event.key==='Enter') handleLogin();">
         </div>
         <div id="loginError" style="color: var(--accent-danger); font-size: 12px; margin-bottom: 12px; display: none;"></div>
-        <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="handleLogin()">Sign In</button>
-        <button class="btn btn-secondary" style="width: 100%;" onclick="switchAuthForm()">Don't have an account? Create one</button>
-      </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 12px;">Sign In</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="switchAuthForm()">Don't have an account? Create one</button>
+      </form>
       
-      <div id="signupForm" style="display: none;">
+      <form id="signupForm" style="display: none;" onsubmit="event.preventDefault(); handleSignup();">
         <div class="form-group">
           <label>Email</label>
-          <input type="text" id="signupEmail" placeholder="you@example.com">
+          <input type="text" id="signupEmail" placeholder="you@example.com" onkeypress="if(event.key==='Enter') handleSignup();">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="signupPassword" placeholder="••••••••">
+          <input type="password" id="signupPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') handleSignup();">
         </div>
         <div class="form-group">
           <label>Confirm Password</label>
-          <input type="password" id="signupPassword2" placeholder="••••••••">
+          <input type="password" id="signupPassword2" placeholder="••••••••" onkeypress="if(event.key==='Enter') handleSignup();">
         </div>
         <div id="signupError" style="color: var(--accent-danger); font-size: 12px; margin-bottom: 12px; display: none;"></div>
-        <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="handleSignup()">Create Account</button>
-        <button class="btn btn-secondary" style="width: 100%;" onclick="switchAuthForm()">← Back</button>
-      </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 12px;">Create Account</button>
+        <button type="button" class="btn btn-secondary" style="width: 100%;" onclick="switchAuthForm()">← Back</button>
+      </form>
     </div>
   </div>
 
@@ -789,6 +789,11 @@
       document.getElementById('signupForm').style.display = 'none';
       document.getElementById('loginEmail').value = '';
       document.getElementById('loginPassword').value = '';
+      document.getElementById('signupEmail').value = '';
+      document.getElementById('signupPassword').value = '';
+      document.getElementById('signupPassword2').value = '';
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('signupError').style.display = 'none';
       document.getElementById('sidebarUserEmail').textContent = '';
       showSuccess('Logged out!');
     }
