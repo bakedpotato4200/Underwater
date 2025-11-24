@@ -134,3 +134,14 @@ All financial settings are managed through the UI - no hardcoding required:
 - All user data is backed up through file persistence
 - The demo account contains your migrated historical data
 - No external email service needed (password reset feature for future)
+
+## Deployment Notes
+
+### Local Development (Replit)
+- Data persists automatically in `/data/users/` ✅
+
+### Railway Deployment
+- **IMPORTANT:** Add a Volume mount at `/app/data` in Railway settings for persistence
+- Without volume: data is lost on redeploy (ephemeral storage)
+- With volume: data persists like local development
+- See `RAILWAY_SETUP.md` for detailed instructions
