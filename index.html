@@ -653,7 +653,9 @@
   <script>
     // Authentication setup
     // Production Railway backend URL
-    const API_BASE_URL = 'https://underwater-production.up.railway.app';
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://localhost:3000'
+      : 'https://underwater-production.up.railway.app';
     let currentUser = null;
     let authToken = null;
     
