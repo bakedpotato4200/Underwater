@@ -1,43 +1,52 @@
-# Railway Deployment - Data Persistence Fix
+# Railway Deployment - MongoDB Configuration
 
-## Problem
-Railway uses ephemeral containers - local data in `/data/` is lost on redeploy.
+## ✅ MongoDB Migration Complete
+Your app now uses MongoDB Atlas for all data persistence. **NO local volumes needed on Railway!**
 
-## Solution
-Your local data is safe! Here's how to restore it on Railway:
+## Critical: Environment Variables on Railway
 
-### Step 1: Add Volume to Railway
-1. Go to your Railway project dashboard
-2. Go to your "Underwater" service
-3. Click **Settings** → **Data** 
-4. Add a new Volume:
-   - **Mount Path:** `/app/data`
-   - This creates persistent storage
+### Backend (Node.js) - MUST SET THESE:
 
-### Step 2: Redeploy
-After adding the volume, Railway will redeploy. Push code to trigger it:
-```bash
-git add .
-git commit -m "Add Railway data persistence setup"
-git push
-```
+1. **MONGO_URI** (Required - or the backend will crash)
+   - Your MongoDB connection string
+   - Format: `mongodb+srv://username:password@cluster.mongodb.net/database?appName=...`
+   - Get this from MongoDB Atlas → Connect → Connection String
 
-### Step 3: Manually Restore Data (First Time Only)
-Since we can't auto-sync files to Railway, you have two options:
+2. **PORT** (Optional)
+   - Defaults to 3000
 
-**Option A: Re-import your transactions**
-- Log in as demo@example.com / demo
-- Go to Dashboard
-- Upload your Capital One PDFs again
-- The app will categorize them with AI
+### Frontend (Vercel)
+- Frontend automatically detects production and uses Railway backend URL
 
-**Option B: Contact support**
-- Send the demo_user data folder to the dev team
-- They'll initialize it on your Railway database
+## How to Fix Production Right Now:
 
-## Why This Happens
-- **Replit:** Uses persistent local storage ✅
-- **Railway (ephemeral):** Fresh container each deploy ❌
+### Step 1: Set MONGO_URI on Railway
+1. Go to Railway dashboard → Backend service
+2. Click **Variables**
+3. Add: `MONGO_URI` = your MongoDB connection string
+4. Click Deploy → New Deployment
+
+### Step 2: Verify Backend Health
+- Open Railway service logs to see if backend starts
+- Look for: "✅ MongoDB Connected"
+
+### Step 3: Test Production
+1. Visit your Vercel frontend
+2. Login: `demo@example.com / demo`
+3. Dashboard should load with data
+
+## Troubleshooting
+
+**"Connection refused" errors?**
+- ❌ MONGO_URI not set on Railway
+- ✅ Set it in Railway Variables and redeploy
+
+**"Invalid token" on login?**
+- JWT_SECRET hardcoded (same in dev and prod) - this is OK for now
+
+**Data missing after deploy?**
+- Check MongoDB Atlas - all data lives there, not in Railway
+- Run a query in MongoDB Atlas to verify collections exist
 - **Railway (with volume):** Persistent storage like Replit ✅
 
 ## Going Forward
